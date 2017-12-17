@@ -162,9 +162,10 @@ class LockMe_dopbsp{
     global $DOPBSP, $lockme, $wpdb;
 
     $api = $lockme->GetApi();
+    $appdata = self::AppData($res);
 
     try{
-      $lockme_data = $api->Reservation("ext/{$id}");
+      $lockme_data = $api->Reservation($appdata["roomid"], "ext/{$id}");
     }catch(Exception $e){
     }
 
@@ -176,7 +177,7 @@ class LockMe_dopbsp{
     }
 
     try{
-      $api->EditReservation("ext/{$id}", self::AppData($res));
+      $api->EditReservation($appdata["roomid"], "ext/{$id}", $appdata);
     }catch(Exception $e){
     }
   }
@@ -190,9 +191,10 @@ class LockMe_dopbsp{
     }
 
     $api = $lockme->GetApi();
+    $appdata = self::AppData($data);
 
     try{
-      $lockme_data = $api->Reservation("ext/{$id}");
+      $lockme_data = $api->Reservation($appdata["roomid"], "ext/{$id}");
     }catch(Exception $e){
     }
 
@@ -201,7 +203,7 @@ class LockMe_dopbsp{
     }
 
     try{
-      $api->DeleteReservation("ext/{$id}");
+      $api->DeleteReservation($appdata["roomid"], "ext/{$id}");
     }catch(Exception $e){
     }
   }
@@ -392,7 +394,8 @@ class LockMe_dopbsp{
         $DOPBSP->classes->backend_calendar_schedule->setApproved($id);
         try{
           $api = $lockme->GetApi();
-          $api->EditReservation($lockme_id, array("extid"=>$id));
+          $api->EditReservation($roomid, $lockme_id, array("extid"=>$id));
+          return true;
         }catch(Exception $e){
         }
         break;
@@ -445,6 +448,7 @@ class LockMe_dopbsp{
         if($result === false){
           throw new Exception("Error saving to database 2 ");
         }
+        return true;
         break;
       case 'delete':
         $res = $wpdb->get_row(
@@ -466,14 +470,15 @@ class LockMe_dopbsp{
         }
         $DOPBSP->classes->backend_calendar_schedule->setCanceled($res->id);
         $wpdb->delete($DOPBSP->tables->reservations, array('id' => $res->id));
+        return true;
         break;
     }
+    return false;
   }
 
   static function ExportToLockMe(){
     global $DOPBSP, $wpdb, $lockme;
     set_time_limit(0);
-    $api = $lockme->getApi();
 
     $sql = "SELECT * FROM ".$DOPBSP->tables->reservations." WHERE `check_in` >= curdate() ORDER BY ID";
     $rows = $wpdb->get_results($sql);

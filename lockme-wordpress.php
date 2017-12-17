@@ -22,7 +22,7 @@ require_once __DIR__.'/vendor/autoload.php';
 
 $lm_plugins = [
   // 'appointments'=>'Appointments',
-  // 'dopbsp'=>'Booking System PRO',
+  'dopbsp'=>'Booking System PRO',
   // 'ezscm'=>'ez Schedule',
   'booked'=>'Booked',
   // 'em'=>'Event Manager',
@@ -84,7 +84,6 @@ class LockMe_Plugin{
       try{
         $api = $this->GetApi();
         $token = $api->getTokenForCode($code, $state);
-        var_dump($token);
         if($token){
           update_option("lockme_oauth2_token", $token);
         }
@@ -179,7 +178,7 @@ class LockMe_Plugin{
       "api_url",
       "URL callback dla Lockme",
       function(){
-        echo '<input readonly type="text" value="'.get_site_url().'/?lockme_api='.$this->url_key.'" />';
+        echo '<input readonly type="text" value="'.get_site_url().'/?lockme_api='.$this->url_key.'" /> - remember to enable OAuth2 based callbacks!';
       },
       'lockme-admin',
       'lockme_settings_section',

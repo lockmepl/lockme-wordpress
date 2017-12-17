@@ -349,6 +349,7 @@ class LockMe_booked{
         }
         break;
     }
+    return false;
   }
 
   static public function ExportToLockMe(){
