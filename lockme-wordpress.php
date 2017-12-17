@@ -13,8 +13,6 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
-ini_set('display_errors', '1');
-
 define('LOCKME_PLUGIN_DIR', dirname(__FILE__), true);
 define('LOCKME_PLUGIN_FILE', __FILE__, true);
 
@@ -125,7 +123,7 @@ class LockMe_Plugin{
   }
 
   public function admin_init(){
-    add_options_page('Integracja z LockMe', 'LockMe', 'manage_options', 'lockme_integration', array(&$this, 'admin_page'));
+    add_options_page('Integracja z Lockme', 'Lockme', 'manage_options', 'lockme_integration', array(&$this, 'admin_page'));
   }
 
   public function admin_register_settings(){
