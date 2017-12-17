@@ -7,7 +7,7 @@ Description: This plugin integrates calendars with LockMe API
 Version:     0.1
 Author:      Jakub Caban
 Author URI:  https://lockme.pl
-License:     GPL2
+License:     GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
 
