@@ -1,0 +1,17 @@
+{
+    "name": "lustmored/lockme-wordpress",
+    "description": "LockMe wordpress integration plugin",
+    "type": "wordpress-plugin",
+    "require": {
+        "php": ">=5.4.0",
+        "lustmored/lockme-sdk": "dev-master"
+    },
+    "license": "GPLv2",
+    "authors": [
+        {
+            "name": "Jakub Caban",
+            "email": "kuba@whyblack.pl"
+        }
+    ],
+    "minimum-stability": "dev"
+}
