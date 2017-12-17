@@ -1,7 +1,7 @@
 <?php
 use Lockme\SDK\Lockme;
 /*
-Plugin Name: LockMe calendars integration
+Plugin Name: Lockme calendars integration
 Plugin URI:  https://github.com/Lustmored/lockme
 Description: This plugin integrates calendars with LockMe API
 Version:     0.1
