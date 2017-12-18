@@ -32,9 +32,8 @@ $lm_plugins = [
   // 'woo'=>"WooCommerce Bookings"
 ];
 
-require_once LOCKME_PLUGIN_DIR.'/inc/installer.php';
 foreach($lm_plugins as $k=>$v){
-  require_once LOCKME_PLUGIN_DIR.'/inc/plugins/'.$k.'.php';
+  require_once LOCKME_PLUGIN_DIR.'/src/plugins/'.$k.'.php';
 }
 include_once ABSPATH.'wp-admin/includes/plugin.php';
 
@@ -268,8 +267,6 @@ class LockMe_Plugin{
     return null;
   }
 }
-
-// LockMe_Installer::check();
 
 global $lockme;
 $lockme = new LockMe_Plugin();

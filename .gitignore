@@ -1,5 +1,3 @@
 .kdev4/
 .sync-config.cson
 lockme-wordpress.kdev4
-/vendor/
-composer.lock

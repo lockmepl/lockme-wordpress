@@ -13,5 +13,5 @@
             "email": "kuba@whyblack.pl"
         }
     ],
-    "minimum-stability": "dev"
+    "minimum-stability": "stable"
 }
