@@ -1,11 +1,11 @@
-=== Lockme calendars integration ===
+=== Lockme OAuth2 calendars integration ===
 Contributors: lustmored
 Donate link:
 Tags: lustmored
 Requires PHP: 5.6
 Requires at least: 4.8
 Tested up to: 4.9.1
-Stable tag: 1.0.3
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
