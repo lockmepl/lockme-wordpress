@@ -5,7 +5,7 @@ Tags: lustmored
 Requires PHP: 5.6
 Requires at least: 4.8
 Tested up to: 4.9.1
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,8 +21,9 @@ Currently publicly supported calendar systems are:
 
 * Booked, recommended version 2.0.6 or newer
 * Pinpoint booking system, recommended version 2.6 or newer
+* Booking Calendar Pro WpDevArt version 10.1 or newer (please don't)
 
-Other booking systems to be available after porting to API 2.0 and testing.
+Other booking systems to be available after porting to API 2.0 and testing. Systems marked as "please don't" are considered extremely unfriendly to our integration purposes and probably will break upon updating. If you still have choice please consider using other booking systems.
 
 **IMPORTANT!** This plugin does it's best to work in whatever condition it has to, but it should be noted that author does not give any warrant regarding data consistency between Lockme and your booking system. If for some reason some bookings will not be sent between systems, you should handle it manually. Plugin author does not take any responsibility for such problems.
 
