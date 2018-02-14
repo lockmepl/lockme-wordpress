@@ -19,9 +19,10 @@ Usage of this plugin isn't required, but if you are Lockme partner and want to s
 
 Currently publicly supported calendar systems are:
 
-* Booked, recommended version 2.0.6 or newer
+* Booked, recommended version 2.0.9 or newer
 * Pinpoint booking system, recommended version 2.6 or newer
 * Booking Calendar Pro WpDevArt version 10.1 or newer (please don't)
+* Bookly Appointment Booking, recommended version 14.5 or newer
 
 Other booking systems to be available after porting to API 2.0 and testing. Systems marked as "please don't" are considered extremely unfriendly to our integration purposes and probably will break upon updating. If you still have choice please consider using other booking systems.
 
