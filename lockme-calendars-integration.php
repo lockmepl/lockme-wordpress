@@ -31,7 +31,8 @@ $lm_plugins = [
   // 'salon'=>'Salon Booking Plugin',
   // 'cpabc'=>'Appointment Booking Calendar',
   // 'woo'=>"WooCommerce Bookings"
-  'wpdevart'=>"Booking Calendar Pro WpDevArt"
+  'wpdevart'=>"Booking Calendar Pro WpDevArt",
+  'easyapp'=>"Easy Appointments"
 ];
 
 foreach ($lm_plugins as $k=>$v) {
