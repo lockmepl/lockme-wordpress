@@ -5,7 +5,7 @@ use Lockme\SDK\Lockme;
 Plugin Name: Lockme calendars integration
 Plugin URI:  https://github.com/Lustmored/lockme
 Description: This plugin integrates popular booking systems with Lockme OAuth2 API.
-Version:     1.0.1
+Version:     1.1.1
 Author:      Jakub Caban
 Author URI:  https://lockme.pl
 License:     GPLv2 or later
@@ -31,6 +31,7 @@ $lm_plugins = [
   // 'salon'=>'Salon Booking Plugin',
   // 'cpabc'=>'Appointment Booking Calendar',
   // 'woo'=>"WooCommerce Bookings"
+  'wpdevart'=>"Booking Calendar Pro WpDevArt"
 ];
 
 foreach ($lm_plugins as $k=>$v) {
