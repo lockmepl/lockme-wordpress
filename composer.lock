@@ -189,29 +189,29 @@
         },
         {
             "name": "league/oauth2-client",
-            "version": "2.2.1",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/oauth2-client.git",
-                "reference": "313250eab923e673a5c0c8f463f443ee79f4383f"
+                "reference": "aa2e3df188f0bfd87f7880cc880e906e99923580"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/oauth2-client/zipball/313250eab923e673a5c0c8f463f443ee79f4383f",
-                "reference": "313250eab923e673a5c0c8f463f443ee79f4383f",
+                "url": "https://api.github.com/repos/thephpleague/oauth2-client/zipball/aa2e3df188f0bfd87f7880cc880e906e99923580",
+                "reference": "aa2e3df188f0bfd87f7880cc880e906e99923580",
                 "shasum": ""
             },
             "require": {
                 "guzzlehttp/guzzle": "^6.0",
                 "paragonie/random_compat": "^1|^2",
-                "php": ">=5.6.0"
+                "php": "^5.6|^7.0"
             },
             "require-dev": {
                 "eloquent/liberator": "^2.0",
-                "eloquent/phony": "^0.14.1",
-                "jakub-onderka/php-parallel-lint": "~0.9",
-                "phpunit/phpunit": "^5.0",
-                "squizlabs/php_codesniffer": "^2.0"
+                "eloquent/phony-phpunit": "^1.0|^3.0",
+                "jakub-onderka/php-parallel-lint": "^0.9.2",
+                "phpunit/phpunit": "^5.7|^6.0",
+                "squizlabs/php_codesniffer": "^2.3|^3.0"
             },
             "type": "library",
             "extra": {
@@ -252,20 +252,20 @@
                 "oauth2",
                 "single sign on"
             ],
-            "time": "2017-04-25T14:43:14+00:00"
+            "time": "2018-01-13T05:27:58+00:00"
         },
         {
             "name": "lustmored/lockme-sdk",
-            "version": "1.0.9",
+            "version": "1.0.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Lustmored/lockme-sdk.git",
-                "reference": "3751f203773285c6559109699d1c307cfec08689"
+                "reference": "d7d641c80d42241e86d7431fc6ed8d801e3e26e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Lustmored/lockme-sdk/zipball/3751f203773285c6559109699d1c307cfec08689",
-                "reference": "3751f203773285c6559109699d1c307cfec08689",
+                "url": "https://api.github.com/repos/Lustmored/lockme-sdk/zipball/d7d641c80d42241e86d7431fc6ed8d801e3e26e6",
+                "reference": "d7d641c80d42241e86d7431fc6ed8d801e3e26e6",
                 "shasum": ""
             },
             "require": {
@@ -280,7 +280,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "GPLv3"
+                "GPL-3.0-or-later"
             ],
             "authors": [
                 {
@@ -289,20 +289,20 @@
                 }
             ],
             "description": "LockMe SDK",
-            "time": "2017-12-13T12:42:19+00:00"
+            "time": "2018-02-12T10:37:41+00:00"
         },
         {
             "name": "lustmored/oauth2-lockme",
-            "version": "1.0.4",
+            "version": "1.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Lustmored/oauth2-lockme.git",
-                "reference": "0b5d4aaafce583379bfaf26aac763ae70d4c252a"
+                "reference": "906c40be9d896d28d20b1bbdf32f91c858e3c280"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Lustmored/oauth2-lockme/zipball/0b5d4aaafce583379bfaf26aac763ae70d4c252a",
-                "reference": "0b5d4aaafce583379bfaf26aac763ae70d4c252a",
+                "url": "https://api.github.com/repos/Lustmored/oauth2-lockme/zipball/906c40be9d896d28d20b1bbdf32f91c858e3c280",
+                "reference": "906c40be9d896d28d20b1bbdf32f91c858e3c280",
                 "shasum": ""
             },
             "require": {
@@ -316,7 +316,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "GPLv3"
+                "GPL-3.0-or-later"
             ],
             "authors": [
                 {
@@ -325,7 +325,7 @@
                 }
             ],
             "description": "LockMe OAuth2 provider",
-            "time": "2017-12-11T14:28:04+00:00"
+            "time": "2018-02-12T10:40:06+00:00"
         },
         {
             "name": "paragonie/random_compat",
