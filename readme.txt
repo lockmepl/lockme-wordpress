@@ -23,6 +23,7 @@ Currently publicly supported calendar systems are:
 * Pinpoint booking system, recommended version 2.6 or newer
 * Booking Calendar Pro WpDevArt version 10.1 or newer (please don't)
 * Bookly Appointment Booking, recommended version 14.5 or newer
+* Easy Appointments - version 2.1.4 and newer
 
 Other booking systems to be available after porting to API 2.0 and testing. Systems marked as "please don't" are considered extremely unfriendly to our integration purposes and probably will break upon updating. If you still have choice please consider using other booking systems.
 
