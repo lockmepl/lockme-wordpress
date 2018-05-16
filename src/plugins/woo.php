@@ -263,7 +263,7 @@ class LockMe_woo
         if ($booking) {
             try {
                 $api = $lockme->GetApi();
-                $api->EditReservation($oomid, $lockme_id, array("extid"=>$booking->id));
+                $api->EditReservation($roomid, $lockme_id, array("extid"=>$booking->id));
                 return true;
             } catch (Exception $e) {
             }
