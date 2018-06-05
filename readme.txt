@@ -5,7 +5,7 @@ Tags: lustmored
 Requires PHP: 5.6
 Requires at least: 4.8
 Tested up to: 4.9.1
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,8 @@ Currently publicly supported calendar systems are:
 * Booking Calendar Pro WpDevArt version 10.1 or newer (please don't)
 * Bookly Appointment Booking, recommended version 14.5 or newer
 * Easy Appointments - version 2.1.4 and newer
+* Booking Calendar WP Plugin - only version 6.0.1 tested (also - please don't)
+* WooCommerce Bookings - version 1.9.1 and newer
 
 Other booking systems to be available after porting to API 2.0 and testing. Systems marked as "please don't" are considered extremely unfriendly to our integration purposes and probably will break upon updating. If you still have choice please consider using other booking systems.
 
