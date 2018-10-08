@@ -5,7 +5,7 @@ use Lockme\SDK\Lockme;
 Plugin Name: Lockme calendars integration
 Plugin URI:  https://github.com/Lustmored/lockme
 Description: This plugin integrates popular booking systems with Lockme OAuth2 API.
-Version:     1.1.7
+Version:     1.1.8
 Author:      Jakub Caban
 Author URI:  https://lockme.pl
 License:     GPLv2 or later
@@ -20,7 +20,7 @@ define('LOCKME_PLUGIN_FILE', __FILE__, true);
 require_once __DIR__.'/vendor/autoload.php';
 
 $lm_plugins = [
-  // 'appointments'=>'Appointments',
+  'appointments'=>'Appointments',
   'dopbsp'=>'Booking System PRO',
   // 'ezscm'=>'ez Schedule',
   'booked'=>'Booked',
