@@ -12,7 +12,7 @@ class LockMe_easyapp
         self::$options = get_option("lockme_easyapp");
 
         if (self::$options['use'] && self::CheckDependencies()) {
-            self::$models = new EADBModels($wpdb, new EATableColumns);
+            self::$models = new EADBModels($wpdb, new EATableColumns, []);
 
             if ($_GET['action'] == "ea_appointment" && $_GET['id']) {
                 self::$resdata = self::AppData($_GET['id']);
