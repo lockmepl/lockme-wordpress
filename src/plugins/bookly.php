@@ -42,7 +42,7 @@ class LockMe_bookly
 
     public static function CheckDependencies()
     {
-        return is_plugin_active("appointment-booking/main.php");
+        return is_plugin_active("appointment-booking/main.php") || is_plugin_active("bookly-responsive-appointment-booking-tool/main.php");
     }
 
     public static function RegisterSettings(LockMe_Plugin $lockme)
