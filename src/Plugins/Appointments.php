@@ -156,7 +156,7 @@ class Appointments implements PluginInterface
 
     public function GetMessage(array $message)
     {
-        global $appointments, $wpdb, $lockme;
+        global $appointments, $wpdb;
         if (!$this->options['use'] || !$this->CheckDependencies()) {
             return false;
         }
@@ -195,7 +195,7 @@ class Appointments implements PluginInterface
                 $row_id = $wpdb->insert_id;
 
                 try {
-                    $api = $lockme->GetApi();
+                    $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, ["extid" => $row_id]);
                     return true;
                 } catch (Exception $e) {
@@ -305,12 +305,11 @@ class Appointments implements PluginInterface
 
     private function Add($app_id, $app)
     {
-        global $lockme;
         if ($app['status'] == 'removed') {
             return;
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($app_id);
 
         try {
@@ -321,13 +320,11 @@ class Appointments implements PluginInterface
 
     private function Update($app_id, $app)
     {
-        global $lockme;
-
         if ($app['status'] == 'removed') {
             return $this->Delete($app_id);
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($app_id);
         $lockme_data = [];
 
@@ -349,9 +346,7 @@ class Appointments implements PluginInterface
 
     private function Delete($app_id)
     {
-        global $lockme;
-
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($app_id);
 
         try {

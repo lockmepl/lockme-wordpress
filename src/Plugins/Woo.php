@@ -170,7 +170,6 @@ class Woo implements PluginInterface
 
     public function AddEditReservation($postid)
     {
-        global $lockme;
         if (!is_numeric($postid)) {
             return false;
         }
@@ -188,7 +187,7 @@ class Woo implements PluginInterface
             return $this->Delete($postid);
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($booking);
 
         $lockme_data = null;
@@ -210,8 +209,6 @@ class Woo implements PluginInterface
 
     public function Delete($postid)
     {
-        global $lockme;
-
         if (defined("LOCKME_MESSAGING")) {
             return null;
         }
@@ -226,7 +223,7 @@ class Woo implements PluginInterface
             return $this->AddEditReservation($postid);
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($booking);
 
         try {
@@ -238,7 +235,6 @@ class Woo implements PluginInterface
 
     public function GetMessage(array $message)
     {
-        global $lockme;
         if (!$this->options['use'] || !$this->CheckDependencies()) {
             return false;
         }
@@ -269,7 +265,7 @@ class Woo implements PluginInterface
 
                 if ($booking) {
                     try {
-                        $api = $lockme->GetApi();
+                        $api = $this->plugin->GetApi();
                         $api->EditReservation($roomid, $lockme_id, ["extid" => $booking->id]);
                         return true;
                     } catch (Exception $e) {

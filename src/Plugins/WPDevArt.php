@@ -62,7 +62,6 @@ class WPDevArt implements PluginInterface
 
     public function AddEditReservation($res)
     {
-        global $lockme;
         if (!is_array($res)) {
             return;
         }
@@ -70,7 +69,7 @@ class WPDevArt implements PluginInterface
             return;
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $id = $res['id'];
         $resdata = $this->AppData($res);
         $lockme_data = [];
@@ -228,13 +227,11 @@ class WPDevArt implements PluginInterface
 
     public function Delete($res)
     {
-        global $lockme;
-
         if (defined("LOCKME_MESSAGING")) {
             return;
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $id = $res['id'];
         $resdata = $this->AppData($res);
 
@@ -246,7 +243,7 @@ class WPDevArt implements PluginInterface
 
     public function GetMessage(array $message)
     {
-        global $wpdb, $lockme;
+        global $wpdb;
         if (!$this->options['use'] || !$this->CheckDependencies()) {
             return false;
         }
@@ -322,7 +319,7 @@ class WPDevArt implements PluginInterface
                 $method->invoke($wpdevart_booking, $id, true, "insert", []);
 
                 try {
-                    $api = $lockme->GetApi();
+                    $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, ["extid" => $id]);
                     return true;
                 } catch (Exception $e) {

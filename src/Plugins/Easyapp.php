@@ -190,7 +190,7 @@ class Easyapp implements PluginInterface
 
     public function ShutDown()
     {
-        global $wpdb, $lockme;
+        global $wpdb;
         if (defined('DOING_AJAX') && DOING_AJAX) {
             switch ($_GET['action']) {
                 case 'ea_res_appointment':
@@ -207,7 +207,7 @@ class Easyapp implements PluginInterface
                     $this->Delete($_GET['id']);
                     break;
                 case 'ea_appointment':
-                    $api = $lockme->GetApi();
+                    $api = $this->plugin->GetApi();
                     switch ($_GET['_method']) {
                         case 'PUT':
                             $this->AddEditReservation($_GET['id']);
@@ -236,7 +236,6 @@ class Easyapp implements PluginInterface
 
     public function GetMessage(array $message)
     {
-        global $lockme;
         if (!$this->options['use'] || !$this->CheckDependencies()) {
             return false;
         }
@@ -270,7 +269,7 @@ class Easyapp implements PluginInterface
                     'status' => $data['status'] ? 'confirmed' : 'pending'
                 ], true);
                 try {
-                    $api = $lockme->GetApi();
+                    $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, ["extid" => $id->id]);
                     return true;
                 } catch (Exception $e) {
@@ -311,13 +310,11 @@ class Easyapp implements PluginInterface
 
     private function Add($res)
     {
-        global $lockme;
-
         if (in_array($res['status'], ['canceled', 'abandoned'])) {
             return;
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
 
         try {
             $api->AddReservation($this->AppData($res['id']));
@@ -327,9 +324,7 @@ class Easyapp implements PluginInterface
 
     private function Update($id, $res)
     {
-        global $lockme;
-
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($res['id']);
         $lockme_data = [];
 
@@ -354,14 +349,12 @@ class Easyapp implements PluginInterface
 
     private function Delete($resid)
     {
-        global $lockme;
-
         $res = $this->models->get_appintment_by_id($resid);
         if (!$res) {
             return;
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($res['id']);
         $lockme_data = [];
 

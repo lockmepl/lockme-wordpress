@@ -73,9 +73,7 @@ class Dopbsp implements PluginInterface
 
     private function Update($id, $res)
     {
-        global $lockme;
-
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($res);
         $lockme_data = null;
 
@@ -119,13 +117,11 @@ class Dopbsp implements PluginInterface
 
     private function Add($res)
     {
-        global $lockme;
-
         if (in_array($res['status'], ['canceled', 'rejected'])) {
             return;
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
 
         try {
             $api->AddReservation($this->AppData($res));
@@ -135,7 +131,7 @@ class Dopbsp implements PluginInterface
 
     private function Delete($id)
     {
-        global $DOPBSP, $lockme, $wpdb;
+        global $DOPBSP, $wpdb;
 
         $data = $wpdb->get_row($wpdb->prepare("SELECT * FROM ".$DOPBSP->tables->reservations." WHERE `id` = %d", $id),
             ARRAY_A);
@@ -143,7 +139,7 @@ class Dopbsp implements PluginInterface
             return;
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($data);
         $lockme_data = [];
 
@@ -382,7 +378,7 @@ class Dopbsp implements PluginInterface
 
     public function GetMessage(array $message)
     {
-        global $DOPBSP, $wpdb, $lockme;
+        global $DOPBSP, $wpdb;
         if (!$this->options['use'] || !$this->CheckDependencies()) {
             return false;
         }
@@ -499,7 +495,7 @@ class Dopbsp implements PluginInterface
                 $id = $wpdb->insert_id;
                 $DOPBSP->classes->backend_calendar_schedule->setApproved($id);
                 try {
-                    $api = $lockme->GetApi();
+                    $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, ["extid" => $id]);
                     return true;
                 } catch (Exception $e) {

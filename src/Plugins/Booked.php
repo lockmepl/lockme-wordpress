@@ -39,7 +39,6 @@ class Booked implements PluginInterface
 
     public function AddEditReservation($id)
     {
-        global $lockme;
         if (!is_numeric($id)) {
             return null;
         }
@@ -60,7 +59,7 @@ class Booked implements PluginInterface
             return $this->Delete($id);
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $lockme_data = [];
 
         try {
@@ -130,8 +129,6 @@ class Booked implements PluginInterface
 
     public function Delete($id)
     {
-        global $lockme;
-
         if (defined("LOCKME_MESSAGING")) {
             return;
         }
@@ -139,7 +136,7 @@ class Booked implements PluginInterface
         $post = get_post($id);
         $appdata = $this->AppData($post);
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
 
         try {
             $api->DeleteReservation($appdata["roomid"], "ext/{$id}");
@@ -149,7 +146,7 @@ class Booked implements PluginInterface
 
     public function GetMessage(array $message)
     {
-        global $wpdb, $lockme;
+        global $wpdb;
         if (!$this->options['use'] || !$this->CheckDependencies()) {
             return false;
         }
@@ -208,7 +205,7 @@ class Booked implements PluginInterface
                 }
 
                 try {
-                    $api = $lockme->GetApi();
+                    $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, ["extid" => $row_id]);
                     return true;
                 } catch (Exception $e) {

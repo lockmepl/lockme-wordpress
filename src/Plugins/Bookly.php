@@ -107,7 +107,6 @@ class Bookly implements PluginInterface
 
     public function AddEditReservation($id)
     {
-        global $lockme;
         if (!is_numeric($id)) {
             return;
         }
@@ -115,7 +114,7 @@ class Bookly implements PluginInterface
             return;
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($id);
         $lockme_data = [];
 
@@ -184,13 +183,11 @@ class Bookly implements PluginInterface
 
     public function Delete($id, $appdata = null)
     {
-        global $lockme;
-
         if (defined("LOCKME_MESSAGING")) {
             return;
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         if (is_null($appdata)) {
             $appdata = $this->AppData($id);
         }
@@ -203,7 +200,6 @@ class Bookly implements PluginInterface
 
     public function GetMessage(array $message)
     {
-        global $lockme;
         if (!$this->options['use'] || !$this->CheckDependencies()) {
             return false;
         }
@@ -277,7 +273,7 @@ class Bookly implements PluginInterface
                 }
 
                 try {
-                    $api = $lockme->GetApi();
+                    $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, ["extid" => $id]);
                     return true;
                 } catch (Exception $e) {

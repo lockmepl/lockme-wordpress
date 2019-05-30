@@ -87,9 +87,7 @@ class WPBooking implements PluginInterface
 
     public function Delete($id, $appdata = null)
     {
-        global $lockme;
-
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $lockme_data = [];
 
         try {
@@ -275,7 +273,7 @@ class WPBooking implements PluginInterface
 
     public function GetMessage(array $message)
     {
-        global $wpdb, $lockme, $blog_id;
+        global $wpdb, $blog_id;
         if (!$this->options['use'] || !$this->CheckDependencies()) {
             return false;
         }
@@ -336,7 +334,7 @@ class WPBooking implements PluginInterface
                     throw new Exception($wpdb->last_error);
                 }
                 try {
-                    $api = $lockme->GetApi();
+                    $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, ["extid" => $id]);
                     return true;
                 } catch (Exception $e) {
@@ -424,15 +422,13 @@ class WPBooking implements PluginInterface
 
     private function Add($id, $res)
     {
-        global $lockme;
-
         $appdata = $this->AppData($id, $res);
 
         if ($res['reservation_cancelled']) {
             return $this->Delete($id, $appdata);
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
 
         try {
             $api->AddReservation($appdata);
@@ -443,15 +439,13 @@ class WPBooking implements PluginInterface
 
     private function Update($id, $res)
     {
-        global $lockme;
-
         $appdata = $this->AppData($id, $res);
 
         if ($res['reservation_cancelled']) {
             return $this->Delete($id, $appdata);
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
         $lockme_data = [];
 
         try {
