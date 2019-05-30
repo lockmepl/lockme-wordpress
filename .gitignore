@@ -1,3 +1,4 @@
 .kdev4/
 .sync-config.cson
 lockme-wordpress.kdev4
+.idea

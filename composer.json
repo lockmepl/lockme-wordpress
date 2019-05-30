@@ -1,17 +1,24 @@
 {
-    "name": "lustmored/lockme-wordpress",
-    "description": "LockMe wordpress integration plugin",
-    "type": "wordpress-plugin",
-    "require": {
-        "php": ">=5.4.0",
-        "lustmored/lockme-sdk": "^1.0"
-    },
-    "license": "GPLv2",
-    "authors": [
-        {
-            "name": "Jakub Caban",
-            "email": "kuba@whyblack.pl"
-        }
-    ],
-    "minimum-stability": "stable"
+  "name": "lustmored/lockme-wordpress",
+  "description": "LockMe wordpress integration plugin",
+  "type": "wordpress-plugin",
+  "require": {
+    "php": ">=5.5.0",
+    "lustmored/lockme-sdk": "^1.0",
+    "ext-mbstring": "*",
+    "paragonie/random_compat": "<9.99"
+  },
+  "license": "GPLv2",
+  "authors": [
+    {
+      "name": "Jakub Caban",
+      "email": "kuba@whyblack.pl"
+    }
+  ],
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-4": {
+      "LockmeIntegration\\": "src/"
+    }
+  }
 }

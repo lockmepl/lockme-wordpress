@@ -7,6 +7,7 @@ namespace Composer\Autoload;
 class ComposerStaticInit0f93bc20a0014bc30ec4d6dc71fc71a5
 {
     public static $files = array (
+        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
@@ -22,6 +23,7 @@ class ComposerStaticInit0f93bc20a0014bc30ec4d6dc71fc71a5
         array (
             'Lockme\\SDK\\' => 11,
             'Lockme\\OAuth2\\Client\\' => 21,
+            'LockmeIntegration\\' => 18,
             'League\\OAuth2\\Client\\' => 21,
         ),
         'G' => 
@@ -44,6 +46,10 @@ class ComposerStaticInit0f93bc20a0014bc30ec4d6dc71fc71a5
         'Lockme\\OAuth2\\Client\\' => 
         array (
             0 => __DIR__ . '/..' . '/lustmored/oauth2-lockme/src',
+        ),
+        'LockmeIntegration\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
         ),
         'League\\OAuth2\\Client\\' => 
         array (

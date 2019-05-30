@@ -9,6 +9,7 @@ return array(
     'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src'),
     'Lockme\\SDK\\' => array($vendorDir . '/lustmored/lockme-sdk/src'),
     'Lockme\\OAuth2\\Client\\' => array($vendorDir . '/lustmored/oauth2-lockme/src'),
+    'LockmeIntegration\\' => array($baseDir . '/src'),
     'League\\OAuth2\\Client\\' => array($vendorDir . '/league/oauth2-client/src'),
     'GuzzleHttp\\Psr7\\' => array($vendorDir . '/guzzlehttp/psr7/src'),
     'GuzzleHttp\\Promise\\' => array($vendorDir . '/guzzlehttp/promises/src'),
