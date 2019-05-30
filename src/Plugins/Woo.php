@@ -61,7 +61,7 @@ class Woo implements PluginInterface
 
     public function CheckDependencies()
     {
-        return is_plugin_active("woocommerce-bookings/woocommmerce-bookings.php");
+        return is_plugin_active("woocommerce-bookings/woocommmerce-bookings.php") || is_plugin_active("woocommerce-bookings/woocommerce-bookings.php");
     }
 
     public function RegisterSettings()

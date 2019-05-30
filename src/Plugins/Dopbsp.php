@@ -489,7 +489,7 @@ class Dopbsp implements PluginInterface
                         'transaction_id' => ''
                     ]
                 );
-                if (!$result) {
+                if ($result === false) {
                     throw new Exception("Error saving to database - ".$wpdb->last_error);
                 }
                 $id = $wpdb->insert_id;

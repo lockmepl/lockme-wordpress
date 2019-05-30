@@ -187,7 +187,7 @@ class Appointments implements PluginInterface
                         'note' => $data['comment']."\n\n#LOCKME!"
                     ]
                 );
-                if (!$result) {
+                if ($result === false) {
                     throw new Exception("Error saving to database");
                 }
                 appointments_clear_cache();
@@ -228,7 +228,7 @@ class Appointments implements PluginInterface
                             'ID' => $app->ID
                         ]
                     );
-                    if (!$result) {
+                    if ($result === false) {
                         throw new Exception("Error saving to database");
                     }
                     appointments_clear_cache();
@@ -252,7 +252,7 @@ class Appointments implements PluginInterface
                             'ID' => $app->ID
                         ]
                     );
-                    if (!$result) {
+                    if ($result === false) {
                         throw new Exception("Error saving to database");
                     }
                     appointments_clear_cache();

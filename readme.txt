@@ -4,7 +4,7 @@ Donate link:
 Tags: lustmored
 Requires PHP: 5.6
 Requires at least: 4.8
-Tested up to: 5.2.0
+Tested up to: 5.2.1
 Stable tag: 1.1.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -59,6 +59,11 @@ Show answer - no. Long answer - please contact us at kontakt@lockme.pl and we'll
 1. Main settings page for connection with Lockme API
 
 == Changelog ==
+
+= 1.2 =
+* Added RODO mode that will prevent plugin from sending ANY customer information to Lockme (only sent data is date, hour, room, booking ID and its status)
+* Refactored plaugins list to show only installed and supported plaugins
+* Added option to manually upload access token. Using it is highly discouraged if you don't know what are you doing.
 
 = 1.0 =
 First public release based on Lockme OAuth2 API (a.k.a. API 2.0), currently publicly supporting Booked and Pinpoint Booking System (a.k.a. dopbsp).

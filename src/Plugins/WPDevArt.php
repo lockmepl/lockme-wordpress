@@ -285,7 +285,7 @@ class WPDevArt implements PluginInterface
                     'date_created' => date('Y-m-d H:i', time()),
                     'is_new' => 0
                 ]);
-                if (!$result) {
+                if ($result === false) {
                     throw new Exception("Error saving to database - ".$wpdb->last_error);
                 }
 
