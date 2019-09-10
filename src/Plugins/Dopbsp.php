@@ -16,7 +16,7 @@ class Dopbsp implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option("lockme_dopbsp");
 
-        if ($this->options['use']) {
+        if ($this->options['use'] && $this->CheckDependencies()) {
             add_action('dopbsp_action_book_after', [$this, 'AddReservation'], 5);
             add_action('woocommerce_payment_complete', [$this, 'AddWooReservation'], 20, 1);
             add_action('woocommerce_thankyou', [$this, 'AddWooReservation'], 20, 1);

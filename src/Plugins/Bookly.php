@@ -22,7 +22,7 @@ class Bookly implements PluginInterface
     {
         $this->plugin = $plugin;
         $this->options = get_option("lockme_bookly");
-        if ($this->options['use']) {
+        if ($this->options['use'] && $this->CheckDependencies()) {
             add_filter('wp_die_ajax_handler', [$this, 'Ajax'], 15, 1);
 
             add_action('init', function () {

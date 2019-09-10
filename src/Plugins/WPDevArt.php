@@ -27,7 +27,7 @@ class WPDevArt implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option("lockme_wpdevart");
 
-        if ($this->options['use']) {
+        if ($this->options['use'] && $this->CheckDependencies()) {
             if ($_GET['page'] == "wpdevart-reservations" && is_admin() && $_POST['task']) {
                 if ($_POST['id']) {
                     $this->resdata = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$wpdb->prefix.'wpdevart_reservations WHERE `id`=%d',

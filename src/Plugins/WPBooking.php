@@ -28,7 +28,7 @@ class WPBooking implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option("lockme_wpb");
 
-        if ($this->options['use']) {
+        if ($this->options['use'] && $this->CheckDependencies()) {
             register_shutdown_function([$this, 'ShutDown']);
 
             $script = preg_replace("/^.*wp-booking-calendar\//", "", $_SERVER['SCRIPT_FILENAME']);

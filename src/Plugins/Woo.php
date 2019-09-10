@@ -18,7 +18,7 @@ class Woo implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option("lockme_woo");
 
-        if ($this->options['use']) {
+        if ($this->options['use'] && $this->CheckDependencies()) {
             add_action('woocommerce_new_booking', [$this, 'AddEditReservation'], 5, 1);
             foreach (['unpaid', 'pending-confirmation', 'confirmed', 'paid', 'complete', 'in-cart'] as $action) {
                 add_action('woocommerce_booking_'.$action, [$this, 'AddEditReservation'], 5, 1);
