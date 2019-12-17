@@ -1,5 +1,4 @@
 <?php
-/** @noinspection SqlDialectInspection */
 
 namespace LockmeIntegration\Plugins;
 
@@ -7,6 +6,7 @@ use Exception;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use ReflectionObject;
+use RuntimeException;
 use wpdevart_bc_BookingCalendar;
 use wpdevart_bc_ControllerReservations;
 use wpdevart_bc_ModelCalendars;
@@ -25,14 +25,12 @@ class WPDevArt implements PluginInterface
         global $wpdb;
 
         $this->plugin = $plugin;
-        $this->options = get_option("lockme_wpdevart");
+        $this->options = get_option('lockme_wpdevart');
 
         if ($this->options['use'] && $this->CheckDependencies()) {
-            if ($_GET['page'] == "wpdevart-reservations" && is_admin() && $_POST['task']) {
-                if ($_POST['id']) {
-                    $this->resdata = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$wpdb->prefix.'wpdevart_reservations WHERE `id`=%d',
-                        $_POST['id']), ARRAY_A);
-                }
+            if ($_GET['page'] === 'wpdevart-reservations' && $_POST['task'] && $_POST['id'] && is_admin()) {
+                $this->resdata = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$wpdb->prefix.'wpdevart_reservations WHERE `id`=%d',
+                    $_POST['id']), ARRAY_A);
             }
             register_shutdown_function([$this, 'ShutDown']);
 
@@ -40,7 +38,7 @@ class WPDevArt implements PluginInterface
                 if ($_GET['wpdevart_export']) {
                     $this->ExportToLockMe();
                     $_SESSION['wpdevart_export'] = 1;
-                    wp_redirect("?page=lockme_integration&tab=wpdevart_plugin");
+                    wp_redirect('?page=lockme_integration&tab=wpdevart_plugin');
                     exit;
                 }
             });
@@ -65,7 +63,7 @@ class WPDevArt implements PluginInterface
         if (!is_array($res)) {
             return;
         }
-        if (defined("LOCKME_MESSAGING")) {
+        if (defined('LOCKME_MESSAGING')) {
             return;
         }
 
@@ -75,7 +73,7 @@ class WPDevArt implements PluginInterface
         $lockme_data = [];
 
         try {
-            $lockme_data = $api->Reservation($resdata["roomid"], "ext/{$id}");
+            $lockme_data = $api->Reservation($resdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
 
@@ -83,7 +81,7 @@ class WPDevArt implements PluginInterface
             if (!$lockme_data) { //Add new
                 $api->AddReservation($resdata);
             } else { //Update
-                $api->EditReservation($resdata["roomid"], "ext/{$id}", $resdata);
+                $api->EditReservation($resdata['roomid'], "ext/{$id}", $resdata);
             }
         } catch (Exception $e) {
         }
@@ -97,12 +95,12 @@ class WPDevArt implements PluginInterface
                 [
                     'roomid' => $this->options['calendar_'.$res['calendar_id']],
                     'date' => date('Y-m-d', strtotime($res['single_day'])),
-                    'hour' => date("H:i:s", strtotime($res['start_hour'])),
-                    'pricer' => "API",
+                    'hour' => date('H:i:s', strtotime($res['start_hour'])),
+                    'pricer' => 'API',
                     'email' => $res['email'],
-                    'status' => $res["status"] == "approved" ? 1 : 0,
+                    'status' => $res['status'] === 'approved' ? 1 : 0,
                     'extid' => $res['id'],
-                    'price' => $res["price"]
+                    'price' => $res['price']
                 ]
             );
     }
@@ -118,15 +116,15 @@ class WPDevArt implements PluginInterface
 
         add_settings_section(
             'lockme_wpdevart_section',
-            "Ustawienia wtyczki Booking Calendar Pro WpDevArt",
-            function () {
+            'Ustawienia wtyczki Booking Calendar Pro WpDevArt',
+            static function () {
                 echo '<p>Ustawienia integracji z wtyczką Booking Calendar Pro WpDevArt</p>';
             },
             'lockme-wpdevart');
 
         add_settings_field(
-            "wpdevart_use",
-            "Włącz integrację",
+            'wpdevart_use',
+            'Włącz integrację',
             function () {
                 echo '<input name="lockme_wpdevart[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'],
                         false).' />';
@@ -135,19 +133,19 @@ class WPDevArt implements PluginInterface
             'lockme_wpdevart_section',
             []);
 
-        if ($this->options['use'] && $this->plugin->tab == 'wpdevart_plugin') {
+        if ($this->options['use'] && $this->plugin->tab === 'wpdevart_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
                 $rooms = $api->RoomList();
             }
 
-            $query = "SELECT * FROM ".$wpdb->prefix."wpdevart_calendars ";
+            $query = 'SELECT * FROM '.$wpdb->prefix.'wpdevart_calendars ';
             $calendars = $wpdb->get_results($query);
             foreach ($calendars as $calendar) {
                 add_settings_field(
-                    "calendar_".$calendar->id,
-                    "Pokój dla ".$calendar->title,
+                    'calendar_'.$calendar->id,
+                    'Pokój dla '.$calendar->title,
                     function () use ($rooms, $calendar) {
                         echo '<select name="lockme_wpdevart[calendar_'.$calendar->id.']">';
                         echo '<option value="">--wybierz--</option>';
@@ -164,9 +162,9 @@ class WPDevArt implements PluginInterface
                 );
             }
             add_settings_field(
-                "export_wpdevart",
-                "Wyślij dane do LockMe",
-                function () {
+                'export_wpdevart',
+                'Wyślij dane do LockMe',
+                static function () {
                     echo '<a href="?page=lockme_integration&tab=wpdevart_plugin&wpdevart_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
                 },
                 'lockme-wpdevart',
@@ -180,8 +178,8 @@ class WPDevArt implements PluginInterface
     public function CheckDependencies()
     {
         return
-            is_plugin_active("booking-calendar-pro/booking_calendar.php") ||
-            is_plugin_active("booking-calendar/booking_calendar.php");
+            is_plugin_active('booking-calendar-pro/booking_calendar.php') ||
+            is_plugin_active('booking-calendar/booking_calendar.php');
     }
 
     public function DrawForm()
@@ -203,13 +201,13 @@ class WPDevArt implements PluginInterface
 
     public function ShutDown()
     {
-        if ($_GET['page'] == "wpdevart-reservations" && is_admin() && $_POST['task']) {
+        if ($_GET['page'] === 'wpdevart-reservations' && $_POST['task'] && is_admin()) {
             switch ($_POST['task']) {
-                case "approve":
+                case 'approve':
                     $this->AddEditReservation($this->resdata);
                     break;
-                case "canceled":
-                case "delete":
+                case 'canceled':
+                case 'delete':
                     $this->Delete($this->resdata);
                     break;
             }
@@ -227,7 +225,7 @@ class WPDevArt implements PluginInterface
 
     public function Delete($res)
     {
-        if (defined("LOCKME_MESSAGING")) {
+        if (defined('LOCKME_MESSAGING')) {
             return;
         }
 
@@ -236,7 +234,7 @@ class WPDevArt implements PluginInterface
         $resdata = $this->AppData($res);
 
         try {
-            $api->DeleteReservation($resdata["roomid"], "ext/{$id}");
+            $api->DeleteReservation($resdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
     }
@@ -248,30 +246,30 @@ class WPDevArt implements PluginInterface
             return false;
         }
 
-        $data = $message["data"];
-        $roomid = $message["roomid"];
-        $lockme_id = $message["reservationid"];
+        $data = $message['data'];
+        $roomid = $message['roomid'];
+        $lockme_id = $message['reservationid'];
         $date = $data['date'];
-        $hour = date("H:i", strtotime($data['hour']));
+        $hour = date('H:i', strtotime($data['hour']));
 
         $calendar_id = $this->GetCalendar($roomid);
         if (!$calendar_id) {
-            throw new Exception("No calendar");
+            throw new RuntimeException('No calendar');
         }
 
-        $cf_meta_value = '';
-        foreach ([
-                     "Żródło" => "LockMe",
-                     "Telefon" => $data['phone'],
-                     "Ilość osób" => $data['people'],
-                     "Cena" => $data['price'],
-                     "Status" => $data['status'] ? "Opłacone" : "Rezerwacja (max. 20 minut)"
-                 ] as $label => $value) {
-            $cf_meta_value .= '<p class="cf-meta-value"><strong>'.$label.'</strong><br>'.$value.'</p>';
-        }
+//        $cf_meta_value = '';
+//        foreach ([
+//                     'Żródło' => 'LockMe',
+//                     'Telefon' => $data['phone'],
+//                     'Ilość osób' => $data['people'],
+//                     'Cena' => $data['price'],
+//                     'Status' => $data['status'] ? 'Opłacone' : 'Rezerwacja (max. 20 minut)'
+//                 ] as $label => $value) {
+//            $cf_meta_value .= '<p class="cf-meta-value"><strong>'.$label.'</strong><br>'.$value.'</p>';
+//        }
 
-        switch ($message["action"]) {
-            case "add":
+        switch ($message['action']) {
+            case 'add':
                 $result = $wpdb->insert($wpdb->prefix.'wpdevart_reservations', [
                     'calendar_id' => $calendar_id,
                     'single_day' => $date,
@@ -282,11 +280,11 @@ class WPDevArt implements PluginInterface
                     'form' => [],
                     'email' => $data['email'],
                     'status' => 'approved',
-                    'date_created' => date('Y-m-d H:i', time()),
+                    'date_created' => date('Y-m-d H:i'),
                     'is_new' => 0
                 ]);
                 if ($result === false) {
-                    throw new Exception("Error saving to database - ".$wpdb->last_error);
+                    throw new RuntimeException('Error saving to database - '.$wpdb->last_error);
                 }
 
                 $id = $wpdb->insert_id;
@@ -299,12 +297,12 @@ class WPDevArt implements PluginInterface
                 $form_model = new wpdevart_bc_ModelForms();
                 $extra_model = new wpdevart_bc_ModelExtras();
                 $ids = $calendar_model->get_ids($calendar_id);
-                $theme_option = $theme_model->get_setting_rows($ids["theme_id"]);
+                $theme_option = $theme_model->get_setting_rows($ids['theme_id']);
                 $calendar_data = $calendar_model->get_db_days_data($calendar_id);
                 $calendar_title = $calendar_model->get_calendar_rows($calendar_id);
-                $calendar_title = $calendar_title["title"];
-                $extra_field = $extra_model->get_extra_rows($ids["extra_id"]);
-                $form_option = $form_model->get_form_rows($ids["form_id"]);
+                $calendar_title = $calendar_title['title'];
+                $extra_field = $extra_model->get_extra_rows($ids['extra_id']);
+                $form_option = $form_model->get_form_rows($ids['form_id']);
                 if (isset($theme_option)) {
                     $theme_option = json_decode($theme_option->value, true);
                 } else {
@@ -316,18 +314,18 @@ class WPDevArt implements PluginInterface
                 $reflector = new ReflectionObject($wpdevart_booking);
                 $method = $reflector->getMethod('change_date_avail_count');
                 $method->setAccessible(true);
-                $method->invoke($wpdevart_booking, $id, true, "insert", []);
+                $method->invoke($wpdevart_booking, $id, true, 'insert', []);
 
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, ["extid" => $id]);
+                    $api->EditReservation($roomid, $lockme_id, ['extid' => $id]);
                     return true;
                 } catch (Exception $e) {
                 }
                 break;
-            case "edit":
+            case 'edit':
                 if ($data['extid']) {
-                    $row_id = $data["extid"];
+                    $row_id = $data['extid'];
 
                     $old_reserv = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$wpdb->prefix.'wpdevart_reservations WHERE `id`=%d',
                         $row_id), ARRAY_A);
@@ -342,7 +340,7 @@ class WPDevArt implements PluginInterface
                         'form' => [],
                         'email' => $data['email'],
                         'status' => 'approved',
-                        'date_created' => date('Y-m-d H:i', time()),
+                        'date_created' => date('Y-m-d H:i'),
                         'is_new' => 0
                     ], ['id' => $row_id]);
 
@@ -351,12 +349,12 @@ class WPDevArt implements PluginInterface
                     $form_model = new wpdevart_bc_ModelForms();
                     $extra_model = new wpdevart_bc_ModelExtras();
                     $ids = $calendar_model->get_ids($calendar_id);
-                    $theme_option = $theme_model->get_setting_rows($ids["theme_id"]);
+                    $theme_option = $theme_model->get_setting_rows($ids['theme_id']);
                     $calendar_data = $calendar_model->get_db_days_data($calendar_id);
                     $calendar_title = $calendar_model->get_calendar_rows($calendar_id);
-                    $calendar_title = $calendar_title["title"];
-                    $extra_field = $extra_model->get_extra_rows($ids["extra_id"]);
-                    $form_option = $form_model->get_form_rows($ids["form_id"]);
+                    $calendar_title = $calendar_title['title'];
+                    $extra_field = $extra_model->get_extra_rows($ids['extra_id']);
+                    $form_option = $form_model->get_form_rows($ids['form_id']);
                     if (isset($theme_option)) {
                         $theme_option = json_decode($theme_option->value, true);
                     } else {
@@ -368,14 +366,14 @@ class WPDevArt implements PluginInterface
                     $reflector = new ReflectionObject($wpdevart_booking);
                     $method = $reflector->getMethod('change_date_avail_count');
                     $method->setAccessible(true);
-                    $method->invoke($wpdevart_booking, $row_id, true, "update", $old_reserv);
+                    $method->invoke($wpdevart_booking, $row_id, true, 'update', $old_reserv);
 
                     return true;
                 }
                 break;
             case 'delete':
-                if ($data["extid"]) {
-                    $row_id = $data["extid"];
+                if ($data['extid']) {
+                    $row_id = $data['extid'];
 
                     $old_reserv = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$wpdb->prefix.'wpdevart_reservations WHERE `id`=%d',
                         $row_id), ARRAY_A);
@@ -402,10 +400,10 @@ class WPDevArt implements PluginInterface
     private function GetCalendar($roomid)
     {
         global $wpdb;
-        $query = "SELECT * FROM ".$wpdb->prefix."wpdevart_calendars ";
+        $query = 'SELECT * FROM '.$wpdb->prefix.'wpdevart_calendars ';
         $calendars = $wpdb->get_results($query);
         foreach ($calendars as $calendar) {
-            if ($this->options["calendar_".$calendar->id] == $roomid) {
+            if ($this->options['calendar_'.$calendar->id] == $roomid) {
                 return $calendar->id;
             }
         }
@@ -414,6 +412,6 @@ class WPDevArt implements PluginInterface
 
     public function getPluginName()
     {
-        return "Booking Calendar Pro WpDevArt";
+        return 'Booking Calendar Pro WpDevArt';
     }
 }

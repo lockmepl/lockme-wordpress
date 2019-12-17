@@ -5,6 +5,7 @@ namespace LockmeIntegration\Plugins;
 use Exception;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
+use RuntimeException;
 use WC_Booking;
 use WP_Query;
 
@@ -16,7 +17,7 @@ class Woo implements PluginInterface
     public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
-        $this->options = get_option("lockme_woo");
+        $this->options = get_option('lockme_woo');
 
         if ($this->options['use'] && $this->CheckDependencies()) {
             add_action('woocommerce_new_booking', [$this, 'AddEditReservation'], 5, 1);
@@ -33,7 +34,7 @@ class Woo implements PluginInterface
                 if ($_GET['woo_export']) {
                     $this->ExportToLockMe();
                     $_SESSION['woo_export'] = 1;
-                    wp_redirect("?page=lockme_integration&tab=woo_plugin");
+                    wp_redirect('?page=lockme_integration&tab=woo_plugin');
                     exit;
                 }
             });
@@ -54,14 +55,15 @@ class Woo implements PluginInterface
         while ($loop->have_posts()) {
             $loop->the_post();
             $post = $loop->post;
-            var_dump($post);
             $this->AddEditReservation($post->ID);
         }
     }
 
     public function CheckDependencies()
     {
-        return is_plugin_active("woocommerce-bookings/woocommmerce-bookings.php") || is_plugin_active("woocommerce-bookings/woocommerce-bookings.php");
+        return is_plugin_active('woocommerce-bookings/woocommmerce-bookings.php') || is_plugin_active(
+                'woocommerce-bookings/woocommerce-bookings.php'
+            );
     }
 
     public function RegisterSettings()
@@ -74,16 +76,16 @@ class Woo implements PluginInterface
 
         add_settings_section(
             'lockme_woo_section',
-            "Ustawienia wtyczki Woocommerce Bookings",
-            function () {
+            'Ustawienia wtyczki Woocommerce Bookings',
+            static function () {
                 echo '<p>Ustawienia integracji z wtyczką Woocommerce Bookings</p>';
             },
             'lockme-woo'
         );
 
         add_settings_field(
-            "woo_use",
-            "Włącz integrację",
+            'woo_use',
+            'Włącz integrację',
             function () {
                 echo '<input name="lockme_woo[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'],
                         false).' />';
@@ -93,12 +95,12 @@ class Woo implements PluginInterface
             []
         );
 
-        if ($this->options['use'] && $this->plugin->tab == 'woo_plugin') {
+        if ($this->options['use'] && $this->plugin->tab === 'woo_plugin') {
             add_settings_field(
-                "slot_length",
-                "Dłogośc slota (w min)",
+                'slot_length',
+                'Dłogośc slota (w min)',
                 function () {
-                    echo '<input name="lockme_woo[slot_length]" type="text" value="'.$this->options["slot_length"].'" />';
+                    echo '<input name="lockme_woo[slot_length]" type="text" value="'.$this->options['slot_length'].'" />';
                 },
                 'lockme-woo',
                 'lockme_woo_section',
@@ -118,8 +120,8 @@ class Woo implements PluginInterface
 
             foreach ($calendars as $calendar) {
                 add_settings_field(
-                    "calendar_".$calendar->ID,
-                    "Pokój dla ".$calendar->post_title,
+                    'calendar_'.$calendar->ID,
+                    'Pokój dla '.$calendar->post_title,
                     function () use ($rooms, $calendar) {
                         echo '<select name="lockme_woo[calendar_'.$calendar->ID.']">';
                         echo '<option value="">--wybierz--</option>';
@@ -136,9 +138,9 @@ class Woo implements PluginInterface
                 );
             }
             add_settings_field(
-                "export_woo",
-                "Wyślij dane do LockMe",
-                function () {
+                'export_woo',
+                'Wyślij dane do LockMe',
+                static function () {
                     echo '<a href="?page=lockme_integration&tab=woo_plugin&woo_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
                 },
                 'lockme-woo',
@@ -173,13 +175,13 @@ class Woo implements PluginInterface
         if (!is_numeric($postid)) {
             return false;
         }
-        if (defined("LOCKME_MESSAGING")) {
+        if (defined('LOCKME_MESSAGING')) {
             return false;
         }
         clean_post_cache($postid);
         $booking = new WC_Booking($postid);
         /** @noinspection PhpUndefinedFieldInspection */
-        if (!$booking->populated || $booking->post->post_type != 'wc_booking') {
+        if (!$booking->populated || $booking->post->post_type !== 'wc_booking') {
             return false;
         }
 
@@ -192,15 +194,15 @@ class Woo implements PluginInterface
 
         $lockme_data = null;
         try {
-            $lockme_data = $api->Reservation($appdata["roomid"], "ext/{$postid}");
+            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$postid}");
         } catch (Exception $e) {
-        };
+        }
 
         try {
             if (!$lockme_data) { //Add new
                 $api->AddReservation($appdata);
             } else { //Update
-                $api->EditReservation($appdata["roomid"], "ext/{$postid}", $appdata);
+                $api->EditReservation($appdata['roomid'], "ext/{$postid}", $appdata);
             }
         } catch (Exception $e) {
         }
@@ -209,13 +211,13 @@ class Woo implements PluginInterface
 
     public function Delete($postid)
     {
-        if (defined("LOCKME_MESSAGING")) {
+        if (defined('LOCKME_MESSAGING')) {
             return null;
         }
         clean_post_cache($postid);
         $booking = new WC_Booking($postid);
         /** @noinspection PhpUndefinedFieldInspection */
-        if (!$booking->populated || $booking->post->post_type != 'wc_booking') {
+        if (!$booking->populated || $booking->post->post_type !== 'wc_booking') {
             return null;
         }
 
@@ -227,7 +229,7 @@ class Woo implements PluginInterface
         $appdata = $this->AppData($booking);
 
         try {
-            $api->DeleteReservation($appdata["roomid"], "ext/{$booking->id}");
+            $api->DeleteReservation($appdata['roomid'], "ext/{$booking->id}");
         } catch (Exception $e) {
         }
         return null;
@@ -239,17 +241,17 @@ class Woo implements PluginInterface
             return false;
         }
 
-        $data = $message["data"];
-        $roomid = $message["roomid"];
-        $lockme_id = $message["reservationid"];
+        $data = $message['data'];
+        $roomid = $message['roomid'];
+        $lockme_id = $message['reservationid'];
         $date = $data['date'];
-        $hour = date("H:i:s", strtotime($data['hour']));
+        $hour = date('H:i:s', strtotime($data['hour']));
         $start = strtotime($date.' '.$hour);
 
         $calendar_id = $this->GetCalendar($roomid);
 
-        switch ($message["action"]) {
-            case "add":
+        switch ($message['action']) {
+            case 'add':
                 $booking = create_wc_booking(
                     $calendar_id,
                     [
@@ -266,23 +268,23 @@ class Woo implements PluginInterface
                 if ($booking) {
                     try {
                         $api = $this->plugin->GetApi();
-                        $api->EditReservation($roomid, $lockme_id, ["extid" => $booking->id]);
+                        $api->EditReservation($roomid, $lockme_id, ['extid' => $booking->id]);
                         return true;
                     } catch (Exception $e) {
                     }
                 } else {
-                    throw new Exception("Saving error");
+                    throw new RuntimeException('Saving error');
                 }
                 break;
-            case "edit":
+            case 'edit':
                 if ($data['extid']) {
                     $booking = new WC_Booking($data['extid']);
                     /** @noinspection PhpUndefinedFieldInspection */
-                    if (!$booking->populated || $booking->post->post_type != 'wc_booking') {
+                    if (!$booking->populated || $booking->post->post_type !== 'wc_booking') {
                         return false;
                     }
 
-                    if ($booking->status != 'confirmed' && $data['status']) {
+                    if ($booking->status !== 'confirmed' && $data['status']) {
                         $booking->update_status('confirmed');
                     }
 
@@ -299,8 +301,8 @@ class Woo implements PluginInterface
                 }
                 break;
             case 'delete':
-                if ($data["extid"]) {
-                    wp_delete_post($data["extid"]);
+                if ($data['extid']) {
+                    wp_delete_post($data['extid']);
                     return true;
                 }
                 break;
@@ -315,10 +317,10 @@ class Woo implements PluginInterface
                 [
                     'roomid' => $this->options['calendar_'.$booking->product_id],
                     'date' => date('Y-m-d', $booking->start),
-                    'hour' => date("H:i:s", $booking->start),
-                    'pricer' => "API",
+                    'hour' => date('H:i:s', $booking->start),
+                    'pricer' => 'API',
                     'price' => $booking->cost,
-                    'status' => $booking->status == 'in-cart' ? 0 : 1,
+                    'status' => $booking->status === 'in-cart' ? 0 : 1,
                     'people' => is_array($booking->persons) ? count($booking->persons) : $booking->persons,
                     'extid' => $booking->id
                 ]
@@ -332,7 +334,7 @@ class Woo implements PluginInterface
         ];
         $calendars = get_posts($args);
         foreach ($calendars as $calendar) {
-            if ($this->options["calendar_".$calendar->ID] == $roomid) {
+            if ($this->options['calendar_'.$calendar->ID] == $roomid) {
                 return $calendar->ID;
             }
         }
@@ -341,6 +343,6 @@ class Woo implements PluginInterface
 
     public function getPluginName()
     {
-        return "WooCommerce Bookings";
+        return 'WooCommerce Bookings';
     }
 }

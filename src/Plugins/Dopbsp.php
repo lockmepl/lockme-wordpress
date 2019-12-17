@@ -5,6 +5,7 @@ namespace LockmeIntegration\Plugins;
 use Exception;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
+use RuntimeException;
 
 class Dopbsp implements PluginInterface
 {
@@ -14,7 +15,7 @@ class Dopbsp implements PluginInterface
     public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
-        $this->options = get_option("lockme_dopbsp");
+        $this->options = get_option('lockme_dopbsp');
 
         if ($this->options['use'] && $this->CheckDependencies()) {
             add_action('dopbsp_action_book_after', [$this, 'AddReservation'], 5);
@@ -26,15 +27,15 @@ class Dopbsp implements PluginInterface
                 if ($_GET['dopbsp_export']) {
                     $this->ExportToLockMe();
                     $_SESSION['dopbsp_export'] = 1;
-                    wp_redirect("?page=lockme_integration&tab=dopbsp_plugin");
+                    wp_redirect('?page=lockme_integration&tab=dopbsp_plugin');
                     exit;
-                } else {
-                    if ($_GET['dopbsp_fix']) {
-                        $this->FixSettings();
-                        $_SESSION['dopbsp_fix'] = 1;
-                        wp_redirect("?page=lockme_integration&tab=dopbsp_plugin");
-                        exit;
-                    }
+                }
+
+                if ($_GET['dopbsp_fix']) {
+                    $this->FixSettings();
+                    $_SESSION['dopbsp_fix'] = 1;
+                    wp_redirect('?page=lockme_integration&tab=dopbsp_plugin');
+                    exit;
                 }
             });
         }
@@ -42,7 +43,7 @@ class Dopbsp implements PluginInterface
 
     public function getPluginName()
     {
-        return "Booking System PRO";
+        return 'Booking System PRO';
     }
 
     public function ExportToLockMe()
@@ -50,7 +51,7 @@ class Dopbsp implements PluginInterface
         global $DOPBSP, $wpdb;
         set_time_limit(0);
 
-        $sql = "SELECT * FROM ".$DOPBSP->tables->reservations." WHERE `check_in` >= curdate() ORDER BY ID";
+        $sql = 'SELECT * FROM '.$DOPBSP->tables->reservations.' WHERE `check_in` >= curdate() ORDER BY ID';
         $rows = $wpdb->get_results($sql);
 
         foreach ($rows as $row) {
@@ -62,7 +63,7 @@ class Dopbsp implements PluginInterface
     {
         global $wpdb, $DOPBSP;
 
-        $data = $wpdb->get_row($wpdb->prepare("SELECT * FROM ".$DOPBSP->tables->reservations." WHERE `id` = %d", $id),
+        $data = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$DOPBSP->tables->reservations.' WHERE `id` = %d', $id),
             ARRAY_A);
         if (!$data) {
             return;
@@ -78,7 +79,7 @@ class Dopbsp implements PluginInterface
         $lockme_data = null;
 
         try {
-            $lockme_data = $api->Reservation($appdata["roomid"], "ext/{$id}");
+            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
 
@@ -90,7 +91,7 @@ class Dopbsp implements PluginInterface
         }
 
         try {
-            $api->EditReservation($appdata["roomid"], "ext/{$id}", $appdata);
+            $api->EditReservation($appdata['roomid'], "ext/{$id}", $appdata);
         } catch (Exception $e) {
         }
         return null;
@@ -103,13 +104,13 @@ class Dopbsp implements PluginInterface
             $this->plugin->AnonymizeData(
                 [
                     'roomid' => $this->options['calendar_'.$res['calendar_id']],
-                    'date' => date("Y-m-d", strtotime($res['check_in'])),
-                    'hour' => date("H:i:s", strtotime($res['start_hour'])),
+                    'date' => date('Y-m-d', strtotime($res['check_in'])),
+                    'hour' => date('H:i:s', strtotime($res['start_hour'])),
                     'people' => 0,
-                    'pricer' => "API",
+                    'pricer' => 'API',
                     'price' => $res['price'],
                     'email' => $res['email'],
-                    'status' => in_array($res['status'], ['approved']),
+                    'status' => $res['status'] === 'approved',
                     'extid' => $res['id']
                 ]
             );
@@ -133,7 +134,7 @@ class Dopbsp implements PluginInterface
     {
         global $DOPBSP, $wpdb;
 
-        $data = $wpdb->get_row($wpdb->prepare("SELECT * FROM ".$DOPBSP->tables->reservations." WHERE `id` = %d", $id),
+        $data = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$DOPBSP->tables->reservations.' WHERE `id` = %d', $id),
             ARRAY_A);
         if (!$data) {
             return;
@@ -144,7 +145,7 @@ class Dopbsp implements PluginInterface
         $lockme_data = [];
 
         try {
-            $lockme_data = $api->Reservation($appdata["roomid"], "ext/{$id}");
+            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
 
@@ -153,7 +154,7 @@ class Dopbsp implements PluginInterface
         }
 
         try {
-            $api->DeleteReservation($appdata["roomid"], "ext/{$id}");
+            $api->DeleteReservation($appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
     }
@@ -206,15 +207,15 @@ class Dopbsp implements PluginInterface
     private function FixVal($val)
     {
         if (preg_match("#^\d\d\.\d\d$#", $val)) {
-            return strtr($val, ["." => ":"]);
-        } else {
-            if (preg_match("#^\d\d(\.|:)\d\d ?\-.*$#", $val)) {
-                $pos = mb_strpos($val, '-');
-                if ($pos === false) {
-                    return $val;
-                }
-                return trim(strtr(mb_substr($val, 0, $pos), ["." => ":"]));
+            return strtr($val, ['.' => ':']);
+        }
+
+        if (preg_match("#^\d\d([.:])\d\d ?-.*$#", $val)) {
+            $pos = mb_strpos($val, '-');
+            if ($pos === false) {
+                return $val;
             }
+            return trim(strtr(mb_substr($val, 0, $pos), ['.' => ':']));
         }
         return $val;
     }
@@ -230,15 +231,15 @@ class Dopbsp implements PluginInterface
 
         add_settings_section(
             'lockme_dopbsp_section',
-            "Ustawienia wtyczki Booking System PRO",
-            function () {
+            'Ustawienia wtyczki Booking System PRO',
+            static function () {
                 echo '<p>Ustawienia integracji z wtyczką Booking System PRO</p>';
             },
             'lockme-dopbsp');
 
         add_settings_field(
-            "dopbsp_use",
-            "Włącz integrację",
+            'dopbsp_use',
+            'Włącz integrację',
             function () {
                 echo '<input name="lockme_dopbsp[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'],
                         false).' />';
@@ -247,7 +248,7 @@ class Dopbsp implements PluginInterface
             'lockme_dopbsp_section',
             []);
 
-        if ($this->options['use'] && $this->plugin->tab == 'dopbsp_plugin') {
+        if ($this->options['use'] && $this->plugin->tab === 'dopbsp_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
@@ -257,8 +258,8 @@ class Dopbsp implements PluginInterface
 
             foreach ($calendars as $calendar) {
                 add_settings_field(
-                    "calendar_".$calendar->id,
-                    "Pokój dla ".$calendar->name,
+                    'calendar_'.$calendar->id,
+                    'Pokój dla '.$calendar->name,
                     function () use ($rooms, $calendar) {
                         echo '<select name="lockme_dopbsp[calendar_'.$calendar->id.']">';
                         echo '<option value="">--wybierz--</option>';
@@ -275,9 +276,9 @@ class Dopbsp implements PluginInterface
                 );
             }
             add_settings_field(
-                "export_dopbsp",
-                "Wyślij dane do LockMe",
-                function () {
+                'export_dopbsp',
+                'Wyślij dane do LockMe',
+                static function () {
                     echo '<a href="?page=lockme_integration&tab=dopbsp_plugin&dopbsp_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
                 },
                 'lockme-dopbsp',
@@ -285,9 +286,9 @@ class Dopbsp implements PluginInterface
                 []
             );
             add_settings_field(
-                "fix_dopbsp",
-                "Napraw ustawienia",
-                function () {
+                'fix_dopbsp',
+                'Napraw ustawienia',
+                static function () {
                     echo '<a href="?page=lockme_integration&tab=dopbsp_plugin&dopbsp_fix=1" onclick="return confirm(\'Na pewno wykonać naprawę? Pamiętaj o backupie bazy danych! Nie ponosimy odpowiedzialności za skutki automatycznej naprawy!\');">Kliknij tutaj</a> aby naprawić ustawienia godzin BSP ("11:20-12:30" -> "11:20"). Ta operacja powinna być wykonywana tylko raz, <b>po uprzednim zbackupowaniu bazy danych!</b>';
                 },
                 'lockme-dopbsp',
@@ -299,7 +300,7 @@ class Dopbsp implements PluginInterface
 
     public function CheckDependencies()
     {
-        return is_plugin_active("dopbsp/dopbsp.php") || is_plugin_active("booking-system/dopbs.php");
+        return is_plugin_active('dopbsp/dopbsp.php') || is_plugin_active('booking-system/dopbs.php');
     }
 
     public function DrawForm()
@@ -315,13 +316,11 @@ class Dopbsp implements PluginInterface
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
             unset($_SESSION['dopbsp_export']);
-        } else {
-            if ($_SESSION['dopbsp_fix']) {
-                echo '<div class="updated">';
-                echo '  <p>Ustawienia zostały naprawione. <b>Sprawdź działanie kalendarza i migrację ustawień!</b></p>';
-                echo '</div>';
-                unset($_SESSION['dopbsp_fix']);
-            }
+        } elseif ($_SESSION['dopbsp_fix']) {
+            echo '<div class="updated">';
+            echo '  <p>Ustawienia zostały naprawione. <b>Sprawdź działanie kalendarza i migrację ustawień!</b></p>';
+            echo '</div>';
+            unset($_SESSION['dopbsp_fix']);
         }
         settings_fields('lockme-dopbsp');
         do_settings_sections('lockme-dopbsp');
@@ -330,7 +329,8 @@ class Dopbsp implements PluginInterface
     public function AddWooReservation($order_id)
     {
         global $wpdb, $DOPBSP;
-        $datas = $wpdb->get_results($wpdb->prepare("SELECT * FROM ".$DOPBSP->tables->reservations." WHERE `transaction_id` = %d",
+        $datas = $wpdb->get_results($wpdb->prepare(
+            'SELECT * FROM '.$DOPBSP->tables->reservations.' WHERE `transaction_id` = %d',
             $order_id), ARRAY_A);
         foreach ($datas as $data) {
             if ($data) {
@@ -368,7 +368,9 @@ class Dopbsp implements PluginInterface
         $calendar_id = $_POST['calendar_id'];
 
         foreach ($cart as $reservation) {
-            $data = $wpdb->get_results($wpdb->prepare("SELECT * FROM ".$DOPBSP->tables->reservations." WHERE `check_in` = %s and `start_hour` = %s and `calendar_id` = %d",
+            $data = $wpdb->get_results($wpdb->prepare(
+                'SELECT * FROM '.$DOPBSP->tables->reservations.
+                ' WHERE `check_in` = %s and `start_hour` = %s and `calendar_id` = %d',
                 $reservation['check_in'], $reservation['start_hour'], $calendar_id), ARRAY_A);
             foreach ($data as $res) {
                 $this->Add($res);
@@ -383,74 +385,74 @@ class Dopbsp implements PluginInterface
             return false;
         }
 
-        $data = $message["data"];
-        $roomid = $message["roomid"];
-        $lockme_id = $message["reservationid"];
-        $hour = date("H:i", strtotime($data['hour']));
+        $data = $message['data'];
+        $roomid = $message['roomid'];
+        $lockme_id = $message['reservationid'];
+        $hour = date('H:i', strtotime($data['hour']));
 
         $calendar_id = $this->GetCalendar($roomid);
 
         $form = [
             [
-                "id" => "1",
-                "is_email" => "false",
-                "add_to_day_hour_info" => "false",
-                "add_to_day_hour_body" => "false",
-                "translation" => "Imię",
-                "value" => $data['name']
+                'id' => '1',
+                'is_email' => 'false',
+                'add_to_day_hour_info' => 'false',
+                'add_to_day_hour_body' => 'false',
+                'translation' => 'Imię',
+                'value' => $data['name']
             ],
             [
-                "id" => "2",
-                "is_email" => "false",
-                "add_to_day_hour_info" => "false",
-                "add_to_day_hour_body" => "false",
-                "translation" => "Nazwisko",
-                "value" => $data['surname']
+                'id' => '2',
+                'is_email' => 'false',
+                'add_to_day_hour_info' => 'false',
+                'add_to_day_hour_body' => 'false',
+                'translation' => 'Nazwisko',
+                'value' => $data['surname']
             ],
             [
-                "id" => "3",
-                "is_email" => "false",
-                "add_to_day_hour_info" => "false",
-                "add_to_day_hour_body" => "false",
-                "translation" => "Email",
-                "value" => $data['email']
+                'id' => '3',
+                'is_email' => 'false',
+                'add_to_day_hour_info' => 'false',
+                'add_to_day_hour_body' => 'false',
+                'translation' => 'Email',
+                'value' => $data['email']
             ],
             [
-                "id" => "4",
-                "is_email" => "false",
-                "add_to_day_hour_info" => "false",
-                "add_to_day_hour_body" => "false",
-                "translation" => "Telefon",
-                "value" => $data['phone']
+                'id' => '4',
+                'is_email' => 'false',
+                'add_to_day_hour_info' => 'false',
+                'add_to_day_hour_body' => 'false',
+                'translation' => 'Telefon',
+                'value' => $data['phone']
             ],
             [
-                "id" => "5",
-                "is_email" => "false",
-                "add_to_day_hour_info" => "false",
-                "add_to_day_hour_body" => "false",
-                "translation" => "Dodatkowe uwagi",
-                "value" => $data['comment']
+                'id' => '5',
+                'is_email' => 'false',
+                'add_to_day_hour_info' => 'false',
+                'add_to_day_hour_body' => 'false',
+                'translation' => 'Dodatkowe uwagi',
+                'value' => $data['comment']
             ],
             [
-                "id" => "6",
-                "is_email" => "false",
-                "add_to_day_hour_info" => "false",
-                "add_to_day_hour_body" => "false",
-                "translation" => "Źródło",
-                "value" => in_array($data['source'], ['panel', 'web', 'widget']) ? 'LockMe' : ''
+                'id' => '6',
+                'is_email' => 'false',
+                'add_to_day_hour_info' => 'false',
+                'add_to_day_hour_body' => 'false',
+                'translation' => 'Źródło',
+                'value' => in_array($data['source'], ['panel', 'web', 'widget']) ? 'LockMe' : ''
             ],
             [
-                "id" => "7",
-                "is_email" => "false",
-                "add_to_day_hour_info" => "false",
-                "add_to_day_hour_body" => "false",
-                "translation" => "Cena",
-                "value" => $data['price']
+                'id' => '7',
+                'is_email' => 'false',
+                'add_to_day_hour_info' => 'false',
+                'add_to_day_hour_body' => 'false',
+                'translation' => 'Cena',
+                'value' => $data['price']
             ]
         ];
 
-        switch ($message["action"]) {
-            case "add":
+        switch ($message['action']) {
+            case 'add':
                 $day_data = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$DOPBSP->tables->days.' WHERE calendar_id=%d AND day="%s"',
                     $calendar_id, $data['date']));
                 $day = json_decode($day_data->data);
@@ -460,13 +462,13 @@ class Dopbsp implements PluginInterface
                 $result = $wpdb->insert($DOPBSP->tables->reservations,
                     [
                         'calendar_id' => $calendar_id,
-                        'language' => "pl",
-                        'currency' => "zł",
-                        'currency_code' => "PLN",
+                        'language' => 'pl',
+                        'currency' => 'zł',
+                        'currency_code' => 'PLN',
                         'check_in' => $data['date'],
-                        'check_out' => "",
+                        'check_out' => '',
                         'start_hour' => $hour,
-                        'end_hour' => "",
+                        'end_hour' => '',
                         'no_items' => 1,
                         'price' => $data['price'],
                         'price_total' => $data['price'],
@@ -490,22 +492,24 @@ class Dopbsp implements PluginInterface
                     ]
                 );
                 if ($result === false) {
-                    throw new Exception("Error saving to database - ".$wpdb->last_error);
+                    throw new RuntimeException('Error saving to database - '.$wpdb->last_error);
                 }
                 $id = $wpdb->insert_id;
                 $DOPBSP->classes->backend_calendar_schedule->setApproved($id);
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, ["extid" => $id]);
+                    $api->EditReservation($roomid, $lockme_id, ['extid' => $id]);
                     return true;
                 } catch (Exception $e) {
                 }
                 break;
-            case "edit":
+            case 'edit':
                 if ($data['from_date'] && $data['from_hour'] && ($data['from_date'] != $data['date'] || $data['from_hour'] != $data['hour'])) {
                     $res = $wpdb->get_row(
-                        $wpdb->prepare("SELECT * FROM ".$DOPBSP->tables->reservations." WHERE `check_in` = %s and `start_hour` = %s and `calendar_id` = %d",
-                            $data['from_date'], date("H:i", strtotime($data['from_hour'])), $calendar_id)
+                        $wpdb->prepare(
+                            'SELECT * FROM '.$DOPBSP->tables->reservations.
+                            ' WHERE `check_in` = %s and `start_hour` = %s and `calendar_id` = %d',
+                            $data['from_date'], date('H:i', strtotime($data['from_hour'])), $calendar_id)
                     );
                     $DOPBSP->classes->backend_calendar_schedule->setCanceled($res->id);
 
@@ -526,16 +530,18 @@ class Dopbsp implements PluginInterface
                         ]
                     );
                     if ($result === false) {
-                        throw new Exception("Error saving to database 1 ");
+                        throw new RuntimeException('Error saving to database 1 ');
                     }
                     $DOPBSP->classes->backend_calendar_schedule->setApproved($res->id);
                 }
                 $res = $wpdb->get_row(
-                    $wpdb->prepare("SELECT * FROM ".$DOPBSP->tables->reservations." WHERE `check_in` = %s and `start_hour` = %s and `calendar_id` = %d",
+                    $wpdb->prepare(
+                        'SELECT * FROM '.$DOPBSP->tables->reservations.
+                        ' WHERE `check_in` = %s and `start_hour` = %s and `calendar_id` = %d',
                         $data['date'], $hour, $calendar_id)
                 );
                 if (!$res) {
-                    throw new Exception('No reservation');
+                    throw new RuntimeException('No reservation');
                 }
                 $result = $wpdb->update($DOPBSP->tables->reservations,
                     [
@@ -550,17 +556,19 @@ class Dopbsp implements PluginInterface
                     ]
                 );
                 if ($result === false) {
-                    throw new Exception("Error saving to database 2 ");
+                    throw new RuntimeException('Error saving to database 2 ');
                 }
                 return true;
                 break;
             case 'delete':
                 $res = $wpdb->get_row(
-                    $wpdb->prepare("SELECT * FROM ".$DOPBSP->tables->reservations." WHERE `check_in` = %s and `start_hour` = %s and `calendar_id` = %d",
+                    $wpdb->prepare(
+                        'SELECT * FROM '.$DOPBSP->tables->reservations.
+                        ' WHERE `check_in` = %s and `start_hour` = %s and `calendar_id` = %d',
                         $data['date'], $hour, $calendar_id)
                 );
                 if (!$res) {
-                    throw new Exception('No reservation');
+                    throw new RuntimeException('No reservation');
                 }
                 $result = $wpdb->update($DOPBSP->tables->reservations,
                     [
@@ -571,7 +579,7 @@ class Dopbsp implements PluginInterface
                     ]
                 );
                 if ($result === false) {
-                    throw new Exception("Error saving to database");
+                    throw new RuntimeException('Error saving to database');
                 }
                 $DOPBSP->classes->backend_calendar_schedule->setCanceled($res->id);
                 $wpdb->delete($DOPBSP->tables->reservations, ['id' => $res->id]);
@@ -592,10 +600,10 @@ class Dopbsp implements PluginInterface
 
         $calendars = $wpdb->get_results('SELECT * FROM '.$DOPBSP->tables->calendars.' ORDER BY id DESC');
         foreach ($calendars as $calendar) {
-            if ($this->options["calendar_".$calendar->id] == $roomid) {
+            if ($this->options['calendar_'.$calendar->id] == $roomid) {
                 return $calendar->id;
             }
         }
-        throw new Exception("No calendar");
+        throw new RuntimeException('No calendar');
     }
 }

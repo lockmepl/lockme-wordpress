@@ -5,6 +5,7 @@ namespace LockmeIntegration\Plugins;
 use Exception;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
+use RuntimeException;
 use WP_Query;
 
 class Booked implements PluginInterface
@@ -15,7 +16,7 @@ class Booked implements PluginInterface
     public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
-        $this->options = get_option("lockme_booked");
+        $this->options = get_option('lockme_booked');
 
         if ($this->options['use'] && $this->CheckDependencies()) {
             add_action('booked_new_appointment_created', [$this, 'AddEditReservation'], 5);
@@ -30,7 +31,7 @@ class Booked implements PluginInterface
                 if ($_GET['booked_export']) {
                     $this->ExportToLockMe();
                     $_SESSION['booked_export'] = 1;
-                    wp_redirect("?page=lockme_integration&tab=booked_plugin");
+                    wp_redirect('?page=lockme_integration&tab=booked_plugin');
                     exit;
                 }
             });
@@ -42,20 +43,20 @@ class Booked implements PluginInterface
         if (!is_numeric($id)) {
             return null;
         }
-        if (defined("LOCKME_MESSAGING")) {
+        if (defined('LOCKME_MESSAGING')) {
             return null;
         }
 
         $type = get_post_type($id);
 
-        if ($type && (get_post_type($id) != 'booked_appointments')) {
+        if ($type && (get_post_type($id) !== 'booked_appointments')) {
             return null;
         }
 
         $post = get_post($id);
         $appdata = $this->AppData($post);
 
-        if (!$post || get_post_status($id) == 'trash') {
+        if (!$post || get_post_status($id) === 'trash') {
             return $this->Delete($id);
         }
 
@@ -63,7 +64,7 @@ class Booked implements PluginInterface
         $lockme_data = [];
 
         try {
-            $lockme_data = $api->Reservation($appdata["roomid"], "ext/{$id}");
+            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
 
@@ -71,7 +72,7 @@ class Booked implements PluginInterface
             if (!$lockme_data) { //Add new
                 $api->AddReservation($appdata);
             } else { //Update
-                $api->EditReservation($appdata["roomid"], "ext/{$id}", $appdata);
+                $api->EditReservation($appdata['roomid'], "ext/{$id}", $appdata);
             }
         } catch (Exception $e) {
         }
@@ -87,7 +88,7 @@ class Booked implements PluginInterface
             'meta_query' => [
                 [
                     'key' => '_appointment_timestamp',
-                    'value' => strtotime("today"),
+                    'value' => strtotime('today'),
                     'compare' => '>='
                 ]
             ],
@@ -97,7 +98,7 @@ class Booked implements PluginInterface
         while ($loop->have_posts()) {
             $loop->the_post();
             $post = $loop->post;
-            if (get_post_meta($post->ID, "_appointment_timestamp", true) >= strtotime("today")) {
+            if (get_post_meta($post->ID, '_appointment_timestamp', true) >= strtotime('today')) {
                 $this->AddEditReservation($post->ID);
             }
         }
@@ -129,7 +130,7 @@ class Booked implements PluginInterface
 
     public function Delete($id)
     {
-        if (defined("LOCKME_MESSAGING")) {
+        if (defined('LOCKME_MESSAGING')) {
             return;
         }
 
@@ -139,7 +140,7 @@ class Booked implements PluginInterface
         $api = $this->plugin->GetApi();
 
         try {
-            $api->DeleteReservation($appdata["roomid"], "ext/{$id}");
+            $api->DeleteReservation($appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
     }
@@ -151,32 +152,32 @@ class Booked implements PluginInterface
             return false;
         }
 
-        $data = $message["data"];
-        $roomid = $message["roomid"];
-        $lockme_id = $message["reservationid"];
+        $data = $message['data'];
+        $roomid = $message['roomid'];
+        $lockme_id = $message['reservationid'];
         $date = strtotime($data['date']);
 
         $calendar_id = $this->GetCalendar($roomid);
         $hour = $this->GetSlot($calendar_id, $date, $data['hour']);
         if (!$hour) {
-            throw new Exception("No time slot");
+            throw new RuntimeException('No time slot');
         }
         $time_format = get_option('time_format');
         $date_format = get_option('date_format');
 
         $cf_meta_value = '';
         foreach ([
-                     "Żródło" => "LockMe",
-                     "Telefon" => $data['phone'],
-                     "Ilość osób" => $data['people'],
-                     "Cena" => $data['price'],
-                     "Status" => $data['status'] ? "Opłacone" : "Rezerwacja (max. 20 minut)"
+                     'Żródło' => 'LockMe',
+                     'Telefon' => $data['phone'],
+                     'Ilość osób' => $data['people'],
+                     'Cena' => $data['price'],
+                     'Status' => $data['status'] ? 'Opłacone' : 'Rezerwacja (max. 20 minut)'
                  ] as $label => $value) {
             $cf_meta_value .= '<p class="cf-meta-value"><strong>'.$label.'</strong><br>'.$value.'</p>';
         }
 
-        switch ($message["action"]) {
-            case "add":
+        switch ($message['action']) {
+            case 'add':
                 $post = apply_filters('booked_new_appointment_args', [
                     'post_title' => date_i18n($date_format, $date).' @ '.date_i18n($time_format,
                             $date).' (User: Guest)',
@@ -186,18 +187,17 @@ class Booked implements PluginInterface
                     'post_type' => 'booked_appointments'
                 ]);
                 $row_id = wp_insert_post($post, true);
-                if (!$row_id || is_wp_error($row_id)) {
-                    if (is_wp_error($row_id)) {
-                        throw new Exception($row_id->get_error_message());
-                    } else {
-                        throw new Exception("Error saving to database: ".$wpdb->last_error);
-                    }
+                if (!$row_id){
+                    throw new RuntimeException('Error saving to database: '.$wpdb->last_error);
+                }
+                if(is_wp_error($row_id)) {
+                    throw new RuntimeException($row_id->get_error_message());
                 }
                 update_post_meta($row_id, '_appointment_guest_name', $data['name'].' '.$data['surname']);
                 update_post_meta($row_id, '_appointment_guest_email', $data['email']);
                 update_post_meta($row_id, '_appointment_timestamp', $date);
                 update_post_meta($row_id, '_appointment_timeslot', $hour);
-                update_post_meta($row_id, '_appointment_source', "LockMe");
+                update_post_meta($row_id, '_appointment_source', 'LockMe');
                 update_post_meta($row_id, '_cf_meta_value', $cf_meta_value);
 
                 if (isset($calendar_id) && $calendar_id) {
@@ -206,14 +206,14 @@ class Booked implements PluginInterface
 
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, ["extid" => $row_id]);
+                    $api->EditReservation($roomid, $lockme_id, ['extid' => $row_id]);
                     return true;
                 } catch (Exception $e) {
                 }
                 break;
-            case "edit":
+            case 'edit':
                 if ($data['extid']) {
-                    $row_id = $data["extid"];
+                    $row_id = $data['extid'];
                     $post = apply_filters('booked_new_appointment_args', [
                         'ID' => $row_id,
                         'post_title' => date_i18n($date_format, $date).' @ '.date_i18n($time_format,
@@ -228,15 +228,15 @@ class Booked implements PluginInterface
                     update_post_meta($row_id, '_appointment_guest_email', $data['email']);
                     update_post_meta($row_id, '_appointment_timestamp', $date);
                     update_post_meta($row_id, '_appointment_timeslot', $hour);
-                    if (get_post_meta($row_id, '_appointment_source', true) == 'LockMe') {
+                    if (get_post_meta($row_id, '_appointment_source', true) === 'LockMe') {
                         update_post_meta($row_id, '_cf_meta_value', $cf_meta_value);
                     }
                     return true;
                 }
                 break;
             case 'delete':
-                if ($data["extid"]) {
-                    wp_delete_post($data["extid"]);
+                if ($data['extid']) {
+                    wp_delete_post($data['extid']);
                     return true;
                 }
                 break;
@@ -249,9 +249,9 @@ class Booked implements PluginInterface
         $cal = wp_get_object_terms($res->ID, 'booked_custom_calendars');
         $timeslot = explode('-', get_post_meta($res->ID, '_appointment_timeslot', true));
         $time = str_split($timeslot[0], 2);
-        $name = "";
-        $email = "";
-        $phone = "";
+        $name = '';
+        $email = '';
+        $phone = '';
 
         if ($res->post_author) {
             $user_info = get_userdata($res->post_author);
@@ -260,16 +260,16 @@ class Booked implements PluginInterface
             $phone = get_user_meta($res->post_author, 'booked_phone', true);
         }
         $name = get_post_meta($res->ID, '_appointment_guest_name', true) ?: $name;
-        $email = get_post_meta($res->ID, "_appointment_guest_email", true) ?: $email;
+        $email = get_post_meta($res->ID, '_appointment_guest_email', true) ?: $email;
 
         return
             $this->plugin->AnonymizeData(
                 [
                     'roomid' => $this->options['calendar_'.($cal[0] ? $cal[0]->term_id : 'default')],
                     'date' => date('Y-m-d', get_post_meta($res->ID, '_appointment_timestamp', true)),
-                    'hour' => date("H:i:s", strtotime("{$time[0]}:{$time[1]}:00")),
+                    'hour' => date('H:i:s', strtotime("{$time[0]}:{$time[1]}:00")),
                     'name' => $name,
-                    'pricer' => "API",
+                    'pricer' => 'API',
                     'email' => $email,
                     'phone' => $phone,
                     'status' => in_array($res->post_status, ['publish', 'future']) ? 1 : 0,
@@ -282,7 +282,7 @@ class Booked implements PluginInterface
     {
         $calendars = get_terms('booked_custom_calendars', 'orderby=slug&hide_empty=0');
         foreach ($calendars as $calendar) {
-            if ($this->options["calendar_".$calendar->term_id] == $roomid) {
+            if ($this->options['calendar_'.$calendar->term_id] == $roomid) {
                 return $calendar->term_id;
             }
         }
@@ -298,9 +298,9 @@ class Booked implements PluginInterface
 
         $day_name = date('D', $date);
         $formatted_date = date_i18n('Ymd', $date);
-        if (function_exists("booked_apply_custom_timeslots_details_filter")) {
+        if (function_exists('booked_apply_custom_timeslots_details_filter')) {
             $booked_defaults = booked_apply_custom_timeslots_details_filter($booked_defaults, $calendar_id);
-        } elseif (function_exists("booked_apply_custom_timeslots_filter")) {
+        } elseif (function_exists('booked_apply_custom_timeslots_filter')) {
             $booked_defaults = booked_apply_custom_timeslots_filter($booked_defaults, $calendar_id);
         }
 
@@ -315,7 +315,7 @@ class Booked implements PluginInterface
             $todays_defaults = false;
         }
 
-        $hour = date("Hi", strtotime($hour));
+        $hour = date('Hi', strtotime($hour));
         foreach ($todays_defaults as $h => $cnt) {
             if (preg_match("/^{$hour}/", $h)) {
                 return $h;
@@ -326,7 +326,7 @@ class Booked implements PluginInterface
 
     public function getPluginName()
     {
-        return "Booked";
+        return 'Booked';
     }
 
     public function RegisterSettings()
@@ -339,16 +339,16 @@ class Booked implements PluginInterface
 
         add_settings_section(
             'lockme_booked_section',
-            "Ustawienia wtyczki Booked",
-            function () {
+            'Ustawienia wtyczki Booked',
+            static function () {
                 echo '<p>Ustawienia integracji z wtyczką Booked</p>';
             },
             'lockme-booked'
         );
 
         add_settings_field(
-            "booked_use",
-            "Włącz integrację",
+            'booked_use',
+            'Włącz integrację',
             function () {
                 echo '<input name="lockme_booked[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'],
                         false).' />';
@@ -358,7 +358,7 @@ class Booked implements PluginInterface
             []
         );
 
-        if ($this->options['use'] && $this->plugin->tab == 'booked_plugin') {
+        if ($this->options['use'] && $this->plugin->tab === 'booked_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
@@ -366,8 +366,8 @@ class Booked implements PluginInterface
             }
 
             add_settings_field(
-                "calendar_default",
-                "Pokój dla domyślnego kalendarza",
+                'calendar_default',
+                'Pokój dla domyślnego kalendarza',
                 function () use ($rooms) {
                     echo '<select name="lockme_booked[calendar_default]">';
                     echo '<option value="">--wybierz--</option>';
@@ -386,8 +386,8 @@ class Booked implements PluginInterface
             $calendars = get_terms('booked_custom_calendars', 'orderby=slug&hide_empty=0');
             foreach ($calendars as $calendar) {
                 add_settings_field(
-                    "calendar_".$calendar->term_id,
-                    "Pokój dla ".$calendar->name,
+                    'calendar_'.$calendar->term_id,
+                    'Pokój dla '.$calendar->name,
                     function () use ($rooms, $calendar) {
                         echo '<select name="lockme_booked[calendar_'.$calendar->term_id.']">';
                         echo '<option value="">--wybierz--</option>';
@@ -404,9 +404,9 @@ class Booked implements PluginInterface
                 );
             }
             add_settings_field(
-                "export_booked",
-                "Wyślij dane do LockMe",
-                function () {
+                'export_booked',
+                'Wyślij dane do LockMe',
+                static function () {
                     echo '<a href="?page=lockme_integration&tab=booked_plugin&booked_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
                 },
                 'lockme-booked',
@@ -419,6 +419,6 @@ class Booked implements PluginInterface
 
     public function CheckDependencies()
     {
-        return is_plugin_active("booked/booked.php") || is_plugin_active("bookedall/booked.php");
+        return is_plugin_active('booked/booked.php') || is_plugin_active('bookedall/booked.php');
     }
 }

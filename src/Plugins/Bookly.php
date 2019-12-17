@@ -11,6 +11,7 @@ use DateTimeZone;
 use Exception;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
+use RuntimeException;
 
 class Bookly implements PluginInterface
 {
@@ -21,17 +22,17 @@ class Bookly implements PluginInterface
     public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
-        $this->options = get_option("lockme_bookly");
+        $this->options = get_option('lockme_bookly');
         if ($this->options['use'] && $this->CheckDependencies()) {
             add_filter('wp_die_ajax_handler', [$this, 'Ajax'], 15, 1);
 
             add_action('init', function () {
                 if (is_admin() && wp_doing_ajax()) {
                     switch ($_POST['action']) {
-                        case "bookly_delete_appointment":
+                        case 'bookly_delete_appointment':
                             $this->ajaxdata = $this->AppData($_POST['appointment_id']);
                             break;
-                        case "bookly_delete_customer_appointments":
+                        case 'bookly_delete_customer_appointments':
                             $this->ajaxdata = [];
                             foreach ($_POST['data'] as $caid) {
                                 $info = Appointment::query('a')
@@ -48,7 +49,7 @@ class Bookly implements PluginInterface
                 if ($_GET['bookly_export']) {
                     $this->ExportToLockMe();
                     $_SESSION['bookly_export'] = 1;
-                    wp_redirect("?page=lockme_integration&tab=bookly_plugin");
+                    wp_redirect('?page=lockme_integration&tab=bookly_plugin');
                     exit;
                 }
             });
@@ -57,7 +58,7 @@ class Bookly implements PluginInterface
 
     public function AppData($id, $info = null)
     {
-        if (is_null($info)) {
+        if ($info === null) {
             $info = Appointment::query('a')
                                ->select('SUM( ca.number_of_persons ) AS total_number_of_persons, a.staff_id, a.service_id, a.start_date, a.end_date, a.internal_note')
                                ->leftJoin('CustomerAppointment', 'ca', 'ca.appointment_id = a.id')
@@ -70,9 +71,9 @@ class Bookly implements PluginInterface
                 [
                     'roomid' => $this->options['calendar_'.$info['staff_id']],
                     'date' => date('Y-m-d', strtotime($info['start_date'])),
-                    'hour' => date("H:i:s", strtotime($info['start_date'])),
-                    'pricer' => "API",
-                    "status" => 1,
+                    'hour' => date('H:i:s', strtotime($info['start_date'])),
+                    'pricer' => 'API',
+                    'status' => 1,
                     'extid' => $id
                 ]
             );
@@ -97,7 +98,7 @@ class Bookly implements PluginInterface
                                        ->leftJoin('StaffService', 'ss',
                                            '`ss`.`staff_id` = `a`.`staff_id` AND `ss`.`service_id` = `a`.`service_id`')
                                        ->leftJoin('Service', 's', '`s`.`id` = `a`.`service_id`')
-                                       ->whereGte('a.start_date', date("Y-m-d"))
+                                       ->whereGte('a.start_date', date('Y-m-d'))
                                        ->groupBy('a.id')
                                        ->fetchArray();
         foreach ($bookings as $b) {
@@ -110,7 +111,7 @@ class Bookly implements PluginInterface
         if (!is_numeric($id)) {
             return;
         }
-        if (defined("LOCKME_MESSAGING")) {
+        if (defined('LOCKME_MESSAGING')) {
             return;
         }
 
@@ -119,7 +120,7 @@ class Bookly implements PluginInterface
         $lockme_data = [];
 
         try {
-            $lockme_data = $api->Reservation($appdata["roomid"], "ext/{$id}");
+            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
 
@@ -127,7 +128,7 @@ class Bookly implements PluginInterface
             if (!$lockme_data) { //Add new
                 $api->AddReservation($appdata);
             } else { //Update
-                $api->EditReservation($appdata["roomid"], "ext/{$id}", $appdata);
+                $api->EditReservation($appdata['roomid'], "ext/{$id}", $appdata);
             }
         } catch (Exception $e) {
         }
@@ -154,16 +155,16 @@ class Bookly implements PluginInterface
     {
         $data = json_decode(ob_get_contents(), true);
         switch ($_REQUEST['action']) {
-            case "bookly_save_appointment_form":
+            case 'bookly_save_appointment_form':
                 $this->AddEditReservation($data['data']['id']);
                 break;
-            case "bookly_delete_appointment":
+            case 'bookly_delete_appointment':
                 $this->Delete($_POST['appointment_id'], $this->ajaxdata);
                 break;
-            case "bookly_delete_customer_appointments":
+            case 'bookly_delete_customer_appointments':
                 $this->DeleteBatch();
                 break;
-            case "bookly_render_complete":
+            case 'bookly_render_complete':
                 foreach ((array)$_SESSION['bookly']['forms'][$_REQUEST['form_id']]['booking_numbers'] as $id) {
                     $this->AddEditReservation($id);
                 }
@@ -183,17 +184,17 @@ class Bookly implements PluginInterface
 
     public function Delete($id, $appdata = null)
     {
-        if (defined("LOCKME_MESSAGING")) {
+        if (defined('LOCKME_MESSAGING')) {
             return;
         }
 
         $api = $this->plugin->GetApi();
-        if (is_null($appdata)) {
+        if ($appdata === null) {
             $appdata = $this->AppData($id);
         }
 
         try {
-            $api->DeleteReservation($appdata["roomid"], "ext/{$id}");
+            $api->DeleteReservation($appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
     }
@@ -204,22 +205,22 @@ class Bookly implements PluginInterface
             return false;
         }
 
-        $data = $message["data"];
-        $roomid = $message["roomid"];
-        $lockme_id = $message["reservationid"];
+        $data = $message['data'];
+        $roomid = $message['roomid'];
+        $lockme_id = $message['reservationid'];
         $timestamp = strtotime($data['date'].' '.$data['hour']);
         $surname = $data['surname'];
-        if ($data['source'] == "web" || $data['source'] == "widget") {
+        if ($data['source'] === 'web' || $data['source'] === 'widget') {
             $surname .= ' (LockMe)';
         }
 
-        $lm_datetimezone = new DateTimeZone("Europe/Warsaw");
+        $lm_datetimezone = new DateTimeZone('Europe/Warsaw');
         $lm_datetime = new DateTime($data['date'].' '.$data['hour'], $lm_datetimezone);
         $offset = $lm_datetimezone->getOffset($lm_datetime)/60;
 
         $calendar_id = $this->GetCalendar($roomid);
         if (!$calendar_id) {
-            throw new Exception("No calendar");
+            throw new RuntimeException('No calendar');
         }
         $staff = new Staff();
         $staff->load($calendar_id);
@@ -227,8 +228,8 @@ class Bookly implements PluginInterface
         $service = $staff->getStaffServices()[0]->service;
         $service_id = $service->getId();
 
-        switch ($message["action"]) {
-            case "add":
+        switch ($message['action']) {
+            case 'add':
                 $customer = new Customer();
                 $customer->loadBy([
                     'full_name' => $data['name'].' '.$surname,
@@ -269,17 +270,17 @@ class Bookly implements PluginInterface
 
                 $id = $appointment->getId();
                 if (!$id || !$customer_appointment->getId()) {
-                    throw new Exception("Save error");
+                    throw new RuntimeException('Save error');
                 }
 
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, ["extid" => $id]);
+                    $api->EditReservation($roomid, $lockme_id, ['extid' => $id]);
                     return true;
                 } catch (Exception $e) {
                 }
                 break;
-            case "edit":
+            case 'edit':
                 if ($data['extid']) {
                     $appointment = new Appointment();
                     $appointment->load($data['extid']);
@@ -303,7 +304,7 @@ class Bookly implements PluginInterface
                 }
                 break;
             case 'delete':
-                if ($data["extid"]) {
+                if ($data['extid']) {
                     $appointment = new Appointment();
                     $appointment->load($data['extid']);
                     $appointment->delete();
@@ -318,7 +319,7 @@ class Bookly implements PluginInterface
     {
         $calendars = Staff::query()->sortBy('position')->fetchArray();
         foreach ($calendars as $calendar) {
-            if ($this->options["calendar_".$calendar['id']] == $roomid) {
+            if ($this->options['calendar_'.$calendar['id']] == $roomid) {
                 return $calendar['id'];
             }
         }
@@ -335,16 +336,16 @@ class Bookly implements PluginInterface
 
         add_settings_section(
             'lockme_bookly_section',
-            "Ustawienia wtyczki bookly",
-            function () {
+            'Ustawienia wtyczki bookly',
+            static function () {
                 echo '<p>Ustawienia integracji z wtyczką bookly</p>';
             },
             'lockme-bookly'
         );
 
         add_settings_field(
-            "bookly_use",
-            "Włącz integrację",
+            'bookly_use',
+            'Włącz integrację',
             function () {
                 echo '<input name="lockme_bookly[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'],
                         false).' />';
@@ -354,10 +355,10 @@ class Bookly implements PluginInterface
             []
         );
 
-        if ($this->options['use'] && $this->plugin->tab == 'bookly_plugin') {
+        if ($this->options['use'] && $this->plugin->tab === 'bookly_plugin') {
             add_settings_field(
-                "one_person",
-                "Traktuj grupy jako jedną osobę",
+                'one_person',
+                'Traktuj grupy jako jedną osobę',
                 function () {
                     echo '<input name="lockme_bookly[one_person]" type="checkbox" value="1"  '.checked(1,
                             $this->options['one_person'], false).' />';
@@ -376,8 +377,8 @@ class Bookly implements PluginInterface
             $calendars = Staff::query()->sortBy('position')->fetchArray();
             foreach ($calendars as $calendar) {
                 add_settings_field(
-                    "calendar_".$calendar['id'],
-                    "Pokój dla ".$calendar['full_name'],
+                    'calendar_'.$calendar['id'],
+                    'Pokój dla '.$calendar['full_name'],
                     function () use ($rooms, $calendar) {
                         echo '<select name="lockme_bookly[calendar_'.$calendar['id'].']">';
                         echo '<option value="">--wybierz--</option>';
@@ -394,9 +395,9 @@ class Bookly implements PluginInterface
                 );
             }
             add_settings_field(
-                "export_bookly",
-                "Wyślij dane do LockMe",
-                function () {
+                'export_bookly',
+                'Wyślij dane do LockMe',
+                static function () {
                     echo '<a href="?page=lockme_integration&tab=bookly_plugin&bookly_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
                 },
                 'lockme-bookly',
@@ -409,11 +410,13 @@ class Bookly implements PluginInterface
 
     public function CheckDependencies()
     {
-        return is_plugin_active("appointment-booking/main.php") || is_plugin_active("bookly-responsive-appointment-booking-tool/main.php");
+        return is_plugin_active('appointment-booking/main.php') || is_plugin_active(
+                'bookly-responsive-appointment-booking-tool/main.php'
+            );
     }
 
     public function getPluginName()
     {
-        return "Bookly";
+        return 'Bookly';
     }
 }

@@ -5,6 +5,7 @@ namespace LockmeIntegration\Plugins;
 use Exception;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
+use RuntimeException;
 
 class Appointments implements PluginInterface
 {
@@ -14,7 +15,7 @@ class Appointments implements PluginInterface
     public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
-        $this->options = get_option("lockme_app");
+        $this->options = get_option('lockme_app');
 
         if ($this->options['use'] && $this->CheckDependencies()) {
             add_action('wpmudev_appointments_insert_appointment', [$this, 'AddReservation'], 10, 1);
@@ -25,7 +26,7 @@ class Appointments implements PluginInterface
                 if ($_GET['app_export']) {
                     $this->ExportToLockMe();
                     $_SESSION['app_export'] = 1;
-                    wp_redirect("?page=lockme_integration&tab=appointments_plugin");
+                    wp_redirect('?page=lockme_integration&tab=appointments_plugin');
                     exit;
                 }
             });
@@ -34,12 +35,12 @@ class Appointments implements PluginInterface
 
     public function getPluginName()
     {
-        return "Appointments";
+        return 'Appointments';
     }
 
     public function CheckDependencies()
     {
-        return is_plugin_active("appointments/appointments.php");
+        return is_plugin_active('appointments/appointments.php');
     }
 
     public function RegisterSettings()
@@ -52,16 +53,16 @@ class Appointments implements PluginInterface
 
         add_settings_section(
             'lockme_app_section',
-            "Ustawienia wtyczki Appointments",
-            function () {
+            'Ustawienia wtyczki Appointments',
+            static function () {
                 echo '<p>Ustawienia integracji z wtyczką Appointments</p>';
             },
             'lockme-app'
         );
 
         add_settings_field(
-            "app_use",
-            "Włącz integrację",
+            'app_use',
+            'Włącz integrację',
             function () {
                 echo '<input name="lockme_app[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'],
                         false).' />';
@@ -71,7 +72,7 @@ class Appointments implements PluginInterface
             []
         );
 
-        if ($this->options['use'] && $this->plugin->tab == 'appointments_plugin') {
+        if ($this->options['use'] && $this->plugin->tab === 'appointments_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
@@ -83,8 +84,8 @@ class Appointments implements PluginInterface
                 foreach ($workers as $worker) {
                     $user = get_userdata($worker->ID);
                     add_settings_field(
-                        "service_".$service->ID."_".$worker->ID,
-                        "Pokój dla ".$service->name." - ".$user->user_login,
+                        'service_'.$service->ID.'_'.$worker->ID,
+                        'Pokój dla '.$service->name.' - '.$user->user_login,
                         function () use ($rooms, $service, $worker) {
                             echo '<select name="lockme_app[service_'.$service->ID.'_'.$worker->ID.']">';
                             echo '<option value="">--wybierz--</option>';
@@ -102,9 +103,9 @@ class Appointments implements PluginInterface
                 }
             }
             add_settings_field(
-                "export_apps",
-                "Wyślij dane do LockMe",
-                function () {
+                'export_apps',
+                'Wyślij dane do LockMe',
+                static function () {
                     echo '<a href="?page=lockme_integration&tab=appointments_plugin&app_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
                 },
                 'lockme-app',
@@ -161,19 +162,19 @@ class Appointments implements PluginInterface
             return false;
         }
 
-        $data = $message["data"];
-        $roomid = $message["roomid"];
-        $lockme_id = $message["reservationid"];
+        $data = $message['data'];
+        $roomid = $message['roomid'];
+        $lockme_id = $message['reservationid'];
         $start = strtotime($data['date'].' '.$data['hour']);
 
         list($service, $worker) = $this->GetService($roomid);
 
-        switch ($message["action"]) {
-            case "add":
+        switch ($message['action']) {
+            case 'add':
                 $result = $wpdb->insert(
                     $wpdb->prefix.'app_appointments',
                     [
-                        'created' => date("Y-m-d H:i:s", $appointments->local_time),
+                        'created' => date('Y-m-d H:i:s', $appointments->local_time),
                         'user' => 0,
                         'name' => $data['name'],
                         'email' => $data['email'],
@@ -182,13 +183,13 @@ class Appointments implements PluginInterface
                         'worker' => $worker,
                         'price' => $data['price'],
                         'status' => $data['status'] ? 'paid' : 'pending',
-                        'start' => date("Y-m-d H:i:s", $start),
-                        'end' => date("Y-m-d H:i:s", $start + ($service->duration*60)),
+                        'start' => date('Y-m-d H:i:s', $start),
+                        'end' => date('Y-m-d H:i:s', $start + ($service->duration*60)),
                         'note' => $data['comment']."\n\n#LOCKME!"
                     ]
                 );
                 if ($result === false) {
-                    throw new Exception("Error saving to database");
+                    throw new RuntimeException('Error saving to database');
                 }
                 appointments_clear_cache();
 
@@ -196,18 +197,18 @@ class Appointments implements PluginInterface
 
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, ["extid" => $row_id]);
+                    $api->EditReservation($roomid, $lockme_id, ['extid' => $row_id]);
                     return true;
                 } catch (Exception $e) {
                 }
                 break;
-            case "edit":
+            case 'edit':
                 if ($data['extid']) {
                     $app = $wpdb->get_row(
-                        "SELECT * FROM {$wpdb->prefix}app_appointments WHERE `ID` = ".intval($data['extid'])
+                        "SELECT * FROM {$wpdb->prefix}app_appointments WHERE `ID` = ".(int)$data['extid']
                     );
                     if (!$app) {
-                        throw new Exception('No appointment');
+                        throw new RuntimeException('No appointment');
                     }
                     $result = $wpdb->update(
                         $wpdb->prefix.'app_appointments',
@@ -220,8 +221,8 @@ class Appointments implements PluginInterface
                             'worker' => $worker,
                             'price' => $data['price'],
                             'status' => $data['status'] ? 'paid' : 'pending',
-                            'start' => date("Y-m-d H:i:s", $start),
-                            'end' => date("Y-m-d H:i:s", $start + ($service->duration*60)),
+                            'start' => date('Y-m-d H:i:s', $start),
+                            'end' => date('Y-m-d H:i:s', $start + ($service->duration*60)),
                             'note' => $data['comment']."\n\n#LOCKME!"
                         ],
                         [
@@ -229,19 +230,19 @@ class Appointments implements PluginInterface
                         ]
                     );
                     if ($result === false) {
-                        throw new Exception("Error saving to database");
+                        throw new RuntimeException('Error saving to database');
                     }
                     appointments_clear_cache();
                 }
                 return true;
                 break;
             case 'delete':
-                if ($data["extid"]) {
+                if ($data['extid']) {
                     $app = $wpdb->get_row(
-                        "SELECT * FROM {$wpdb->prefix}app_appointments WHERE `ID` = ".intval($data['extid'])
+                        "SELECT * FROM {$wpdb->prefix}app_appointments WHERE `ID` = ".(int)$data['extid']
                     );
                     if (!$app) {
-                        throw new Exception('No appointment');
+                        throw new RuntimeException('No appointment');
                     }
                     $result = $wpdb->update(
                         $wpdb->prefix.'app_appointments',
@@ -253,7 +254,7 @@ class Appointments implements PluginInterface
                         ]
                     );
                     if ($result === false) {
-                        throw new Exception("Error saving to database");
+                        throw new RuntimeException('Error saving to database');
                     }
                     appointments_clear_cache();
                 }
@@ -305,7 +306,7 @@ class Appointments implements PluginInterface
 
     private function Add($app_id, $app)
     {
-        if ($app['status'] == 'removed') {
+        if ($app['status'] === 'removed') {
             return;
         }
 
@@ -320,7 +321,7 @@ class Appointments implements PluginInterface
 
     private function Update($app_id, $app)
     {
-        if ($app['status'] == 'removed') {
+        if ($app['status'] === 'removed') {
             return $this->Delete($app_id);
         }
 
@@ -329,7 +330,7 @@ class Appointments implements PluginInterface
         $lockme_data = [];
 
         try {
-            $lockme_data = $api->Reservation($appdata["roomid"], "ext/{$app_id}");
+            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$app_id}");
         } catch (Exception $e) {
         }
 
@@ -337,7 +338,7 @@ class Appointments implements PluginInterface
             if (!$lockme_data) { //Add new
                 $api->AddReservation($appdata);
             } else { //Update
-                $api->EditReservation($appdata["roomid"], "ext/{$app_id}", $appdata);
+                $api->EditReservation($appdata['roomid'], "ext/{$app_id}", $appdata);
             }
         } catch (Exception $e) {
         }
@@ -350,7 +351,7 @@ class Appointments implements PluginInterface
         $appdata = $this->AppData($app_id);
 
         try {
-            $api->DeleteReservation($appdata["roomid"], "ext/{$app_id}");
+            $api->DeleteReservation($appdata['roomid'], "ext/{$app_id}");
         } catch (Exception $e) {
         }
     }
@@ -366,11 +367,11 @@ class Appointments implements PluginInterface
         foreach ($services as $k => $v) {
             $workers = appointments_get_workers_by_service($v->ID);
             foreach ($workers as $worker) {
-                if ($this->options["service_".$v->ID."_".$worker->ID] == $roomid) {
+                if ($this->options['service_'.$v->ID.'_'.$worker->ID] == $roomid) {
                     return [$v, $worker->ID];
                 }
             }
         }
-        throw new Exception("No service");
+        throw new RuntimeException('No service');
     }
 }

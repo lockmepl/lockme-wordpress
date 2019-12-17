@@ -7,6 +7,7 @@ use Lockme\SDK\Lockme;
 use LockmeIntegration\Plugins\Appointments;
 use LockmeIntegration\Plugins\Booked;
 use LockmeIntegration\Plugins\Bookly;
+use LockmeIntegration\Plugins\Cpabc;
 use LockmeIntegration\Plugins\Dopbsp;
 use LockmeIntegration\Plugins\Easyapp;
 use LockmeIntegration\Plugins\Woo;
@@ -22,6 +23,7 @@ class Plugin
     private $url_key;
     private $plugins = [
         'appointments'=> Appointments::class,
+        'cpabc' => Cpabc::class,
         'dopbsp'=> Dopbsp::class,
         'booked'=> Booked::class,
         'wp_booking' => WPBooking::class,
@@ -41,16 +43,16 @@ class Plugin
             session_start();
         }
 
-        $this->options = get_option("lockme_settings");
+        $this->options = get_option('lockme_settings');
 
-        $this->url_key = get_option("lockme_url_key");
+        $this->url_key = get_option('lockme_url_key');
         if (!$this->url_key) {
             try {
                 $this->url_key = bin2hex(random_bytes(10));
             } catch (Exception $e) {
-                $this->url_key = "39836295616564325481";
+                $this->url_key = '39836295616564325481';
             }
-            update_option("lockme_url_key", $this->url_key);
+            update_option('lockme_url_key', $this->url_key);
         }
 
         add_action('init', array(&$this, 'api_call'));
@@ -81,12 +83,12 @@ class Plugin
                 $api = $this->GetApi();
                 $token = $api->getTokenForCode($code, $state);
                 if ($token instanceof AccessToken) {
-                    update_option("lockme_oauth2_token", $token);
+                    update_option('lockme_oauth2_token', $token);
                 }
-                wp_redirect("options-general.php?page=lockme_integration&tab=api_options");
+                wp_redirect('options-general.php?page=lockme_integration&tab=api_options');
                 exit;
             } catch (Exception $e) {
-                wp_redirect("options-general.php?page=lockme_integration&tab=api_options");
+                wp_redirect('options-general.php?page=lockme_integration&tab=api_options');
                 exit;
             }
         }
@@ -98,7 +100,7 @@ class Plugin
                 if(json_decode($token, true)) {
                     $new_token = $api->setDefaultAccessToken($token);
                     if ($new_token instanceof AccessToken) {
-                        update_option("lockme_oauth2_token", $new_token);
+                        update_option('lockme_oauth2_token', $new_token);
                     }
                 }
             }catch (Exception $e){
@@ -111,7 +113,7 @@ class Plugin
             return;
         }
 
-        define("LOCKME_MESSAGING", 1);
+        define('LOCKME_MESSAGING', 1);
 
         try {
             $messageid = $_SERVER['HTTP_X_MESSAGEID'];
@@ -125,7 +127,7 @@ class Plugin
                 }
             }
 
-            echo "OK";
+            echo 'OK';
         } catch (Exception $e) {
             echo $e->getMessage();
         }
@@ -137,17 +139,17 @@ class Plugin
     {
         if ($this->options['client_id'] && $this->options['client_secret']) {
             $lm = new Lockme([
-                "clientId" => $this->options['client_id'],
-                "clientSecret" => $this->options['client_secret'],
-                "beta" => $this->options["api_beta"],
-                "redirectUri" => get_admin_url()."options-general.php?page=lockme_integration&tab=api_options"
+                'clientId' => $this->options['client_id'],
+                'clientSecret' => $this->options['client_secret'],
+                'beta' => $this->options['api_beta'],
+                'redirectUri' => get_admin_url().'options-general.php?page=lockme_integration&tab=api_options'
             ]);
-            $token = get_option("lockme_oauth2_token");
+            $token = get_option('lockme_oauth2_token');
             if ($token) {
                 try {
                     $new_token = $lm->setDefaultAccessToken($token);
                     if($new_token instanceof AccessToken) {
-                        update_option("lockme_oauth2_token", $new_token);
+                        update_option('lockme_oauth2_token', $new_token);
                     }
                 } catch (Exception $e) {
                     return null;
@@ -169,18 +171,18 @@ class Plugin
 
         add_settings_section(
             'lockme_settings_section',
-            "Ustawienia API",
-            function () {
+            'Ustawienia API',
+            static function () {
                 echo '<p>Podstawowe dane partnera LockMe - dostępne na <a href="https://panel.lockme.pl/" target="_blank">panel.lockme.pl</a></p>';
             },
             'lockme-admin'
         );
 
         add_settings_field(
-            "client_id",
-            "Client ID",
+            'client_id',
+            'Client ID',
             function () {
-                echo '<input name="lockme_settings[client_id]"  type="text" value="'.$this->options["client_id"].'" />';
+                echo '<input name="lockme_settings[client_id]"  type="text" value="'.$this->options['client_id'].'" />';
             },
             'lockme-admin',
             'lockme_settings_section',
@@ -188,10 +190,10 @@ class Plugin
         );
 
         add_settings_field(
-            "client_secret",
-            "Client secret",
+            'client_secret',
+            'Client secret',
             function () {
-                echo '<input name="lockme_settings[client_secret]" type="text" value="'.$this->options["client_secret"].'" />';
+                echo '<input name="lockme_settings[client_secret]" type="text" value="'.$this->options['client_secret'].'" />';
             },
             'lockme-admin',
             'lockme_settings_section',
@@ -199,8 +201,8 @@ class Plugin
         );
 
         add_settings_field(
-            "rodo_mode",
-            "RODO mode (anonymize data)",
+            'rodo_mode',
+            'RODO mode (anonymize data)',
             function () {
                 echo '<input type="checkbox" name="lockme_settings[rodo_mode]" value="1"  '.checked(1, $this->options['rodo_mode'], false).' /> <small>Jeśli włączysz tę funkcję to w ramach wymiany danych przez API pomiędzy Twoją stroną a Lockme będzie wysyłana jedynie informacja o dacie i godzinie wizyty. Wszystkie dane osobowe klienta zostaną tylko na Twojej stronie. <strong>Uwaga!</strong> jeśli taką rezerwację wyedytujesz z poziomu panelu lockme to istnieje ryzyko, że skasuje to dane w Twoim systemie rezerwacyjnym. Pamiętaj aby takimi rezerwacjami zarządzać tylko przez swój system.</small>';
             },
@@ -210,8 +212,8 @@ class Plugin
         );
 
         add_settings_field(
-            "api_beta",
-            "Testowa wersja Lockme",
+            'api_beta',
+            'Testowa wersja Lockme',
             function () {
                 echo '<input type="checkbox" name="lockme_settings[api_beta]" value="1"  '.checked(1, $this->options['api_beta'], false).' />';
             },
@@ -221,8 +223,8 @@ class Plugin
         );
 
         add_settings_field(
-            "api_url",
-            "URL callback dla Lockme",
+            'api_url',
+            'URL callback dla Lockme',
             function () {
                 echo '<input readonly type="text" value="'.get_site_url().'/?lockme_api='.$this->url_key.'" /> - remember to enable OAuth2 based callbacks!';
             },
@@ -246,7 +248,8 @@ class Plugin
         echo '<h2>Integracja LockMe</h2>';
 
         echo '<h2 class="nav-tab-wrapper">';
-        echo '    <a href="?page=lockme_integration&tab=api_options" class="nav-tab '.($this->tab=='api_options'?'nav-tab-active':'').'">Ustawienia API</a>';
+        echo '    <a href="?page=lockme_integration&tab=api_options" class="nav-tab '.($this->tab ===
+                                                                                       'api_options'?'nav-tab-active':'').'">Ustawienia API</a>';
         foreach ($this->available_plugins as $k=>$plugin) {
             echo '    <a href="?page=lockme_integration&tab='.$k.'_plugin" class="nav-tab '.($this->tab==$k.'_plugin'?'nav-tab-active':'').'">Wtyczka '.$plugin->getPluginName().'</a>';
         }
@@ -255,44 +258,41 @@ class Plugin
         /** @noinspection HtmlUnknownTarget */
         echo '<form method="post" action="options.php">';
 
-        switch ($this->tab) {
-            case 'api_options':
-                settings_fields('lockme-admin');
-                do_settings_sections('lockme-admin');
+        if ($this->tab === 'api_options') {
+            settings_fields('lockme-admin');
+            do_settings_sections('lockme-admin');
 
-                $api = $this->GetApi();
-                if ($api) {
+            $api = $this->GetApi();
+            if ($api) {
+                try {
+                    $test = $api->Test();
+                    if ($test === 'OK') {
+                        echo '<p>Połączenie z LockMe API <strong>POPRAWNE</strong>.</p>';
+                        $user = $api->getResourceOwner();
+                        echo '<p>Zalogowano do Lockme jako: <strong>'.$user->toArray()['nick'].'</strong></p>';
+                    } else {
+                        echo '<p><strong>BŁĄD</strong> odpowiedzi.</p>';
+                    }
+                } catch (Exception $e) {
+                    echo '<p><strong>BŁĄD API: '.$e->getMessage().'.</p>';
+                }
+                $authorizationUrl = $api->getAuthorizationUrl(['rooms_manage']);
+                echo '<p><a href="'.$authorizationUrl.'">Kliknij tutaj</a>, aby połączyć wtyczkę z Lockme.</p>';
+                echo '<p>Custom Oauth2 Access Token (use <b>only if you know what are you doing</b>):</p>';
+                echo '<p><textarea name="oauth_token"></textarea></p>';
+            } else {
+                echo '<p><strong>BRAK połączenia z API</strong>.</p>';
+            }
+        } else {
+            foreach ($this->available_plugins as $k=>$plugin) {
+                if ($this->tab == $k.'_plugin') {
                     try {
-                        $test = $api->Test();
-                        if ($test == "OK") {
-                            echo '<p>Połączenie z LockMe API <strong>POPRAWNE</strong>.</p>';
-                            $user = $api->getResourceOwner();
-                            echo '<p>Zalogowano do Lockme jako: <strong>'.$user->toArray()['nick'].'</strong></p>';
-                        } else {
-                            echo '<p><strong>BŁĄD</strong> odpowiedzi.</p>';
-                        }
-                    } catch (Exception $e) {
-                        echo '<p><strong>BŁĄD API: '.$e->getMessage().'.</p>';
-                    }
-                    $authorizationUrl = $api->getAuthorizationUrl(['rooms_manage']);
-                    echo '<p><a href="'.$authorizationUrl.'">Kliknij tutaj</a>, aby połączyć wtyczkę z Lockme.</p>';
-                    echo '<p>Custom Oauth2 Access Token (use <b>only if you know what are you doing</b>):</p>';
-                    echo '<p><textarea name="oauth_token"></textarea></p>';
-                } else {
-                    echo '<p><strong>BRAK połączenia z API</strong>.</p>';
-                }
-                break;
-            default:
-                foreach ($this->available_plugins as $k=>$plugin) {
-                    if ($this->tab == $k."_plugin") {
-                        try {
-                            $plugin->DrawForm();
-                        }catch (Exception $e){
-                            echo '<p>Configuration error. Details: '.$e->getMessage().'</p>';
-                        }
+                        $plugin->DrawForm();
+                    }catch (Exception $e){
+                        echo '<p>Configuration error. Details: '.$e->getMessage().'</p>';
                     }
                 }
-                break;
+            }
         }
 
         submit_button();
@@ -301,18 +301,18 @@ class Plugin
     }
 
     public function AnonymizeData(array $data){
-        if($this->options["rodo_mode"]){
+        if($this->options['rodo_mode']){
             return array_filter(
                 $data,
-                function($key) {
+                static function($key) {
                     return in_array(
                         $key,
                         [
-                            "roomid",
-                            "date",
-                            "hour",
-                            "status",
-                            "extid"
+                            'roomid',
+                            'date',
+                            'hour',
+                            'status',
+                            'extid'
                         ]
                     );
                 },
