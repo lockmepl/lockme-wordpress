@@ -2,6 +2,7 @@
 namespace LockmeIntegration;
 
 use Exception;
+use League\OAuth2\Client\Token\AccessToken;
 use Lockme\SDK\Lockme;
 use LockmeIntegration\Plugins\Appointments;
 use LockmeIntegration\Plugins\Booked;
@@ -79,7 +80,7 @@ class Plugin
             try {
                 $api = $this->GetApi();
                 $token = $api->getTokenForCode($code, $state);
-                if ($token) {
+                if ($token instanceof AccessToken) {
                     update_option("lockme_oauth2_token", $token);
                 }
                 wp_redirect("options-general.php?page=lockme_integration&tab=api_options");
@@ -94,10 +95,9 @@ class Plugin
             $token = stripslashes($_POST['oauth_token']);
             $api = $this->GetApi();
             try {
-                echo $token;
                 if(json_decode($token, true)) {
                     $new_token = $api->setDefaultAccessToken($token);
-                    if ($new_token) {
+                    if ($new_token instanceof AccessToken) {
                         update_option("lockme_oauth2_token", $new_token);
                     }
                 }
@@ -146,10 +146,11 @@ class Plugin
             if ($token) {
                 try {
                     $new_token = $lm->setDefaultAccessToken($token);
-                    if($new_token) {
+                    if($new_token instanceof AccessToken) {
                         update_option("lockme_oauth2_token", $new_token);
                     }
                 } catch (Exception $e) {
+                    return null;
                 }
             }
             return $lm;
