@@ -19,9 +19,10 @@ class Cpabc implements PluginInterface {
         if($this->options['use']){
             register_shutdown_function([$this, 'ShutDown']);
 
-            add_action('init', static function(){
+            add_action('init', function(){
+                $this->CheckAdminActions();
                 if($_GET['cpabc_export']){
-                    Cpabc::ExportToLockMe();
+                    $this->ExportToLockMe();
                     $_SESSION['cpabc_export'] = 1;
                     wp_redirect('?page=lockme_integration&tab=cpabc_plugin');
                     exit;
@@ -165,26 +166,26 @@ class Cpabc implements PluginInterface {
         }
 
         $api = $this->plugin->GetApi();
-
+        $appdata = $this->AppData($id);
         $lockme_data = null;
         try{
-            $lockme_data = $api->Reservation("ext/{$id}");
+            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
         }catch(Exception $e){
         }
 
         try{
             if(!$lockme_data){ //Add new
-                $api->AddReservation($this->AppData($id));
+                $api->AddReservation($appdata);
             }else{ //Update
-                $api->EditReservation("ext/{$id}", $this->AppData($id));
+                $api->EditReservation($appdata['roomid'], "ext/{$id}", $appdata);
             }
         }catch(Exception $e){
         }
         return true;
     }
 
-    public function Delete($id){
-        global $lockme, $wpdb;
+    public function Delete($id, $force = false){
+        global $wpdb;
 
         if(defined('LOCKME_MESSAGING')){
             return false;
@@ -194,28 +195,34 @@ class Cpabc implements PluginInterface {
             'select * from '.CPABC_APPOINTMENTS_TABLE_NAME.' a join '.CPABC_TDEAPP_CALENDAR_DATA_TABLE.
             ' b on(b.reference = a.id) where b.id = %d', $id), ARRAY_A);
 
-        if($res && !$res['is_cancelled']){
+        if(!$force && $res && !$res['is_cancelled']){
             return $this->AddEditReservation($id);
         }
 
-        $api = $lockme->GetApi();
+        $api = $this->plugin->GetApi();
+        $appdata = $this->AppData($id);
 
         try{
-            $api->DeleteReservation("ext/{$id}");
+            $api->DeleteReservation($appdata['roomid'], "ext/{$id}");
         }catch(Exception $e){
         }
         return true;
     }
 
-    public function ShutDown(){
+    public function ShutDown()
+    {
         global $wpdb;
         //Add from website
-        if($_POST['cpabc_item'] && $_POST['dateAndTime']){
-            foreach($_POST['dateAndTime'] as $dat){
-                $res = $wpdb->get_row($wpdb->prepare(
-                    'select * from '.CPABC_APPOINTMENTS_TABLE_NAME.' a join '.CPABC_TDEAPP_CALENDAR_DATA_TABLE.
-                    ' b on(b.reference = a.id) where  `calendar` = %d and `booked_time_unformatted` = %s', $_POST['cpabc_item'], $dat), ARRAY_A);
-                if($res){
+        if ($_POST['cpabc_item'] && $_POST['dateAndTime']) {
+            foreach ($_POST['dateAndTime'] as $dat) {
+                $res = $wpdb->get_row(
+                    $wpdb->prepare(
+                        'select * from '.CPABC_APPOINTMENTS_TABLE_NAME.' a join '.CPABC_TDEAPP_CALENDAR_DATA_TABLE.
+                        ' b on(b.reference = a.id) where  `calendar` = %d and `booked_time_unformatted` = %s',
+                        $_POST['cpabc_item'], $dat
+                    ), ARRAY_A
+                );
+                if ($res) {
                     $this->AddEditReservation($res['id']);
                 }
             }
@@ -223,21 +230,28 @@ class Cpabc implements PluginInterface {
 
         //Admin
         if($_GET['page'] === 'cpabc_appointments' && is_admin()) {
+            if (isset($_GET['nocancel']) && $_GET['nocancel'] != ''){
+                $this->AddEditReservation($_GET['nocancel']);
+            }else if($_GET['edit'] && $_POST){
+                $this->AddEditReservation($_GET['edit']);
+            }
+        }
+    }
+
+    public function CheckAdminActions(){
+        //Admin
+        if($_GET['page'] === 'cpabc_appointments' && is_admin()) {
             if (isset($_GET['delmark']) && $_GET['delmark'] != ''){
                 for ($i=0; $i<=50; $i++){
                     $index = 'c'.$i;
                     if (isset($_GET[$index]) && $_GET[$index] != ''){
-                        $this->Delete($_GET[$index]);
+                        $this->Delete($_GET[$index], true);
                     }
                 }
             }else if (isset($_GET['ld']) && $_GET['ld'] != ''){
-                $this->Delete($_GET['ld']);
+                $this->Delete($_GET['ld'], true);
             }else if (isset($_GET['cancel']) && $_GET['cancel'] != ''){
-                $this->Delete($_GET['cancel']);
-            }else if (isset($_GET['nocancel']) && $_GET['nocancel'] != ''){
-                $this->AddEditReservation($_GET['nocancel']);
-            }else if($_GET['edit'] && $_POST){
-                $this->AddEditReservation($_GET['edit']);
+                $this->Delete($_GET['cancel'], true);
             }
         }
     }
@@ -254,9 +268,9 @@ class Cpabc implements PluginInterface {
     }
 
     public function GetMessage(array $message){
-        global $wpdb, $lockme;
+        global $wpdb;
         if(!$this->options['use'] || !$this->CheckDependencies()){
-            return;
+            return false;
         }
 
         $data = $message['data'];
@@ -310,8 +324,9 @@ class Cpabc implements PluginInterface {
                 $id = $wpdb->insert_id;
 
                 try{
-                    $api = $lockme->GetApi();
-                    $api->EditReservation($lockme_id, array('extid' =>$id));
+                    $api = $this->plugin->GetApi();
+                    $api->EditReservation($roomid, $lockme_id, array('extid' =>$id));
+                    return true;
                 }catch(Exception $e){
                 }
                 break;
@@ -339,14 +354,17 @@ class Cpabc implements PluginInterface {
                     if ($event->reference != '') {
                         $wpdb->update(CPABC_APPOINTMENTS_TABLE_NAME, $data2, ['id' => $event->reference]);
                     }
+                    return true;
                 }
                 break;
             case 'delete':
                 if($data['extid']){
                     $wpdb->query('DELETE FROM `'.CPABC_APPOINTMENTS_CALENDARS_TABLE_NAME.'` WHERE id='.$data['extid']);
+                    return true;
                 }
                 break;
         }
+        return false;
     }
 
     public function ExportToLockMe(){
