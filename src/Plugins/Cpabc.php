@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpUndefinedConstantInspection */
+<?php
 
 namespace LockmeIntegration\Plugins;
 
@@ -132,17 +132,20 @@ class Cpabc implements PluginInterface {
             return [];
         }
 
-        return [
-            'roomid'=>$this->options['calendar_'.$res['calendar']],
-            'date'=>date('Y-m-d', strtotime($res['booked_time_unformatted'])),
-            'hour'=>date('H:i:s', strtotime($res['booked_time_unformatted'])),
-            'name'=>$res['name'],
-            'pricer'=> 'API',
-            'email'=>$res['email'],
-            'phone'=>$res['phone'],
-            'status'=>1,
-            'extid'=>$resid
-        ];
+        return
+            $this->plugin->AnonymizeData(
+                [
+                    'roomid'=>$this->options['calendar_'.$res['calendar']],
+                    'date'=>date('Y-m-d', strtotime($res['booked_time_unformatted'])),
+                    'hour'=>date('H:i:s', strtotime($res['booked_time_unformatted'])),
+                    'name'=>$res['name'],
+                    'pricer'=> 'API',
+                    'email'=>$res['email'],
+                    'phone'=>$res['phone'],
+                    'status'=>1,
+                    'extid'=>$resid
+                ]
+            );
     }
 
     public function AddEditReservation($id){
