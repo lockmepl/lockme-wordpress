@@ -162,7 +162,7 @@ class Ezscm implements PluginInterface
                     'people'=>0,
                     'pricer'=> 'API',
                     'price'=>0,
-                    'email'=>$details['Email'],
+                    'email'=>$details['Adres e-mail:'],
                     'status'=>1,
                     'extid'=>$res['e_id']
                 ]
@@ -310,12 +310,12 @@ class Ezscm implements PluginInterface
         $calendar_id = $this->GetCalendar($roomid);
 
         $form = array(
-            'Nazwa Pokoju' => 'LockMe',
-            'Ilość graczy' => $data['people'],
-            'Imię' => $data['name'].' '.$data['surname'],
-            'Email' => $data['email'],
-            'Telefon' => $data['phone'],
-            'Wiadomość' => $data['comment']
+            'Imię:' => $data['name'],
+            'Nazwisko:' =>$data['surname'],
+            'Adres e-mail:' => $data['email'],
+            'Telefon:' => $data['phone'],
+            'Voucher:' => '',
+            'Dodatkowe uwagi:' => 'Lockme! '.$data['comment'],
         );
         $sql_data = json_encode($form);
 
