@@ -28,6 +28,7 @@ Currently publicly supported calendar systems are:
 * WooCommerce Bookings - version 1.9.1 and newer
 * Appointments by WPMU DEV - version 2.4.0 and newer
 * Appointment Booking Calendar - version 7.2.34 and newer
+* ez Schedule Manager - version 2.2 (once again - please don't)
 
 Other booking systems to be available after porting to API 2.0 and testing. Systems marked as "please don't" are considered extremely unfriendly to our integration purposes and probably will break upon updating. If you still have choice please consider using other booking systems.
 

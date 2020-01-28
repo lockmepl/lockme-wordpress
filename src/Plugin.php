@@ -10,6 +10,7 @@ use LockmeIntegration\Plugins\Bookly;
 use LockmeIntegration\Plugins\Cpabc;
 use LockmeIntegration\Plugins\Dopbsp;
 use LockmeIntegration\Plugins\Easyapp;
+use LockmeIntegration\Plugins\Ezscm;
 use LockmeIntegration\Plugins\Woo;
 use LockmeIntegration\Plugins\WPBooking;
 use LockmeIntegration\Plugins\WPDevArt;
@@ -23,14 +24,15 @@ class Plugin
     private $url_key;
     private $plugins = [
         'appointments'=> Appointments::class,
+        'booked'=> Booked::class,
+        'bookly' => Bookly::class,
         'cpabc' => Cpabc::class,
         'dopbsp'=> Dopbsp::class,
-        'booked'=> Booked::class,
-        'wp_booking' => WPBooking::class,
-        'bookly' => Bookly::class,
-        'wpdevart'=> WPDevArt::class,
         'easyapp'=> Easyapp::class,
-        'woo'=> Woo::class
+        'ezscm' => Ezscm::class,
+        'woo'=> Woo::class,
+        'wpdevart'=> WPDevArt::class,
+        'wp_booking' => WPBooking::class,
     ];
     /**
      * @var PluginInterface[]
@@ -255,7 +257,6 @@ class Plugin
         }
         echo '</h2>';
 
-        /** @noinspection HtmlUnknownTarget */
         echo '<form method="post" action="options.php">';
 
         if ($this->tab === 'api_options') {

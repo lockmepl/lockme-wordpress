@@ -455,7 +455,7 @@ class Dopbsp implements PluginInterface
             case 'add':
                 $day_data = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$DOPBSP->tables->days.' WHERE calendar_id=%d AND day="%s"',
                     $calendar_id, $data['date']));
-                $day = json_decode($day_data->data);
+                $day = json_decode($day_data->data, false);
                 $history = [
                     $hour => $day->hours->$hour
                 ];
@@ -515,7 +515,7 @@ class Dopbsp implements PluginInterface
 
                     $day_data = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$DOPBSP->tables->days.' WHERE calendar_id=%d AND day="%s"',
                         $calendar_id, $data['date']));
-                    $day = json_decode($day_data->data);
+                    $day = json_decode($day_data->data, false);
                     $history = [
                         $hour => $day->hours->$hour
                     ];
