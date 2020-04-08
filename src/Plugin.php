@@ -143,8 +143,8 @@ class Plugin
             $lm = new Lockme([
                 'clientId' => $this->options['client_id'],
                 'clientSecret' => $this->options['client_secret'],
-                'beta' => $this->options['api_beta'],
-                'redirectUri' => get_admin_url().'options-general.php?page=lockme_integration&tab=api_options'
+                'redirectUri' => get_admin_url().'options-general.php?page=lockme_integration&tab=api_options',
+                'api_domain' => $this->options['api_domain']
             ]);
             $token = get_option('lockme_oauth2_token');
             if ($token) {
@@ -213,11 +213,11 @@ class Plugin
             array()
         );
 
-        add_settings_field(
-            'api_beta',
-            'Testowa wersja Lockme',
+        \add_settings_field(
+            'api_domain',
+            'API domain',
             function () {
-                echo '<input type="checkbox" name="lockme_settings[api_beta]" value="1"  '.checked(1, $this->options['api_beta'], false).' />';
+                echo '<input name="lockme_settings[api_domain]" type="text" value="'.$this->options['api_domain'].'" placeholder="https://api.lock.me" />';
             },
             'lockme-admin',
             'lockme_settings_section',
