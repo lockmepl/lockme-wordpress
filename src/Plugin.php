@@ -214,7 +214,7 @@ class Plugin
             array()
         );
 
-        \add_settings_field(
+        add_settings_field(
             'api_domain',
             'API domain',
             function () {
