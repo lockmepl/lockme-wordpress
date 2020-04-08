@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f3ac0c74f5799a1313470dbbbe86e891",
+    "content-hash": "69e0b923836c1c9091209e99cee5837d",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -263,6 +263,43 @@
             "time": "2018-11-22T18:33:57+00:00"
         },
         {
+            "name": "lustmored/oauth2-lockme",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Lustmored/oauth2-lockme.git",
+                "reference": "1272ac861af561ff78b5b36d9fe0354f3eac2e27"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Lustmored/oauth2-lockme/zipball/1272ac861af561ff78b5b36d9fe0354f3eac2e27",
+                "reference": "1272ac861af561ff78b5b36d9fe0354f3eac2e27",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "league/oauth2-client": "^2.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Lockme\\OAuth2\\Client\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Jakub Caban",
+                    "email": "kontakt@lockme.pl"
+                }
+            ],
+            "description": "LockMe OAuth2 provider",
+            "time": "2020-04-08T09:34:59+00:00"
+        },
+        {
             "name": "paragonie/random_compat",
             "version": "v9.99.99",
             "source": {
@@ -405,6 +442,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
+        "php": ">=5.5.0",
         "ext-json": "*"
     },
     "platform-dev": [],
