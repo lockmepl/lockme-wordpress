@@ -12,6 +12,7 @@ use Exception;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
+use function method_exists;
 
 class Bookly implements PluginInterface
 {
@@ -225,7 +226,11 @@ class Bookly implements PluginInterface
         $staff = new Staff();
         $staff->load($calendar_id);
         $staff_id = $staff->getId();
-        $service = $staff->getStaffServices()[0]->service;
+        if(method_exists($staff, 'getStaffServices')) {
+            $service = $staff->getStaffServices()[0]->service;
+        } else {
+            $service = $staff->getServicesData()[0]->service;
+        }
         $service_id = $service->getId();
 
         switch ($message['action']) {
