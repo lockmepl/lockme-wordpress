@@ -504,86 +504,94 @@ class Dopbsp implements PluginInterface
                 }
                 break;
             case 'edit':
-                if ($data['from_date'] && $data['from_hour'] && ($data['from_date'] != $data['date'] || $data['from_hour'] != $data['hour'])) {
+                if ($data['extid']) {
                     $res = $wpdb->get_row(
                         $wpdb->prepare(
                             'SELECT * FROM '.$DOPBSP->tables->reservations.
-                            ' WHERE `check_in` = %s and `start_hour` = %s and `calendar_id` = %d',
-                            $data['from_date'], date('H:i', strtotime($data['from_hour'])), $calendar_id)
+                            ' WHERE `id` = %d',
+                            $data['extid']
+                        )
                     );
-                    $DOPBSP->classes->backend_calendar_schedule->setCanceled($res->id);
+                    if (!$res) {
+                        throw new RuntimeException('No reservation');
+                    }
+                    if ($data['from_date'] && $data['from_hour'] &&
+                        ($data['from_date'] != $data['date'] || $data['from_hour'] != $data['hour'])) {
+                        $DOPBSP->classes->backend_calendar_schedule->setCanceled($res->id);
 
-                    $day_data = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$DOPBSP->tables->days.' WHERE calendar_id=%d AND day="%s"',
-                        $calendar_id, $data['date']));
-                    $day = json_decode($day_data->data, false);
-                    $history = [
-                        $hour => $day->hours->$hour
-                    ];
-                    $result = $wpdb->update($DOPBSP->tables->reservations,
+                        $day_data = $wpdb->get_row(
+                            $wpdb->prepare(
+                                'SELECT * FROM '.$DOPBSP->tables->days.' WHERE calendar_id=%d AND day="%s"',
+                                $calendar_id, $data['date']
+                            )
+                        );
+                        $day = json_decode($day_data->data, false);
+                        $history = [
+                            $hour => $day->hours->$hour
+                        ];
+                        $result = $wpdb->update(
+                            $DOPBSP->tables->reservations,
+                            [
+                                'check_in' => $data['date'],
+                                'start_hour' => $hour,
+                                'days_hours_history' => json_encode($history)
+                            ],
+                            [
+                                'id' => $res->id
+                            ]
+                        );
+                        if ($result === false) {
+                            throw new RuntimeException('Error saving to database 1 ');
+                        }
+                        $DOPBSP->classes->backend_calendar_schedule->setApproved($res->id);
+                    }
+                    $result = $wpdb->update(
+                        $DOPBSP->tables->reservations,
                         [
-                            'check_in' => $data['date'],
-                            'start_hour' => $hour,
-                            'days_hours_history' => json_encode($history)
+                            'email' => $data['email'],
+                            'form' => json_encode($form),
+                            'price' => $data['price'],
+                            'price_total' => $data['price'],
+                            'status' => $data['status'] ? 'approved' : 'pending'
                         ],
                         [
                             'id' => $res->id
                         ]
                     );
                     if ($result === false) {
-                        throw new RuntimeException('Error saving to database 1 ');
+                        throw new RuntimeException('Error saving to database 2 ');
                     }
-                    $DOPBSP->classes->backend_calendar_schedule->setApproved($res->id);
+                    return true;
                 }
-                $res = $wpdb->get_row(
-                    $wpdb->prepare(
-                        'SELECT * FROM '.$DOPBSP->tables->reservations.
-                        ' WHERE `check_in` = %s and `start_hour` = %s and `calendar_id` = %d',
-                        $data['date'], $hour, $calendar_id)
-                );
-                if (!$res) {
-                    throw new RuntimeException('No reservation');
-                }
-                $result = $wpdb->update($DOPBSP->tables->reservations,
-                    [
-                        'email' => $data['email'],
-                        'form' => json_encode($form),
-                        'price' => $data['price'],
-                        'price_total' => $data['price'],
-                        'status' => $data['status'] ? 'approved' : 'pending'
-                    ],
-                    [
-                        'id' => $res->id
-                    ]
-                );
-                if ($result === false) {
-                    throw new RuntimeException('Error saving to database 2 ');
-                }
-                return true;
                 break;
             case 'delete':
-                $res = $wpdb->get_row(
-                    $wpdb->prepare(
-                        'SELECT * FROM '.$DOPBSP->tables->reservations.
-                        ' WHERE `check_in` = %s and `start_hour` = %s and `calendar_id` = %d',
-                        $data['date'], $hour, $calendar_id)
-                );
-                if (!$res) {
-                    throw new RuntimeException('No reservation');
+                if ($data['extid']) {
+                    $res = $wpdb->get_row(
+                        $wpdb->prepare(
+                            'SELECT * FROM '.$DOPBSP->tables->reservations.
+                            ' WHERE `id` = %d',
+                            $data['extid']
+                        )
+                    );
+                    if (!$res) {
+                        throw new RuntimeException('No reservation');
+                    }
+                    $result = $wpdb->update(
+                        $DOPBSP->tables->reservations,
+                        [
+                            'status' => 'canceled'
+                        ],
+                        [
+                            'id' => $res->id
+                        ]
+                    );
+                    if ($result === false) {
+                        throw new RuntimeException('Error saving to database');
+                    }
+                    $DOPBSP->classes->backend_calendar_schedule->setCanceled($res->id);
+                    $wpdb->delete($DOPBSP->tables->reservations, ['id' => $res->id]);
+                    return true;
                 }
-                $result = $wpdb->update($DOPBSP->tables->reservations,
-                    [
-                        'status' => 'canceled'
-                    ],
-                    [
-                        'id' => $res->id
-                    ]
-                );
-                if ($result === false) {
-                    throw new RuntimeException('Error saving to database');
-                }
-                $DOPBSP->classes->backend_calendar_schedule->setCanceled($res->id);
-                $wpdb->delete($DOPBSP->tables->reservations, ['id' => $res->id]);
-                return true;
                 break;
         }
         return false;
