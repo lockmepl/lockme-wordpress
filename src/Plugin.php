@@ -144,7 +144,7 @@ class Plugin
                 'clientId' => $this->options['client_id'],
                 'clientSecret' => $this->options['client_secret'],
                 'redirectUri' => get_admin_url().'options-general.php?page=lockme_integration&tab=api_options',
-                'api_domain' => $this->options['api_domain']
+                'api_domain' => $this->options['api_domain'] ?: 'https://api.lock.me'
             ]);
             $token = get_option('lockme_oauth2_token');
             if ($token) {
