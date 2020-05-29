@@ -78,8 +78,8 @@ class Plugin
     public function api_call()
     {
         // Check for OAuth2 state
-        $code = $_GET['code'];
-        $state = $_GET['state'];
+        $code = isset($_GET['code']) ? $_GET['code'] : null;
+        $state = isset($_GET['state']) ? $_GET['state'] : null;
         if ($code && $state) {
             try {
                 $api = $this->GetApi();
@@ -95,7 +95,7 @@ class Plugin
             }
         }
 
-        if($_POST['oauth_token']){
+        if(isset($_POST['oauth_token'])){
             $token = stripslashes($_POST['oauth_token']);
             $api = $this->GetApi();
             try {
