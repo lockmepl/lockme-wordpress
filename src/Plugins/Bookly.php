@@ -229,7 +229,7 @@ class Bookly implements PluginInterface
         if(method_exists($staff, 'getStaffServices')) {
             $service = $staff->getStaffServices()[0]->service;
         } else {
-            $service = $staff->getServicesData()[0]->service;
+            $service = $staff->getServicesData()[0]['service'];
         }
         $service_id = $service->getId();
 
