@@ -6,6 +6,7 @@ use Bookly\Lib\Entities\Appointment;
 use Bookly\Lib\Entities\Customer;
 use Bookly\Lib\Entities\CustomerAppointment;
 use Bookly\Lib\Entities\Staff;
+use Bookly\Lib\UserBookingData;
 use DateTime;
 use DateTimeZone;
 use Exception;
@@ -158,6 +159,14 @@ class Bookly implements PluginInterface
         switch ($_REQUEST['action']) {
             case 'bookly_save_appointment_form':
                 $this->AddEditReservation($data['data']['id']);
+                break;
+            case 'bookly_save_appointment':
+                $form_id = $_REQUEST['form_id'];
+                $userData = new UserBookingData($form_id);
+                $userData->load();
+                foreach($userData->cart->getItems() as $item) {
+                    $this->AddEditReservation($item->getAppointmentId());
+                }
                 break;
             case 'bookly_delete_appointment':
                 $this->Delete($_POST['appointment_id'], $this->ajaxdata);
