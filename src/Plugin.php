@@ -154,7 +154,7 @@ class Plugin
                         update_option('lockme_oauth2_token', $new_token);
                     }
                 } catch (Exception $e) {
-                    delete_option('lockme_oauth2_token');
+                    // delete_option('lockme_oauth2_token');
                     return $lm;
                 }
             }
