@@ -285,6 +285,9 @@ class Plugin
             } else {
                 echo '<p><strong>BRAK połączenia z API</strong>.</p>';
             }
+            $token = get_option('lockme_oauth2_token');
+            echo '<p>Current access token (don\'t share with anyone!)</p>';
+            echo '<p><textarea readonly>'.\json_encode($token).'</textarea></p>';
         } else {
             foreach ($this->available_plugins as $k=>$plugin) {
                 if ($this->tab == $k.'_plugin') {
