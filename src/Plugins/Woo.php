@@ -179,9 +179,12 @@ class Woo implements PluginInterface
             return false;
         }
         clean_post_cache($postid);
+        $post = get_post($postid);
+        if ($post->post_type !== 'wc_booking') {
+            return false;
+        }
         $booking = new WC_Booking($postid);
-        /** @noinspection PhpUndefinedFieldInspection */
-        if (!$booking->populated || $booking->post->post_type !== 'wc_booking') {
+        if(!$booking->populated) {
             return false;
         }
 
@@ -215,10 +218,13 @@ class Woo implements PluginInterface
             return null;
         }
         clean_post_cache($postid);
+        $post = get_post($postid);
+        if ($post->post_type !== 'wc_booking') {
+            return false;
+        }
         $booking = new WC_Booking($postid);
-        /** @noinspection PhpUndefinedFieldInspection */
-        if (!$booking->populated || $booking->post->post_type !== 'wc_booking') {
-            return null;
+        if(!$booking->populated) {
+            return false;
         }
 
         if (!in_array($booking->status, ['cancelled', 'trash', 'was-in-cart'])) {
@@ -229,7 +235,7 @@ class Woo implements PluginInterface
         $appdata = $this->AppData($booking);
 
         try {
-            $api->DeleteReservation($appdata['roomid'], "ext/{$booking->id}");
+            $api->DeleteReservation($appdata['roomid'], "ext/{$booking->get_id()}");
         } catch (Exception $e) {
         }
         return null;
@@ -268,7 +274,7 @@ class Woo implements PluginInterface
                 if ($booking) {
                     try {
                         $api = $this->plugin->GetApi();
-                        $api->EditReservation($roomid, $lockme_id, ['extid' => $booking->id]);
+                        $api->EditReservation($roomid, $lockme_id, ['extid' => $booking->get_id()]);
                         return true;
                     } catch (Exception $e) {
                     }
@@ -278,9 +284,12 @@ class Woo implements PluginInterface
                 break;
             case 'edit':
                 if ($data['extid']) {
+                    $post = get_post($data['extid']);
+                    if ($post->post_type !== 'wc_booking') {
+                        return false;
+                    }
                     $booking = new WC_Booking($data['extid']);
-                    /** @noinspection PhpUndefinedFieldInspection */
-                    if (!$booking->populated || $booking->post->post_type !== 'wc_booking') {
+                    if (!$booking->populated) {
                         return false;
                     }
 
@@ -295,7 +304,7 @@ class Woo implements PluginInterface
                         '_booking_end' => date('YmdHis', $start + $this->options['slot_length']*60)
                     ];
                     foreach ($meta_args as $key => $value) {
-                        update_post_meta($booking->id, $key, $value);
+                        update_post_meta($booking->get_id(), $key, $value);
                     }
                     return true;
                 }
