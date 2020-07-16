@@ -165,7 +165,23 @@ class Bookly implements PluginInterface
                 $userData = new UserBookingData($form_id);
                 $userData->load();
                 foreach($userData->cart->getItems() as $item) {
-                    $this->AddEditReservation($item->getAppointmentId());
+                    if(method_exists($item, 'getAppointmentId')) {
+                        if($item->getAppointmentId()) {
+                            $this->AddEditReservation($item->getAppointmentId());
+                        }
+                    } else {
+                        foreach ( $item->getSlots() as list ( $service_id, $staff_id, $start_datetime ) ) {
+                            $appointment = new Appointment();
+                            $appointment->loadBy( array(
+                                'service_id' => $service_id,
+                                'staff_id'   => $staff_id,
+                                'start_date' => $start_datetime,
+                            ) );
+                            if($appointment->isLoaded() && $appointment->getId()) {
+                                $this->AddEditReservation($appointment->getId());
+                            }
+                        }
+                    }
                 }
                 break;
             case 'bookly_delete_appointment':
