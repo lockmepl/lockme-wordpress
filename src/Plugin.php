@@ -150,7 +150,7 @@ class Plugin
             if ($token) {
                 try {
                     $new_token = $lm->setDefaultAccessToken($token);
-                    if($new_token instanceof AccessToken) {
+                    if($new_token !== $token) {
                         update_option('lockme_oauth2_token', $new_token);
                     }
                 } catch (Exception $e) {
