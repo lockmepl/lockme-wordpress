@@ -3,6 +3,7 @@
 namespace LockmeIntegration\Plugins;
 
 use Exception;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
@@ -62,7 +63,7 @@ class WPBooking implements PluginInterface
     }
 
 
-    private function AppData($id, $res)
+    private function AppData($id, $res): array
     {
         return
             $this->plugin->AnonymizeData(
@@ -84,7 +85,7 @@ class WPBooking implements PluginInterface
             );
     }
 
-    public function Delete($id, $appdata = null)
+    public function Delete($id, $appdata = null): void
     {
         $api = $this->plugin->GetApi();
         $lockme_data = [];
@@ -104,7 +105,7 @@ class WPBooking implements PluginInterface
         }
     }
 
-    public function ExportToLockMe()
+    public function ExportToLockMe(): void
     {
         global $wpb_path;
         set_time_limit(0);
@@ -133,15 +134,15 @@ class WPBooking implements PluginInterface
         }
     }
 
-    public function CheckDependencies()
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('wp-booking-calendar/wp-booking-calendar.php');
     }
 
-    public function RegisterSettings()
+    public function RegisterSettings(): void
     {
         if (!$this->CheckDependencies()) {
-            return false;
+            return;
         }
 
         register_setting('lockme-wpb', 'lockme_wpb');
@@ -171,7 +172,10 @@ class WPBooking implements PluginInterface
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
-                $rooms = $api->RoomList();
+                try {
+                    $rooms = $api->RoomList();
+                } catch (IdentityProviderException $e) {
+                }
             }
             $bookingListObj = new wp_booking_calendar_lists();
             $calendars = $bookingListObj->getCalendarsList('');
@@ -205,10 +209,9 @@ class WPBooking implements PluginInterface
                 []
             );
         }
-        return true;
     }
 
-    public function DrawForm()
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
@@ -228,7 +231,7 @@ class WPBooking implements PluginInterface
         do_settings_sections('lockme-wpb');
     }
 
-    public function ShutDown()
+    public function ShutDown(): void
     {
         global $bookingReservationObj, $listReservations, $bookingSlotsObj;
 
@@ -269,7 +272,7 @@ class WPBooking implements PluginInterface
         }
     }
 
-    public function GetMessage(array $message)
+    public function GetMessage(array $message): bool
     {
         global $wpdb, $blog_id;
         if (!$this->options['use'] || !$this->CheckDependencies()) {
@@ -404,7 +407,7 @@ class WPBooking implements PluginInterface
      * @param wp_booking_calendar_slot $slot
      * @return array
      */
-    private function Obj2Data($res, $slot)
+    private function Obj2Data($res, $slot): array
     {
         return [
             'calendar_id' => $res->getReservationCalendarId(),
@@ -421,12 +424,14 @@ class WPBooking implements PluginInterface
         ];
     }
 
-    private function Add($id, $res)
+    private function Add($id, $res): void
     {
         $appdata = $this->AppData($id, $res);
 
         if ($res['reservation_cancelled']) {
-            return $this->Delete($id, $appdata);
+            $this->Delete($id, $appdata);
+
+            return;
         }
 
         $api = $this->plugin->GetApi();
@@ -435,15 +440,16 @@ class WPBooking implements PluginInterface
             $api->AddReservation($appdata);
         } catch (Exception $e) {
         }
-        return null;
     }
 
-    private function Update($id, $res)
+    private function Update($id, $res): void
     {
         $appdata = $this->AppData($id, $res);
 
         if ($res['reservation_cancelled']) {
-            return $this->Delete($id, $appdata);
+            $this->Delete($id, $appdata);
+
+            return;
         }
 
         $api = $this->plugin->GetApi();
@@ -455,14 +461,15 @@ class WPBooking implements PluginInterface
         }
 
         if (!$lockme_data) {
-            return $this->Add($id, $res);
+            $this->Add($id, $res);
+
+            return;
         }
 
         try {
             $api->EditReservation($appdata['roomid'], "ext/{$id}", $appdata);
         } catch (Exception $e) {
         }
-        return null;
     }
 
     /**
@@ -482,7 +489,7 @@ class WPBooking implements PluginInterface
         throw new RuntimeException('No calendar');
     }
 
-    public function getPluginName()
+    public function getPluginName(): string
     {
         return 'WP Booking Calendar';
     }

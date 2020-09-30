@@ -3,6 +3,7 @@
 namespace LockmeIntegration\Plugins;
 
 use Exception;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
@@ -41,7 +42,7 @@ class Woo implements PluginInterface
         }
     }
 
-    public function ExportToLockMe()
+    public function ExportToLockMe(): void
     {
         $args = [
             'post_type' => 'wc_booking',
@@ -59,17 +60,17 @@ class Woo implements PluginInterface
         }
     }
 
-    public function CheckDependencies()
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('woocommerce-bookings/woocommmerce-bookings.php') || is_plugin_active(
                 'woocommerce-bookings/woocommerce-bookings.php'
             );
     }
 
-    public function RegisterSettings()
+    public function RegisterSettings(): void
     {
         if (!$this->CheckDependencies()) {
-            return false;
+            return;
         }
 
         register_setting('lockme-woo', 'lockme_woo');
@@ -110,7 +111,10 @@ class Woo implements PluginInterface
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
-                $rooms = $api->RoomList();
+                try {
+                    $rooms = $api->RoomList();
+                } catch (IdentityProviderException $e) {
+                }
             }
 
             $args = [
@@ -148,10 +152,9 @@ class Woo implements PluginInterface
                 []
             );
         }
-        return true;
     }
 
-    public function DrawForm()
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
@@ -241,7 +244,7 @@ class Woo implements PluginInterface
         return null;
     }
 
-    public function GetMessage(array $message)
+    public function GetMessage(array $message): bool
     {
         if (!$this->options['use'] || !$this->CheckDependencies()) {
             return false;
@@ -319,7 +322,7 @@ class Woo implements PluginInterface
         return false;
     }
 
-    private function AppData($booking)
+    private function AppData($booking): array
     {
         return
             $this->plugin->AnonymizeData(
@@ -350,7 +353,7 @@ class Woo implements PluginInterface
         return null;
     }
 
-    public function getPluginName()
+    public function getPluginName(): string
     {
         return 'WooCommerce Bookings';
     }

@@ -3,6 +3,7 @@
 namespace LockmeIntegration\Plugins;
 
 use Exception;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
@@ -33,20 +34,20 @@ class Appointments implements PluginInterface
         }
     }
 
-    public function getPluginName()
+    public function getPluginName(): string
     {
         return 'Appointments';
     }
 
-    public function CheckDependencies()
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('appointments/appointments.php');
     }
 
-    public function RegisterSettings()
+    public function RegisterSettings(): void
     {
         if (!$this->CheckDependencies()) {
-            return false;
+            return;
         }
 
         register_setting('lockme-app', 'lockme_app');
@@ -76,7 +77,10 @@ class Appointments implements PluginInterface
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
-                $rooms = $api->RoomList();
+                try {
+                    $rooms = $api->RoomList();
+                } catch (IdentityProviderException $e) {
+                }
             }
             $services = appointments_get_services();
             foreach ($services as $service) {
@@ -113,10 +117,9 @@ class Appointments implements PluginInterface
                 []
             );
         }
-        return true;
     }
 
-    public function DrawForm()
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
@@ -135,14 +138,14 @@ class Appointments implements PluginInterface
         do_settings_sections('lockme-app');
     }
 
-    public function AddReservation($id)
+    public function AddReservation($id): void
     {
         $app = json_decode(json_encode(appointments_get_appointment($id)), true);
 
         $this->Add($id, $app);
     }
 
-    public function AddEditReservation($id, $data = [])
+    public function AddEditReservation($id, $data = []): void
     {
         $id = $id ?: $data['ID'];
         $app = $data ?: json_decode(json_encode(appointments_get_appointment($id)), true);
@@ -150,12 +153,12 @@ class Appointments implements PluginInterface
         $this->Update($id, $app);
     }
 
-    public function RemoveReservation($id)
+    public function RemoveReservation($id): void
     {
         $this->Delete($id);
     }
 
-    public function GetMessage(array $message)
+    public function GetMessage(array $message): bool
     {
         global $appointments, $wpdb;
         if (!$this->options['use'] || !$this->CheckDependencies()) {
@@ -167,7 +170,7 @@ class Appointments implements PluginInterface
         $lockme_id = $message['reservationid'];
         $start = strtotime($data['date'].' '.$data['hour']);
 
-        list($service, $worker) = $this->GetService($roomid);
+        [$service, $worker] = $this->GetService($roomid);
 
         switch ($message['action']) {
             case 'add':
@@ -235,7 +238,6 @@ class Appointments implements PluginInterface
                     appointments_clear_cache();
                 }
                 return true;
-                break;
             case 'delete':
                 if ($data['extid']) {
                     $app = $wpdb->get_row(
@@ -259,12 +261,11 @@ class Appointments implements PluginInterface
                     appointments_clear_cache();
                 }
                 return true;
-                break;
         }
         return false;
     }
 
-    public function ExportToLockMe()
+    public function ExportToLockMe(): void
     {
         global $wpdb;
 
@@ -276,7 +277,7 @@ class Appointments implements PluginInterface
         }
     }
 
-    private function AppData($id)
+    private function AppData($id): array
     {
         global $appointments;
 
@@ -304,7 +305,7 @@ class Appointments implements PluginInterface
             );
     }
 
-    private function Add($app_id, $app)
+    private function Add($app_id, $app): void
     {
         if ($app['status'] === 'removed') {
             return;
@@ -322,7 +323,8 @@ class Appointments implements PluginInterface
     private function Update($app_id, $app)
     {
         if ($app['status'] === 'removed') {
-            return $this->Delete($app_id);
+            $this->Delete($app_id);
+            return;
         }
 
         $api = $this->plugin->GetApi();
@@ -345,7 +347,7 @@ class Appointments implements PluginInterface
         return null;
     }
 
-    private function Delete($app_id)
+    private function Delete($app_id): void
     {
         $api = $this->plugin->GetApi();
         $appdata = $this->AppData($app_id);
@@ -361,7 +363,7 @@ class Appointments implements PluginInterface
      * @return array
      * @throws Exception
      */
-    private function GetService($roomid)
+    private function GetService($roomid): array
     {
         $services = appointments_get_services();
         foreach ($services as $k => $v) {

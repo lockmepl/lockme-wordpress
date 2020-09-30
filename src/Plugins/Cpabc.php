@@ -3,6 +3,7 @@
 namespace LockmeIntegration\Plugins;
 
 use Exception;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
@@ -31,14 +32,16 @@ class Cpabc implements PluginInterface {
         }
     }
 
-    public function CheckDependencies(){
+    public function CheckDependencies(): bool
+    {
         return is_plugin_active('appointment-booking-calendar/cpabc_appointments.php');
     }
 
-    public function RegisterSettings(){
+    public function RegisterSettings(): void
+    {
         global $wpdb;
         if(!$this->CheckDependencies()) {
-            return false;
+            return;
         }
 
         register_setting( 'lockme-cpabc', 'lockme_cpabc' );
@@ -67,7 +70,10 @@ class Cpabc implements PluginInterface {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if($api){
-                $rooms = $api->RoomList();
+                try {
+                    $rooms = $api->RoomList();
+                } catch (IdentityProviderException $e) {
+                }
             }
 
             $calendars = $wpdb->get_results('SELECT * FROM '.CPABC_APPOINTMENTS_CONFIG_TABLE_NAME);
@@ -99,10 +105,10 @@ class Cpabc implements PluginInterface {
                 array()
             );
         }
-        return true;
     }
 
-    public function DrawForm(){
+    public function DrawForm(): void
+    {
         if(!$this->CheckDependencies()){
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
             return;
@@ -123,7 +129,8 @@ class Cpabc implements PluginInterface {
         do_settings_sections( 'lockme-cpabc' );
     }
 
-    private function AppData($resid){
+    private function AppData($resid): array
+    {
         global $wpdb;
         $res = $wpdb->get_row($wpdb->prepare(
             'select * from '.CPABC_APPOINTMENTS_TABLE_NAME.' a join '.CPABC_TDEAPP_CALENDAR_DATA_TABLE.
@@ -212,7 +219,7 @@ class Cpabc implements PluginInterface {
         return true;
     }
 
-    public function ShutDown()
+    public function ShutDown(): void
     {
         global $wpdb;
         //Add from website
@@ -241,7 +248,8 @@ class Cpabc implements PluginInterface {
         }
     }
 
-    public function CheckAdminActions(){
+    public function CheckAdminActions(): void
+    {
         //Admin
         if($_GET['page'] === 'cpabc_appointments' && is_admin()) {
             if (isset($_GET['delmark']) && $_GET['delmark'] != ''){
@@ -270,7 +278,8 @@ class Cpabc implements PluginInterface {
         return null;
     }
 
-    public function GetMessage(array $message){
+    public function GetMessage(array $message): bool
+    {
         global $wpdb;
         if(!$this->options['use'] || !$this->CheckDependencies()){
             return false;
@@ -370,7 +379,8 @@ class Cpabc implements PluginInterface {
         return false;
     }
 
-    public function ExportToLockMe(){
+    public function ExportToLockMe(): void
+    {
         global $wpdb;
         $rows = $wpdb->get_results(
             'select * from '.CPABC_APPOINTMENTS_TABLE_NAME.' a join '.CPABC_TDEAPP_CALENDAR_DATA_TABLE.
@@ -383,7 +393,7 @@ class Cpabc implements PluginInterface {
     /**
      * @inheritDoc
      */
-    public function getPluginName()
+    public function getPluginName(): string
     {
         return 'Appointment Booking Calendar';
     }

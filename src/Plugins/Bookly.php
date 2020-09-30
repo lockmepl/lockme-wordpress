@@ -10,6 +10,7 @@ use Bookly\Lib\UserBookingData;
 use DateTime;
 use DateTimeZone;
 use Exception;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
@@ -58,7 +59,7 @@ class Bookly implements PluginInterface
         }
     }
 
-    public function AppData($id, $info = null)
+    public function AppData($id, $info = null): array
     {
         if ($info === null) {
             $info = Appointment::query('a')
@@ -81,7 +82,7 @@ class Bookly implements PluginInterface
             );
     }
 
-    public function ExportToLockMe()
+    public function ExportToLockMe(): void
     {
         $bookings = CustomerAppointment::query('ca')
                                        ->select(
@@ -108,7 +109,7 @@ class Bookly implements PluginInterface
         }
     }
 
-    public function AddEditReservation($id)
+    public function AddEditReservation($id): void
     {
         if (!is_numeric($id)) {
             return;
@@ -136,7 +137,7 @@ class Bookly implements PluginInterface
         }
     }
 
-    public function DrawForm()
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
@@ -170,7 +171,7 @@ class Bookly implements PluginInterface
                             $this->AddEditReservation($item->getAppointmentId());
                         }
                     } else {
-                        foreach ( $item->getSlots() as list ( $service_id, $staff_id, $start_datetime ) ) {
+                        foreach ( $item->getSlots() as [ $service_id, $staff_id, $start_datetime ] ) {
                             $appointment = new Appointment();
                             $appointment->loadBy( array(
                                 'service_id' => $service_id,
@@ -199,7 +200,7 @@ class Bookly implements PluginInterface
         return $msg;
     }
 
-    public function DeleteBatch()
+    public function DeleteBatch(): void
     {
         foreach ($this->ajaxdata as $id => $ca) {
             if ($id && $ca) {
@@ -208,7 +209,7 @@ class Bookly implements PluginInterface
         }
     }
 
-    public function Delete($id, $appdata = null)
+    public function Delete($id, $appdata = null): void
     {
         if (defined('LOCKME_MESSAGING')) {
             return;
@@ -225,7 +226,7 @@ class Bookly implements PluginInterface
         }
     }
 
-    public function GetMessage(array $message)
+    public function GetMessage(array $message): bool
     {
         if (!$this->options['use'] || !$this->CheckDependencies()) {
             return false;
@@ -356,10 +357,10 @@ class Bookly implements PluginInterface
         return null;
     }
 
-    public function RegisterSettings()
+    public function RegisterSettings(): void
     {
         if (!$this->CheckDependencies()) {
-            return false;
+            return;
         }
 
         register_setting('lockme-bookly', 'lockme_bookly');
@@ -401,7 +402,10 @@ class Bookly implements PluginInterface
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
-                $rooms = $api->RoomList();
+                try {
+                    $rooms = $api->RoomList();
+                } catch (IdentityProviderException $e) {
+                }
             }
 
             $calendars = Staff::query()->sortBy('position')->fetchArray();
@@ -435,17 +439,16 @@ class Bookly implements PluginInterface
                 []
             );
         }
-        return true;
     }
 
-    public function CheckDependencies()
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('appointment-booking/main.php') || is_plugin_active(
                 'bookly-responsive-appointment-booking-tool/main.php'
             );
     }
 
-    public function getPluginName()
+    public function getPluginName(): string
     {
         return 'Bookly';
     }

@@ -15,27 +15,27 @@ interface PluginInterface
     /**
      * @return string
      */
-    public function getPluginName();
+    public function getPluginName(): string;
 
     /**
      * @return bool
      */
-    public function CheckDependencies();
+    public function CheckDependencies(): bool;
 
     /**
      * @return void
      */
-    public function RegisterSettings();
+    public function RegisterSettings(): void;
 
     /**
      * @return void
      */
-    public function DrawForm();
+    public function DrawForm(): void;
 
     /**
-     * @param array $message
+     * @param  array  $message
      * @return bool
      * @throws Exception
      */
-    public function GetMessage(array $message);
+    public function GetMessage(array $message): bool;
 }

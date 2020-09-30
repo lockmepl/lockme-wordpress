@@ -3,6 +3,7 @@
 namespace LockmeIntegration\Plugins;
 
 use Exception;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
@@ -57,7 +58,8 @@ class Booked implements PluginInterface
         $appdata = $this->AppData($post);
 
         if (!$post || get_post_status($id) === 'trash') {
-            return $this->Delete($id);
+            $this->Delete($id);
+            return;
         }
 
         $api = $this->plugin->GetApi();
@@ -79,7 +81,7 @@ class Booked implements PluginInterface
         return null;
     }
 
-    public function ExportToLockMe()
+    public function ExportToLockMe(): void
     {
         $args = [
             'post_type' => 'booked_appointments',
@@ -104,7 +106,7 @@ class Booked implements PluginInterface
         }
     }
 
-    public function DrawForm()
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
@@ -128,7 +130,7 @@ class Booked implements PluginInterface
         do_settings_sections('lockme-booked');
     }
 
-    public function Delete($id)
+    public function Delete($id): void
     {
         if (defined('LOCKME_MESSAGING')) {
             return;
@@ -145,7 +147,7 @@ class Booked implements PluginInterface
         }
     }
 
-    public function GetMessage(array $message)
+    public function GetMessage(array $message): bool
     {
         global $wpdb;
         if (!$this->options['use'] || !$this->CheckDependencies()) {
@@ -244,7 +246,7 @@ class Booked implements PluginInterface
         return false;
     }
 
-    private function AppData($res)
+    private function AppData($res): array
     {
         $cal = wp_get_object_terms($res->ID, 'booked_custom_calendars');
         $timeslot = explode('-', get_post_meta($res->ID, '_appointment_timeslot', true));
@@ -265,7 +267,7 @@ class Booked implements PluginInterface
         return
             $this->plugin->AnonymizeData(
                 [
-                    'roomid' => $this->options['calendar_'.($cal[0] ? $cal[0]->term_id : 'default')],
+                    'roomid' => $this->options['calendar_'.($cal[0]->term_id ?? 'default')],
                     'date' => date('Y-m-d', get_post_meta($res->ID, '_appointment_timestamp', true)),
                     'hour' => date('H:i:s', strtotime("{$time[0]}:{$time[1]}:00")),
                     'name' => $name,
@@ -324,15 +326,15 @@ class Booked implements PluginInterface
         return null;
     }
 
-    public function getPluginName()
+    public function getPluginName(): string
     {
         return 'Booked';
     }
 
-    public function RegisterSettings()
+    public function RegisterSettings(): void
     {
         if (!$this->CheckDependencies()) {
-            return false;
+            return;
         }
 
         register_setting('lockme-booked', 'lockme_booked');
@@ -362,7 +364,10 @@ class Booked implements PluginInterface
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
-                $rooms = $api->RoomList();
+                try {
+                    $rooms = $api->RoomList();
+                } catch (IdentityProviderException $e) {
+                }
             }
 
             add_settings_field(
@@ -414,10 +419,9 @@ class Booked implements PluginInterface
                 []
             );
         }
-        return true;
     }
 
-    public function CheckDependencies()
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('booked/booked.php') || is_plugin_active('bookedall/booked.php');
     }

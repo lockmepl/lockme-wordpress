@@ -3,6 +3,7 @@
 namespace LockmeIntegration\Plugins;
 
 use Exception;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
@@ -41,12 +42,12 @@ class Dopbsp implements PluginInterface
         }
     }
 
-    public function getPluginName()
+    public function getPluginName(): string
     {
         return 'Booking System PRO';
     }
 
-    public function ExportToLockMe()
+    public function ExportToLockMe(): void
     {
         global $DOPBSP, $wpdb;
         set_time_limit(0);
@@ -59,7 +60,7 @@ class Dopbsp implements PluginInterface
         }
     }
 
-    public function AddEditReservation($id)
+    public function AddEditReservation($id): void
     {
         global $wpdb, $DOPBSP;
 
@@ -84,10 +85,14 @@ class Dopbsp implements PluginInterface
         }
 
         if (!$lockme_data) {
-            return $this->Add($res);
+            $this->Add($res);
+
+            return;
         }
         if (in_array($res['status'], ['canceled', 'rejected'])) {
-            return $this->Delete($id);
+            $this->Delete($id);
+
+            return;
         }
 
         try {
@@ -97,7 +102,7 @@ class Dopbsp implements PluginInterface
         return null;
     }
 
-    private function AppData($res)
+    private function AppData($res): array
     {
 
         return
@@ -116,7 +121,7 @@ class Dopbsp implements PluginInterface
             );
     }
 
-    private function Add($res)
+    private function Add($res): void
     {
         if (in_array($res['status'], ['canceled', 'rejected'])) {
             return;
@@ -130,7 +135,7 @@ class Dopbsp implements PluginInterface
         }
     }
 
-    private function Delete($id)
+    private function Delete($id): void
     {
         global $DOPBSP, $wpdb;
 
@@ -159,7 +164,7 @@ class Dopbsp implements PluginInterface
         }
     }
 
-    public function FixSettings()
+    public function FixSettings(): void
     {
         global $DOPBSP, $wpdb;
 
@@ -220,7 +225,7 @@ class Dopbsp implements PluginInterface
         return $val;
     }
 
-    public function RegisterSettings()
+    public function RegisterSettings(): void
     {
         global $wpdb, $DOPBSP;
         if (!$this->CheckDependencies()) {
@@ -252,7 +257,10 @@ class Dopbsp implements PluginInterface
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
-                $rooms = $api->RoomList();
+                try {
+                    $rooms = $api->RoomList();
+                } catch (IdentityProviderException $e) {
+                }
             }
             $calendars = $wpdb->get_results('SELECT * FROM '.$DOPBSP->tables->calendars.' ORDER BY id DESC');
 
@@ -298,12 +306,12 @@ class Dopbsp implements PluginInterface
         }
     }
 
-    public function CheckDependencies()
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('dopbsp/dopbsp.php') || is_plugin_active('booking-system/dopbs.php');
     }
 
-    public function DrawForm()
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
@@ -326,7 +334,7 @@ class Dopbsp implements PluginInterface
         do_settings_sections('lockme-dopbsp');
     }
 
-    public function AddWooReservation($order_id)
+    public function AddWooReservation($order_id): void
     {
         global $wpdb, $DOPBSP;
         $datas = $wpdb->get_results($wpdb->prepare(
@@ -339,7 +347,7 @@ class Dopbsp implements PluginInterface
         }
     }
 
-    public function ShutDown()
+    public function ShutDown(): void
     {
         if (defined('DOING_AJAX') && DOING_AJAX) {
             switch ($_POST['action']) {
@@ -360,7 +368,7 @@ class Dopbsp implements PluginInterface
         }
     }
 
-    public function AddReservation()
+    public function AddReservation(): void
     {
         global $wpdb, $DOPBSP;
 
@@ -378,7 +386,7 @@ class Dopbsp implements PluginInterface
         }
     }
 
-    public function GetMessage(array $message)
+    public function GetMessage(array $message): bool
     {
         global $DOPBSP, $wpdb;
         if (!$this->options['use'] || !$this->CheckDependencies()) {

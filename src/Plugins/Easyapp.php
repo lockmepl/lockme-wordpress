@@ -7,6 +7,7 @@ use DateTime;
 use EADBModels;
 use EATableColumns;
 use Exception;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
@@ -44,12 +45,12 @@ class Easyapp implements PluginInterface
         }
     }
 
-    public function CheckDependencies()
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('easy-appointments/main.php');
     }
 
-    private function AppData($resid)
+    private function AppData($resid): array
     {
         $res = $this->models->get_appintment_by_id($resid);
 
@@ -71,7 +72,7 @@ class Easyapp implements PluginInterface
             );
     }
 
-    public function ExportToLockMe()
+    public function ExportToLockMe(): void
     {
         set_time_limit(0);
 
@@ -85,11 +86,11 @@ class Easyapp implements PluginInterface
         }
     }
 
-    public function RegisterSettings()
+    public function RegisterSettings(): void
     {
         global $wpdb;
         if (!$this->CheckDependencies()) {
-            return false;
+            return;
         }
 
         register_setting('lockme-easyapp', 'lockme_easyapp');
@@ -119,7 +120,10 @@ class Easyapp implements PluginInterface
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
-                $rooms = $api->RoomList();
+                try {
+                    $rooms = $api->RoomList();
+                } catch (IdentityProviderException $e) {
+                }
             }
             $calendars = $wpdb->get_results('SELECT DISTINCT concat(l.`id`,"_",s.`id`,"_",ss.`id`) `id`, concat(l.`name`," - ",s.`name`," - ",ss.`name`) `name` FROM '.$wpdb->prefix.'ea_locations l join '.$wpdb->prefix.'ea_services s join '.$wpdb->prefix.'ea_staff ss');
 
@@ -153,14 +157,13 @@ class Easyapp implements PluginInterface
                 []
             );
         }
-        return true;
     }
 
-    public function DrawForm()
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
-            return false;
+            return;
         }
 
         if ($_SESSION['easyapp_export']) {
@@ -176,10 +179,9 @@ class Easyapp implements PluginInterface
         }
         settings_fields('lockme-easyapp');
         do_settings_sections('lockme-easyapp');
-        return true;
     }
 
-    public function AddEditReservation($id)
+    public function AddEditReservation($id): void
     {
         $data = $this->models->get_appintment_by_id($id);
         if (!$data) {
@@ -189,7 +191,7 @@ class Easyapp implements PluginInterface
         $this->Update($id, $data);
     }
 
-    public function ShutDown()
+    public function ShutDown(): void
     {
         global $wpdb;
         if (defined('DOING_AJAX') && DOING_AJAX) {
@@ -235,7 +237,7 @@ class Easyapp implements PluginInterface
         }
     }
 
-    public function GetMessage(array $message)
+    public function GetMessage(array $message): bool
     {
         if (!$this->options['use'] || !$this->CheckDependencies()) {
             return false;
@@ -245,7 +247,7 @@ class Easyapp implements PluginInterface
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
 
-        list($location, $service, $worker) = explode('_', $this->GetCalendar($roomid));
+        [$location, $service, $worker] = explode('_', $this->GetCalendar($roomid));
 
         switch ($message['action']) {
             case 'add':
@@ -306,7 +308,7 @@ class Easyapp implements PluginInterface
         return false;
     }
 
-    private function Add($res)
+    private function Add($res): void
     {
         if (in_array($res['status'], ['canceled', 'abandoned'])) {
             return;
@@ -320,7 +322,7 @@ class Easyapp implements PluginInterface
         }
     }
 
-    private function Update($id, $res)
+    private function Update($id, $res): void
     {
         $api = $this->plugin->GetApi();
         $appdata = $this->AppData($res['id']);
@@ -332,20 +334,23 @@ class Easyapp implements PluginInterface
         }
 
         if (!$lockme_data) {
-            return $this->Add($res);
+            $this->Add($res);
+
+            return;
         }
         if (in_array($res['status'], ['canceled', 'abandoned'])) {
-            return $this->Delete($id);
+            $this->Delete($id);
+
+            return;
         }
 
         try {
             $api->EditReservation($appdata['roomid'], "ext/{$id}", $appdata);
         } catch (Exception $e) {
         }
-        return false;
     }
 
-    private function Delete($resid)
+    private function Delete($resid): void
     {
         $res = $this->models->get_appintment_by_id($resid);
         if (!$res) {
@@ -389,7 +394,7 @@ class Easyapp implements PluginInterface
         throw new RuntimeException('No calendar');
     }
 
-    public function getPluginName()
+    public function getPluginName(): string
     {
         return 'Easy Appointments';
     }

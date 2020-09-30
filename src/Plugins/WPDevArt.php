@@ -3,6 +3,7 @@
 namespace LockmeIntegration\Plugins;
 
 use Exception;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use ReflectionObject;
@@ -45,7 +46,7 @@ class WPDevArt implements PluginInterface
         }
     }
 
-    public function ExportToLockMe()
+    public function ExportToLockMe(): void
     {
         global $wpdb;
         set_time_limit(0);
@@ -58,7 +59,7 @@ class WPDevArt implements PluginInterface
         }
     }
 
-    public function AddEditReservation($res)
+    public function AddEditReservation($res): void
     {
         if (!is_array($res)) {
             return;
@@ -87,7 +88,7 @@ class WPDevArt implements PluginInterface
         }
     }
 
-    private function AppData($res)
+    private function AppData($res): array
     {
 
         return
@@ -105,11 +106,11 @@ class WPDevArt implements PluginInterface
             );
     }
 
-    public function RegisterSettings()
+    public function RegisterSettings(): void
     {
         global $wpdb;
         if (!$this->CheckDependencies()) {
-            return false;
+            return;
         }
 
         register_setting('lockme-wpdevart', 'lockme_wpdevart');
@@ -137,7 +138,10 @@ class WPDevArt implements PluginInterface
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
-                $rooms = $api->RoomList();
+                try {
+                    $rooms = $api->RoomList();
+                } catch (IdentityProviderException $e) {
+                }
             }
 
             $query = 'SELECT * FROM '.$wpdb->prefix.'wpdevart_calendars ';
@@ -172,17 +176,16 @@ class WPDevArt implements PluginInterface
                 []
             );
         }
-        return true;
     }
 
-    public function CheckDependencies()
+    public function CheckDependencies(): bool
     {
         return
             is_plugin_active('booking-calendar-pro/booking_calendar.php') ||
             is_plugin_active('booking-calendar/booking_calendar.php');
     }
 
-    public function DrawForm()
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
@@ -199,7 +202,7 @@ class WPDevArt implements PluginInterface
         do_settings_sections('lockme-wpdevart');
     }
 
-    public function ShutDown()
+    public function ShutDown(): void
     {
         if ($_GET['page'] === 'wpdevart-reservations' && $_POST['task'] && is_admin()) {
             switch ($_POST['task']) {
@@ -223,7 +226,7 @@ class WPDevArt implements PluginInterface
 //        }
     }
 
-    public function Delete($res)
+    public function Delete($res): void
     {
         if (defined('LOCKME_MESSAGING')) {
             return;
@@ -239,7 +242,7 @@ class WPDevArt implements PluginInterface
         }
     }
 
-    public function GetMessage(array $message)
+    public function GetMessage(array $message): bool
     {
         global $wpdb;
         if (!$this->options['use'] || !$this->CheckDependencies()) {
@@ -410,7 +413,7 @@ class WPDevArt implements PluginInterface
         return null;
     }
 
-    public function getPluginName()
+    public function getPluginName(): string
     {
         return 'Booking Calendar Pro WpDevArt';
     }

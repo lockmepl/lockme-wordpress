@@ -3,6 +3,7 @@
 namespace LockmeIntegration\Plugins;
 
 use Exception;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
@@ -56,15 +57,17 @@ class Ezscm implements PluginInterface
         }
     }
 
-    public function CheckDependencies(){
+    public function CheckDependencies(): bool
+    {
         return is_plugin_active('ez-schedule-manager/ezscm.php');
     }
 
-    public function RegisterSettings(){
+    public function RegisterSettings(): void
+    {
         global $wpdb;
 
         if(!$this->CheckDependencies()) {
-            return false;
+            return;
         }
 
         register_setting( 'lockme-ezscm', 'lockme_ezscm' );
@@ -93,7 +96,10 @@ class Ezscm implements PluginInterface
             $api = $this->plugin->GetApi();
             $rooms = [];
             if($api){
-                $rooms = $api->RoomList();
+                try {
+                    $rooms = $api->RoomList();
+                } catch (IdentityProviderException $e) {
+                }
             }
             $calendars = $wpdb->get_results(
                 '
@@ -130,13 +136,13 @@ class Ezscm implements PluginInterface
                 array()
             );
         }
-        return true;
     }
 
-    public function DrawForm(){
+    public function DrawForm(): void
+    {
         if(!$this->CheckDependencies()){
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
-            return false;
+            return;
         }
 
         if($_SESSION['ezscm_export']){
@@ -147,10 +153,10 @@ class Ezscm implements PluginInterface
         }
         settings_fields( 'lockme-ezscm' );
         do_settings_sections( 'lockme-ezscm' );
-        return true;
     }
 
-    private function AppData($res){
+    private function AppData($res): array
+    {
         $details = json_decode($res['data'], true);
 
         return
@@ -169,7 +175,8 @@ class Ezscm implements PluginInterface
             );
     }
 
-    private function Add($res){
+    private function Add($res): void
+    {
         $api = $this->plugin->GetApi();
 
         try{
@@ -178,7 +185,8 @@ class Ezscm implements PluginInterface
         }
     }
 
-    private function Update($id, $res){
+    private function Update($id, $res): void
+    {
         $api = $this->plugin->GetApi();
 
         $data = $this->AppData($res);
@@ -190,17 +198,19 @@ class Ezscm implements PluginInterface
         }
 
         if(!$lockme_data){
-            return $this->Add($res);
+            $this->Add($res);
+
+            return;
         }
 
         try{
             $api->EditReservation($data['roomid'], "ext/{$id}", $data);
         }catch(Exception $e){
         }
-        return null;
     }
 
-    private function Delete($id, $res){
+    private function Delete($id, $res): void
+    {
         $api = $this->plugin->GetApi();
 
         $data = $this->AppData($res);
@@ -221,7 +231,8 @@ class Ezscm implements PluginInterface
         }
     }
 
-    public function AddReservation($save_data){
+    public function AddReservation($save_data): void
+    {
         global $wpdb;
 
         $existing = $wpdb->get_row($wpdb->prepare(
@@ -237,7 +248,8 @@ class Ezscm implements PluginInterface
         $this->Add($existing);
     }
 
-    public function AddEditReservation($save_data){
+    public function AddEditReservation($save_data): void
+    {
         global $wpdb;
 
         $existing = $wpdb->get_row($wpdb->prepare(
@@ -253,7 +265,8 @@ class Ezscm implements PluginInterface
         $this->Update($existing['e_id'], $existing);
     }
 
-    public function ShutDown(){
+    public function ShutDown(): void
+    {
         if (
             $_POST['action'] === 'ezscm_frontend' ||
             $_POST['action'] === 'ezscm_backend'
@@ -296,7 +309,8 @@ class Ezscm implements PluginInterface
         throw new RuntimeException('No calendar');
     }
 
-    public function GetMessage(array $message){
+    public function GetMessage(array $message): bool
+    {
         global $wpdb;
         if(!$this->options['use'] || !$this->CheckDependencies()){
             return false;
@@ -391,7 +405,8 @@ class Ezscm implements PluginInterface
         return false;
     }
 
-    public function ExportToLockMe(){
+    public function ExportToLockMe(): void
+    {
         global $wpdb;
         set_time_limit(0);
 
@@ -403,7 +418,7 @@ class Ezscm implements PluginInterface
         }
     }
 
-    public function getPluginName()
+    public function getPluginName(): string
     {
         return 'ez Schedule Manager';
     }
