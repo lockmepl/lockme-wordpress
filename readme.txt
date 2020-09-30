@@ -5,7 +5,7 @@ Tags: lustmored
 Requires PHP: 7.2
 Requires at least: 4.8
 Tested up to: 5.4.0
-Stable tag: 1.3.8
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,7 +13,7 @@ This plugin integrates popular booking systems with Lockme OAuth2 API.
 
 == Description ==
 
-This plugin acts as a middleware between your booking system and [Lockme OAuth2 API](https://apidoc.lockme.pl/ "Locke API 2.0 documentation") (a.k.a. API 2.0).
+This plugin acts as a middleware between your booking system and [Lockme OAuth2 API](https://apidoc.lockme.pl/ "Lockme API 2.0 documentation") (a.k.a. API 2.0).
 
 Usage of this plugin isn't required, but if you are Lockme partner and want to seamlessly integrate your booking solution with that found on Lockme website, it is the easiest way. It **will send booking data** created via Wordpress site to Lockme and handle messages about bookings from Lockme.
 
@@ -61,6 +61,10 @@ Show answer - no. Long answer - please contact us at kontakt@lockme.pl and we'll
 1. Main settings page for connection with Lockme API
 
 == Changelog ==
+
+= 2.0 =
+* Require PHP 7.2 and Lockme SDK 2.0
+* Solve race condition on refreshing tokens
 
 = 1.3 =
 * Added option to use plugin against any specified domain per Lockme team internal needs

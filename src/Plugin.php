@@ -68,18 +68,18 @@ class Plugin
         }
 
         if (is_admin()) {
-            $this->tab = isset($_GET['tab']) ? $_GET['tab'] : 'api_options';
+            $this->tab = $_GET['tab'] ?? 'api_options';
 
             add_action('admin_menu', array(&$this, 'admin_init'));
             add_action('admin_init', array(&$this, 'admin_register_settings'));
         }
     }
 
-    public function api_call()
+    public function api_call(): void
     {
         // Check for OAuth2 state
-        $code = isset($_GET['code']) ? $_GET['code'] : null;
-        $state = isset($_GET['state']) ? $_GET['state'] : null;
+        $code = $_GET['code'] ?? null;
+        $state = $_GET['state'] ?? null;
         if ($code && $state) {
             try {
                 $api = $this->GetApi();
@@ -99,19 +99,17 @@ class Plugin
             $token = stripslashes($_POST['oauth_token']);
             $api = $this->GetApi();
             try {
-                if(json_decode($token, true)) {
-                    $new_token = $api->setDefaultAccessToken($token);
-                    if ($new_token instanceof AccessToken) {
-                        update_option('lockme_oauth2_token', $new_token);
-                    }
-                }
+                $api->loadAccessToken(
+                    function () use ($token) { return json_decode($token, true); },
+                    function ($token) { update_option('lockme_oauth2_token', $token); }
+                );
             }catch (Exception $e){
             }
         }
 
         // Proceed with API callback
         $api = $_GET['lockme_api'];
-        if ($api != $this->url_key) {
+        if ($api !== $this->url_key) {
             return;
         }
 
@@ -137,7 +135,7 @@ class Plugin
         die();
     }
 
-    public function GetApi()
+    public function GetApi(): ?Lockme
     {
         if ($this->options['client_id'] && $this->options['client_secret']) {
             $lm = new Lockme([
@@ -146,29 +144,25 @@ class Plugin
                 'redirectUri' => get_admin_url().'options-general.php?page=lockme_integration&tab=api_options',
                 'api_domain' => $this->options['api_domain'] ?: 'https://api.lock.me'
             ]);
-            $token = get_option('lockme_oauth2_token');
-            if ($token) {
-                try {
-                    $new_token = $lm->setDefaultAccessToken($token);
-                    if($new_token !== $token) {
-                        update_option('lockme_oauth2_token', $new_token);
-                    }
-                } catch (Exception $e) {
-                    // delete_option('lockme_oauth2_token');
-                    return $lm;
-                }
+            try{
+                $lm->loadAccessToken(
+                    function () { return get_option('lockme_oauth2_token'); },
+                    function ($token) { update_option('lockme_oauth2_token', $token); }
+                );
+            } catch (Exception $e) {
+                return $lm;
             }
             return $lm;
         }
         return null;
     }
 
-    public function admin_init()
+    public function admin_init(): void
     {
         add_options_page('Integracja z Lockme', 'Lockme', 'manage_options', 'lockme_integration', array(&$this, 'admin_page'));
     }
 
-    public function admin_register_settings()
+    public function admin_register_settings(): void
     {
         register_setting('lockme-admin', 'lockme_settings');
 
@@ -241,7 +235,7 @@ class Plugin
         }
     }
 
-    public function admin_page()
+    public function admin_page(): void
     {
         if (!current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.'));
@@ -254,7 +248,7 @@ class Plugin
         echo '    <a href="?page=lockme_integration&tab=api_options" class="nav-tab '.($this->tab ===
                                                                                        'api_options'?'nav-tab-active':'').'">Ustawienia API</a>';
         foreach ($this->available_plugins as $k=>$plugin) {
-            echo '    <a href="?page=lockme_integration&tab='.$k.'_plugin" class="nav-tab '.($this->tab==$k.'_plugin'?'nav-tab-active':'').'">Wtyczka '.$plugin->getPluginName().'</a>';
+            echo '    <a href="?page=lockme_integration&tab='.$k.'_plugin" class="nav-tab '.($this->tab === $k.'_plugin'?'nav-tab-active':'').'">Wtyczka '.$plugin->getPluginName().'</a>';
         }
         echo '</h2>';
 
@@ -290,7 +284,7 @@ class Plugin
             echo '<p><textarea readonly>'.\json_encode($token).'</textarea></p>';
         } else {
             foreach ($this->available_plugins as $k=>$plugin) {
-                if ($this->tab == $k.'_plugin') {
+                if ($this->tab === $k.'_plugin') {
                     try {
                         $plugin->DrawForm();
                     }catch (Exception $e){
@@ -305,7 +299,8 @@ class Plugin
         echo '</div>';
     }
 
-    public function AnonymizeData(array $data){
+    public function AnonymizeData(array $data): array
+    {
         if($this->options['rodo_mode']){
             return array_filter(
                 $data,
