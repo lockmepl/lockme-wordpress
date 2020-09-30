@@ -19,7 +19,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'c50268ca20d09df748880d42bfd14f7a5b5ac391',
+    'reference' => '5b9d1512b1fd5ff13798823c2872afea8cc6a435',
     'name' => 'lustmored/lockme-wordpress',
   ),
   'versions' => 
@@ -35,21 +35,21 @@ private static $installed = array (
     ),
     'guzzlehttp/promises' => 
     array (
-      'pretty_version' => 'v1.3.1',
-      'version' => '1.3.1.0',
+      'pretty_version' => '1.4.0',
+      'version' => '1.4.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'a59da6cf61d80060647ff4d3eb2c03a2bc694646',
+      'reference' => '60d379c243457e073cff02bc323a2a86cb355631',
     ),
     'guzzlehttp/psr7' => 
     array (
-      'pretty_version' => '1.6.1',
-      'version' => '1.6.1.0',
+      'pretty_version' => '1.7.0',
+      'version' => '1.7.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => '239400de7a173fe9901b9ac7c06497751f00727a',
+      'reference' => '53330f47520498c0ae1f61f7e2c90f55690c06a3',
     ),
     'league/oauth2-client' => 
     array (
@@ -62,12 +62,12 @@ private static $installed = array (
     ),
     'lustmored/lockme-sdk' => 
     array (
-      'pretty_version' => '2.0.0',
-      'version' => '2.0.0.0',
+      'pretty_version' => '2.0.1',
+      'version' => '2.0.1.0',
       'aliases' => 
       array (
       ),
-      'reference' => '9fc7e6524bb7531147c6529a9816d409869efe81',
+      'reference' => '0fe9cd8f61576d11c9d400a372df6a700fcdd620',
     ),
     'lustmored/lockme-wordpress' => 
     array (
@@ -76,7 +76,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'c50268ca20d09df748880d42bfd14f7a5b5ac391',
+      'reference' => '5b9d1512b1fd5ff13798823c2872afea8cc6a435',
     ),
     'lustmored/oauth2-lockme' => 
     array (
