@@ -65,6 +65,7 @@ Show answer - no. Long answer - please contact us at kontakt@lockme.pl and we'll
 = 2.0 =
 * Require PHP 7.2 and Lockme SDK 2.0
 * Solve race condition on refreshing tokens
+* Adapt to another ABI change in Bookly
 
 = 1.3 =
 * Added option to use plugin against any specified domain per Lockme team internal needs

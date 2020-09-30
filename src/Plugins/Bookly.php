@@ -295,9 +295,15 @@ class Bookly implements PluginInterface
                                      ->setCustomFields('[]')
                                      ->setStatus(CustomerAppointment::STATUS_APPROVED)
                                      ->setTimeZoneOffset($offset)
-                                     ->setCreatedFrom('backend')
-                                     ->setCreated(date('Y-m-d H:i:s'))
-                                     ->save();
+                                     ->setCreatedFrom('backend');
+
+                if(method_exists($customer_appointment, 'setCreated')) {
+                    $customer_appointment->setCreated(date('Y-m-d H:i:s'))
+                                         ->save();
+                } else {
+                    $customer_appointment->setCreatedAt(date('Y-m-d H:i:s'))
+                                         ->save();
+                }
 
                 $id = $appointment->getId();
                 if (!$id || !$customer_appointment->getId()) {
