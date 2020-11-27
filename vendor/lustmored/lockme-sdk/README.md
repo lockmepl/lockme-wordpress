@@ -1,2 +1,0 @@
-# lockme-sdk
-LockMe SDK
