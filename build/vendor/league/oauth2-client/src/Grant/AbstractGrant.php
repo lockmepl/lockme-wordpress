@@ -12,9 +12,9 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\Grant;
+namespace League\OAuth2\Client\Grant;
 
-use LockmeDep\League\OAuth2\Client\Tool\RequiredParameterTrait;
+use League\OAuth2\Client\Tool\RequiredParameterTrait;
 /**
  * Represents a type of authorization grant.
  *

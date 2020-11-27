@@ -2,9 +2,9 @@
 
 namespace LockmeDep\Lockme\OAuth2\Client\Provider\Exception;
 
-use LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\Psr\Http\Message\ResponseInterface;
-class LockmeIdentityProviderException extends \LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException
+class LockmeIdentityProviderException extends \League\OAuth2\Client\Provider\Exception\IdentityProviderException
 {
     /**
      * Creates client exception from response.

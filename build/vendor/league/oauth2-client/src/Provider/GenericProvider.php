@@ -12,18 +12,18 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\Provider;
+namespace League\OAuth2\Client\Provider;
 
 use InvalidArgumentException;
-use LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use LockmeDep\League\OAuth2\Client\Token\AccessToken;
-use LockmeDep\League\OAuth2\Client\Tool\BearerAuthorizationTrait;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Token\AccessToken;
+use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use LockmeDep\Psr\Http\Message\ResponseInterface;
 /**
  * Represents a generic service provider that may be used to interact with any
  * OAuth 2.0 service provider, using Bearer token authentication.
  */
-class GenericProvider extends \LockmeDep\League\OAuth2\Client\Provider\AbstractProvider
+class GenericProvider extends \League\OAuth2\Client\Provider\AbstractProvider
 {
     use BearerAuthorizationTrait;
     /**
@@ -131,7 +131,7 @@ class GenericProvider extends \LockmeDep\League\OAuth2\Client\Provider\AbstractP
     /**
      * @inheritdoc
      */
-    public function getResourceOwnerDetailsUrl(\LockmeDep\League\OAuth2\Client\Token\AccessToken $token)
+    public function getResourceOwnerDetailsUrl(\League\OAuth2\Client\Token\AccessToken $token)
     {
         return $this->urlResourceOwnerDetails;
     }
@@ -177,14 +177,14 @@ class GenericProvider extends \LockmeDep\League\OAuth2\Client\Provider\AbstractP
             if (!\is_int($code)) {
                 $code = \intval($code);
             }
-            throw new \LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException($error, $code, $data);
+            throw new \League\OAuth2\Client\Provider\Exception\IdentityProviderException($error, $code, $data);
         }
     }
     /**
      * @inheritdoc
      */
-    protected function createResourceOwner(array $response, \LockmeDep\League\OAuth2\Client\Token\AccessToken $token)
+    protected function createResourceOwner(array $response, \League\OAuth2\Client\Token\AccessToken $token)
     {
-        return new \LockmeDep\League\OAuth2\Client\Provider\GenericResourceOwner($response, $this->responseResourceOwnerId);
+        return new \League\OAuth2\Client\Provider\GenericResourceOwner($response, $this->responseResourceOwnerId);
     }
 }

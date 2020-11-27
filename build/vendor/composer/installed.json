@@ -277,7 +277,7 @@
             "installation-source": "dist",
             "autoload": {
                 "psr-4": {
-                    "LockmeDep\\League\\OAuth2\\Client\\": "src\/"
+                    "League\\OAuth2\\Client\\": "src\/"
                 }
             },
             "notification-url": "https:\/\/packagist.org\/downloads\/",

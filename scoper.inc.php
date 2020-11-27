@@ -64,6 +64,7 @@ return [
     // Fore more see https://github.com/humbug/php-scoper#whitelist
     'whitelist' => [
         'Bookly\*',
+        'League\OAuth2\Client\*',
         // 'PHPUnit\Framework\TestCase',   // A specific class
         // 'PHPUnit\Framework\*',          // The whole namespace
         // '*',                            // Everything

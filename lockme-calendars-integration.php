@@ -18,11 +18,6 @@ defined('ABSPATH') or die('No script kiddies please!');
 
 require_once __DIR__.'/build/vendor/autoload.php';
 
-/** @noinspection PhpIgnoredClassAliasDeclaration */
-class_alias(
-    AccessToken::class,
-    "League\\OAuth2\\Client\\Token\\AccessToken"
-);
 $global = [
     'WP_Query',
     'EADBModels',

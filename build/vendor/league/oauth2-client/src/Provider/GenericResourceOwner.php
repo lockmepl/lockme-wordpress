@@ -12,12 +12,12 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\Provider;
+namespace League\OAuth2\Client\Provider;
 
 /**
  * Represents a generic resource owner for use with the GenericProvider.
  */
-class GenericResourceOwner implements \LockmeDep\League\OAuth2\Client\Provider\ResourceOwnerInterface
+class GenericResourceOwner implements \League\OAuth2\Client\Provider\ResourceOwnerInterface
 {
     /**
      * @var array

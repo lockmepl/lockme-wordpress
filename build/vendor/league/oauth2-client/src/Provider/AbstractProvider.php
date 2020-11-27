@@ -12,22 +12,22 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\Provider;
+namespace League\OAuth2\Client\Provider;
 
 use LockmeDep\GuzzleHttp\Client as HttpClient;
 use LockmeDep\GuzzleHttp\ClientInterface as HttpClientInterface;
 use LockmeDep\GuzzleHttp\Exception\BadResponseException;
-use LockmeDep\League\OAuth2\Client\Grant\AbstractGrant;
-use LockmeDep\League\OAuth2\Client\Grant\GrantFactory;
-use LockmeDep\League\OAuth2\Client\OptionProvider\OptionProviderInterface;
-use LockmeDep\League\OAuth2\Client\OptionProvider\PostAuthOptionProvider;
-use LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use LockmeDep\League\OAuth2\Client\Token\AccessToken;
-use LockmeDep\League\OAuth2\Client\Token\AccessTokenInterface;
-use LockmeDep\League\OAuth2\Client\Tool\ArrayAccessorTrait;
-use LockmeDep\League\OAuth2\Client\Tool\GuardedPropertyTrait;
-use LockmeDep\League\OAuth2\Client\Tool\QueryBuilderTrait;
-use LockmeDep\League\OAuth2\Client\Tool\RequestFactory;
+use League\OAuth2\Client\Grant\AbstractGrant;
+use League\OAuth2\Client\Grant\GrantFactory;
+use League\OAuth2\Client\OptionProvider\OptionProviderInterface;
+use League\OAuth2\Client\OptionProvider\PostAuthOptionProvider;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Token\AccessToken;
+use League\OAuth2\Client\Token\AccessTokenInterface;
+use League\OAuth2\Client\Tool\ArrayAccessorTrait;
+use League\OAuth2\Client\Tool\GuardedPropertyTrait;
+use League\OAuth2\Client\Tool\QueryBuilderTrait;
+use League\OAuth2\Client\Tool\RequestFactory;
 use LockmeDep\Psr\Http\Message\RequestInterface;
 use LockmeDep\Psr\Http\Message\ResponseInterface;
 use UnexpectedValueException;
@@ -102,11 +102,11 @@ abstract class AbstractProvider
         // options, skipping any blacklisted properties defined in the provider
         $this->fillProperties($options);
         if (empty($collaborators['grantFactory'])) {
-            $collaborators['grantFactory'] = new \LockmeDep\League\OAuth2\Client\Grant\GrantFactory();
+            $collaborators['grantFactory'] = new \League\OAuth2\Client\Grant\GrantFactory();
         }
         $this->setGrantFactory($collaborators['grantFactory']);
         if (empty($collaborators['requestFactory'])) {
-            $collaborators['requestFactory'] = new \LockmeDep\League\OAuth2\Client\Tool\RequestFactory();
+            $collaborators['requestFactory'] = new \League\OAuth2\Client\Tool\RequestFactory();
         }
         $this->setRequestFactory($collaborators['requestFactory']);
         if (empty($collaborators['httpClient'])) {
@@ -115,7 +115,7 @@ abstract class AbstractProvider
         }
         $this->setHttpClient($collaborators['httpClient']);
         if (empty($collaborators['optionProvider'])) {
-            $collaborators['optionProvider'] = new \LockmeDep\League\OAuth2\Client\OptionProvider\PostAuthOptionProvider();
+            $collaborators['optionProvider'] = new \League\OAuth2\Client\OptionProvider\PostAuthOptionProvider();
         }
         $this->setOptionProvider($collaborators['optionProvider']);
     }
@@ -142,7 +142,7 @@ abstract class AbstractProvider
      * @param  GrantFactory $factory
      * @return self
      */
-    public function setGrantFactory(\LockmeDep\League\OAuth2\Client\Grant\GrantFactory $factory)
+    public function setGrantFactory(\League\OAuth2\Client\Grant\GrantFactory $factory)
     {
         $this->grantFactory = $factory;
         return $this;
@@ -162,7 +162,7 @@ abstract class AbstractProvider
      * @param  RequestFactory $factory
      * @return self
      */
-    public function setRequestFactory(\LockmeDep\League\OAuth2\Client\Tool\RequestFactory $factory)
+    public function setRequestFactory(\League\OAuth2\Client\Tool\RequestFactory $factory)
     {
         $this->requestFactory = $factory;
         return $this;
@@ -202,7 +202,7 @@ abstract class AbstractProvider
      * @param  OptionProviderInterface $provider
      * @return self
      */
-    public function setOptionProvider(\LockmeDep\League\OAuth2\Client\OptionProvider\OptionProviderInterface $provider)
+    public function setOptionProvider(\League\OAuth2\Client\OptionProvider\OptionProviderInterface $provider)
     {
         $this->optionProvider = $provider;
         return $this;
@@ -250,7 +250,7 @@ abstract class AbstractProvider
      * @param AccessToken $token
      * @return string
      */
-    public abstract function getResourceOwnerDetailsUrl(\LockmeDep\League\OAuth2\Client\Token\AccessToken $token);
+    public abstract function getResourceOwnerDetailsUrl(\League\OAuth2\Client\Token\AccessToken $token);
     /**
      * Returns a new random string to use as the state parameter in an
      * authorization flow.
@@ -624,9 +624,9 @@ abstract class AbstractProvider
      * @param  AbstractGrant $grant
      * @return AccessTokenInterface
      */
-    protected function createAccessToken(array $response, \LockmeDep\League\OAuth2\Client\Grant\AbstractGrant $grant)
+    protected function createAccessToken(array $response, \League\OAuth2\Client\Grant\AbstractGrant $grant)
     {
-        return new \LockmeDep\League\OAuth2\Client\Token\AccessToken($response);
+        return new \League\OAuth2\Client\Token\AccessToken($response);
     }
     /**
      * Generates a resource owner object from a successful resource owner
@@ -636,14 +636,14 @@ abstract class AbstractProvider
      * @param  AccessToken $token
      * @return ResourceOwnerInterface
      */
-    protected abstract function createResourceOwner(array $response, \LockmeDep\League\OAuth2\Client\Token\AccessToken $token);
+    protected abstract function createResourceOwner(array $response, \League\OAuth2\Client\Token\AccessToken $token);
     /**
      * Requests and returns the resource owner of given access token.
      *
      * @param  AccessToken $token
      * @return ResourceOwnerInterface
      */
-    public function getResourceOwner(\LockmeDep\League\OAuth2\Client\Token\AccessToken $token)
+    public function getResourceOwner(\League\OAuth2\Client\Token\AccessToken $token)
     {
         $response = $this->fetchResourceOwnerDetails($token);
         return $this->createResourceOwner($response, $token);
@@ -654,7 +654,7 @@ abstract class AbstractProvider
      * @param  AccessToken $token
      * @return mixed
      */
-    protected function fetchResourceOwnerDetails(\LockmeDep\League\OAuth2\Client\Token\AccessToken $token)
+    protected function fetchResourceOwnerDetails(\League\OAuth2\Client\Token\AccessToken $token)
     {
         $url = $this->getResourceOwnerDetailsUrl($token);
         $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $token);

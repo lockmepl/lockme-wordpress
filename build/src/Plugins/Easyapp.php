@@ -7,7 +7,7 @@ use DateTime;
 use LockmeDep\EADBModels;
 use LockmeDep\EATableColumns;
 use Exception;
-use LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
@@ -77,7 +77,7 @@ class Easyapp implements \LockmeDep\LockmeIntegration\PluginInterface
             if ($api) {
                 try {
                     $rooms = $api->RoomList();
-                } catch (\LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+                } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
                 }
             }
             $calendars = $wpdb->get_results('SELECT DISTINCT concat(l.`id`,"_",s.`id`,"_",ss.`id`) `id`, concat(l.`name`," - ",s.`name`," - ",ss.`name`) `name` FROM ' . $wpdb->prefix . 'ea_locations l join ' . $wpdb->prefix . 'ea_services s join ' . $wpdb->prefix . 'ea_staff ss');

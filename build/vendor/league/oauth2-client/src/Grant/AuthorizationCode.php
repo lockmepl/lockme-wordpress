@@ -12,14 +12,14 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\Grant;
+namespace League\OAuth2\Client\Grant;
 
 /**
  * Represents an authorization code grant.
  *
  * @link http://tools.ietf.org/html/rfc6749#section-1.3.1 Authorization Code (RFC 6749, §1.3.1)
  */
-class AuthorizationCode extends \LockmeDep\League\OAuth2\Client\Grant\AbstractGrant
+class AuthorizationCode extends \League\OAuth2\Client\Grant\AbstractGrant
 {
     /**
      * @inheritdoc

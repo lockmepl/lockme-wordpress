@@ -4,9 +4,9 @@ namespace LockmeDep\Lockme\SDK;
 
 use DateTime;
 use Exception;
-use LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use LockmeDep\League\OAuth2\Client\Provider\ResourceOwnerInterface;
-use LockmeDep\League\OAuth2\Client\Token\AccessToken;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Provider\ResourceOwnerInterface;
+use League\OAuth2\Client\Token\AccessToken;
 use LockmeDep\Lockme\OAuth2\Client\Provider\Lockme as LockmeProvider;
 use RuntimeException;
 use LockmeDep\Symfony\Component\Lock\LockFactory;
@@ -59,7 +59,7 @@ class Lockme
      * @return AccessToken       Access Token
      * @throws Exception
      */
-    public function getTokenForCode(string $code, string $state) : \LockmeDep\League\OAuth2\Client\Token\AccessToken
+    public function getTokenForCode(string $code, string $state) : \League\OAuth2\Client\Token\AccessToken
     {
         if ($state !== $_SESSION['oauth2_lockme_state']) {
             unset($_SESSION['oauth2_lockme_state']);
@@ -75,7 +75,7 @@ class Lockme
      * @return AccessToken        Refreshed token
      * @throws IdentityProviderException
      */
-    public function refreshToken($accessToken = null) : \LockmeDep\League\OAuth2\Client\Token\AccessToken
+    public function refreshToken($accessToken = null) : \League\OAuth2\Client\Token\AccessToken
     {
         $accessToken = $accessToken ?: $this->accessToken;
         $this->accessToken = $this->provider->getAccessToken('refresh_token', ['refresh_token' => $accessToken->getRefreshToken()]);
@@ -88,11 +88,11 @@ class Lockme
      * @throws Exception
      * @deprecated use loadAccessToken to solve race conditions on token refreshing
      */
-    public function setDefaultAccessToken($token) : \LockmeDep\League\OAuth2\Client\Token\AccessToken
+    public function setDefaultAccessToken($token) : \League\OAuth2\Client\Token\AccessToken
     {
         if (\is_string($token)) {
-            $this->accessToken = new \LockmeDep\League\OAuth2\Client\Token\AccessToken(\json_decode($token, \true));
-        } elseif ($token instanceof \LockmeDep\League\OAuth2\Client\Token\AccessToken) {
+            $this->accessToken = new \League\OAuth2\Client\Token\AccessToken(\json_decode($token, \true));
+        } elseif ($token instanceof \League\OAuth2\Client\Token\AccessToken) {
             $this->accessToken = $token;
         } else {
             throw new \RuntimeException("Incorrect access token");
@@ -106,13 +106,13 @@ class Lockme
      * @param  callable  $load
      * @return AccessToken
      */
-    private function reloadToken(callable $load) : \LockmeDep\League\OAuth2\Client\Token\AccessToken
+    private function reloadToken(callable $load) : \League\OAuth2\Client\Token\AccessToken
     {
         if (\is_callable($load)) {
             $token = $load();
             if (\is_string($token)) {
-                $this->accessToken = new \LockmeDep\League\OAuth2\Client\Token\AccessToken(\json_decode($token, \true));
-            } elseif ($token instanceof \LockmeDep\League\OAuth2\Client\Token\AccessToken) {
+                $this->accessToken = new \League\OAuth2\Client\Token\AccessToken(\json_decode($token, \true));
+            } elseif ($token instanceof \League\OAuth2\Client\Token\AccessToken) {
                 $this->accessToken = $token;
             }
         }
@@ -127,7 +127,7 @@ class Lockme
      * @return AccessToken
      * @throws Exception
      */
-    public function loadAccessToken(callable $load, ?callable $save = null) : \LockmeDep\League\OAuth2\Client\Token\AccessToken
+    public function loadAccessToken(callable $load, ?callable $save = null) : \League\OAuth2\Client\Token\AccessToken
     {
         $this->reloadToken($load);
         if ($this->accessToken->hasExpired()) {
@@ -250,7 +250,7 @@ class Lockme
      * @param  string|AccessToken|null $accessToken Access token
      * @return ResourceOwnerInterface              Resource owner
      */
-    public function getResourceOwner($accessToken = null) : \LockmeDep\League\OAuth2\Client\Provider\ResourceOwnerInterface
+    public function getResourceOwner($accessToken = null) : \League\OAuth2\Client\Provider\ResourceOwnerInterface
     {
         return $this->provider->getResourceOwner($accessToken ?: $this->accessToken);
     }

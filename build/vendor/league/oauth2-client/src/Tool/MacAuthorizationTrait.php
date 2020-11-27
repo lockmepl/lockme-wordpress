@@ -12,10 +12,10 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\Tool;
+namespace League\OAuth2\Client\Tool;
 
-use LockmeDep\League\OAuth2\Client\Token\AccessToken;
-use LockmeDep\League\OAuth2\Client\Token\AccessTokenInterface;
+use League\OAuth2\Client\Token\AccessToken;
+use League\OAuth2\Client\Token\AccessTokenInterface;
 /**
  * Enables `MAC` header authorization for providers.
  *
@@ -29,7 +29,7 @@ trait MacAuthorizationTrait
      * @param  AccessToken $token
      * @return string
      */
-    protected abstract function getTokenId(\LockmeDep\League\OAuth2\Client\Token\AccessToken $token);
+    protected abstract function getTokenId(\League\OAuth2\Client\Token\AccessToken $token);
     /**
      * Returns the MAC signature for the current request.
      *

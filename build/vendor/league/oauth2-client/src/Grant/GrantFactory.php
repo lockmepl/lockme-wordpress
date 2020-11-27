@@ -12,9 +12,9 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\Grant;
+namespace League\OAuth2\Client\Grant;
 
-use LockmeDep\League\OAuth2\Client\Grant\Exception\InvalidGrantException;
+use League\OAuth2\Client\Grant\Exception\InvalidGrantException;
 /**
  * Represents a factory used when retrieving an authorization grant type.
  */
@@ -31,7 +31,7 @@ class GrantFactory
      * @param  AbstractGrant $grant
      * @return self
      */
-    public function setGrant($name, \LockmeDep\League\OAuth2\Client\Grant\AbstractGrant $grant)
+    public function setGrant($name, \League\OAuth2\Client\Grant\AbstractGrant $grant)
     {
         $this->registry[$name] = $grant;
         return $this;
@@ -73,7 +73,7 @@ class GrantFactory
      */
     public function isGrant($class)
     {
-        return \is_subclass_of($class, \LockmeDep\League\OAuth2\Client\Grant\AbstractGrant::class);
+        return \is_subclass_of($class, \League\OAuth2\Client\Grant\AbstractGrant::class);
     }
     /**
      * Checks if a variable is a valid grant.
@@ -85,7 +85,7 @@ class GrantFactory
     public function checkGrant($class)
     {
         if (!$this->isGrant($class)) {
-            throw new \LockmeDep\League\OAuth2\Client\Grant\Exception\InvalidGrantException(\sprintf('Grant "%s" must extend AbstractGrant', \is_object($class) ? \get_class($class) : $class));
+            throw new \League\OAuth2\Client\Grant\Exception\InvalidGrantException(\sprintf('Grant "%s" must extend AbstractGrant', \is_object($class) ? \get_class($class) : $class));
         }
     }
 }

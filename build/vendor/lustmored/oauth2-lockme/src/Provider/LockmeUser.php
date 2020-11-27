@@ -2,12 +2,12 @@
 
 namespace LockmeDep\Lockme\OAuth2\Client\Provider;
 
-use LockmeDep\League\OAuth2\Client\Provider\ResourceOwnerInterface;
-use LockmeDep\League\OAuth2\Client\Tool\ArrayAccessorTrait;
+use League\OAuth2\Client\Provider\ResourceOwnerInterface;
+use League\OAuth2\Client\Tool\ArrayAccessorTrait;
 /**
  * Lockme user
  */
-class LockmeUser implements \LockmeDep\League\OAuth2\Client\Provider\ResourceOwnerInterface
+class LockmeUser implements \League\OAuth2\Client\Provider\ResourceOwnerInterface
 {
     use ArrayAccessorTrait;
     /**

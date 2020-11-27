@@ -12,9 +12,9 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\Tool;
+namespace League\OAuth2\Client\Tool;
 
-use LockmeDep\League\OAuth2\Client\Token\AccessTokenInterface;
+use League\OAuth2\Client\Token\AccessTokenInterface;
 /**
  * Enables `Bearer` header authorization for providers.
  *

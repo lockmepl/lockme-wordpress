@@ -2,13 +2,13 @@
 
 namespace LockmeDep\Lockme\OAuth2\Client\Provider;
 
-use LockmeDep\League\OAuth2\Client\Provider\AbstractProvider;
-use LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use LockmeDep\League\OAuth2\Client\Token\AccessToken;
-use LockmeDep\League\OAuth2\Client\Tool\BearerAuthorizationTrait;
+use League\OAuth2\Client\Provider\AbstractProvider;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Token\AccessToken;
+use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use LockmeDep\Lockme\OAuth2\Client\Provider\Exception\LockmeIdentityProviderException;
 use LockmeDep\Psr\Http\Message\ResponseInterface;
-class Lockme extends \LockmeDep\League\OAuth2\Client\Provider\AbstractProvider
+class Lockme extends \League\OAuth2\Client\Provider\AbstractProvider
 {
     use BearerAuthorizationTrait;
     /**
@@ -43,7 +43,7 @@ class Lockme extends \LockmeDep\League\OAuth2\Client\Provider\AbstractProvider
     {
         return $this->apiDomain . '/access_token';
     }
-    public function getResourceOwnerDetailsUrl(\LockmeDep\League\OAuth2\Client\Token\AccessToken $token)
+    public function getResourceOwnerDetailsUrl(\League\OAuth2\Client\Token\AccessToken $token)
     {
         return $this->apiDomain . '/' . $this->version . '/me';
     }
@@ -60,7 +60,7 @@ class Lockme extends \LockmeDep\League\OAuth2\Client\Provider\AbstractProvider
             throw \LockmeDep\Lockme\OAuth2\Client\Provider\Exception\LockmeIdentityProviderException::oauthException($response, $data);
         }
     }
-    protected function createResourceOwner(array $response, \LockmeDep\League\OAuth2\Client\Token\AccessToken $token)
+    protected function createResourceOwner(array $response, \League\OAuth2\Client\Token\AccessToken $token)
     {
         return new \LockmeDep\Lockme\OAuth2\Client\Provider\LockmeUser($response);
     }

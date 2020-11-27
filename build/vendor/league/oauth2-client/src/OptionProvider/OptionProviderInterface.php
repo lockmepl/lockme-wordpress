@@ -12,7 +12,7 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\OptionProvider;
+namespace League\OAuth2\Client\OptionProvider;
 
 /**
  * Interface for access token options provider

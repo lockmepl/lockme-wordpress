@@ -14,8 +14,8 @@ return array(
     'LockmeDep\\Lockme\\SDK\\' => array($vendorDir . '/lustmored/lockme-sdk/src'),
     'LockmeDep\\Lockme\\OAuth2\\Client\\' => array($vendorDir . '/lustmored/oauth2-lockme/src'),
     'LockmeDep\\LockmeIntegration\\' => array($baseDir . '/src'),
-    'LockmeDep\\League\\OAuth2\\Client\\' => array($vendorDir . '/league/oauth2-client/src'),
     'LockmeDep\\GuzzleHttp\\Psr7\\' => array($vendorDir . '/guzzlehttp/psr7/src'),
     'LockmeDep\\GuzzleHttp\\Promise\\' => array($vendorDir . '/guzzlehttp/promises/src'),
     'LockmeDep\\GuzzleHttp\\' => array($vendorDir . '/guzzlehttp/guzzle/src'),
+    'League\\OAuth2\\Client\\' => array($vendorDir . '/league/oauth2-client/src'),
 );

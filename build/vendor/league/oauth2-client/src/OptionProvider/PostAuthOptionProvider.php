@@ -12,14 +12,14 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\OptionProvider;
+namespace League\OAuth2\Client\OptionProvider;
 
-use LockmeDep\League\OAuth2\Client\Provider\AbstractProvider;
-use LockmeDep\League\OAuth2\Client\Tool\QueryBuilderTrait;
+use League\OAuth2\Client\Provider\AbstractProvider;
+use League\OAuth2\Client\Tool\QueryBuilderTrait;
 /**
  * Provide options for access token
  */
-class PostAuthOptionProvider implements \LockmeDep\League\OAuth2\Client\OptionProvider\OptionProviderInterface
+class PostAuthOptionProvider implements \League\OAuth2\Client\OptionProvider\OptionProviderInterface
 {
     use QueryBuilderTrait;
     /**
@@ -28,7 +28,7 @@ class PostAuthOptionProvider implements \LockmeDep\League\OAuth2\Client\OptionPr
     public function getAccessTokenOptions($method, array $params)
     {
         $options = ['headers' => ['content-type' => 'application/x-www-form-urlencoded']];
-        if ($method === \LockmeDep\League\OAuth2\Client\Provider\AbstractProvider::METHOD_POST) {
+        if ($method === \League\OAuth2\Client\Provider\AbstractProvider::METHOD_POST) {
             $options['body'] = $this->getAccessTokenBody($params);
         }
         return $options;

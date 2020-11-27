@@ -12,7 +12,7 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\Tool;
+namespace League\OAuth2\Client\Tool;
 
 /**
  * Provides a standard way to generate query strings.

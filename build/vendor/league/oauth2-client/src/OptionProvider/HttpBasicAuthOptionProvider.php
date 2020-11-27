@@ -12,14 +12,14 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\OptionProvider;
+namespace League\OAuth2\Client\OptionProvider;
 
 use InvalidArgumentException;
 /**
  * Add http basic auth into access token request options
  * @link https://tools.ietf.org/html/rfc6749#section-2.3.1
  */
-class HttpBasicAuthOptionProvider extends \LockmeDep\League\OAuth2\Client\OptionProvider\PostAuthOptionProvider
+class HttpBasicAuthOptionProvider extends \League\OAuth2\Client\OptionProvider\PostAuthOptionProvider
 {
     /**
      * @inheritdoc

@@ -3,7 +3,7 @@
 namespace LockmeDep\LockmeIntegration;
 
 use Exception;
-use LockmeDep\League\OAuth2\Client\Token\AccessToken;
+use League\OAuth2\Client\Token\AccessToken;
 use LockmeDep\Lockme\SDK\Lockme;
 use LockmeDep\LockmeIntegration\Plugins\Appointments;
 use LockmeDep\LockmeIntegration\Plugins\Booked;
@@ -64,7 +64,7 @@ class Plugin
             try {
                 $api = $this->GetApi();
                 $token = $api->getTokenForCode($code, $state);
-                if ($token instanceof \LockmeDep\League\OAuth2\Client\Token\AccessToken) {
+                if ($token instanceof \League\OAuth2\Client\Token\AccessToken) {
                     update_option('lockme_oauth2_token', $token);
                 }
                 wp_redirect('options-general.php?page=lockme_integration&tab=api_options');

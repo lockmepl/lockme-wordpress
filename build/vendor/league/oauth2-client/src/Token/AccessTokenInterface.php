@@ -12,7 +12,7 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\Token;
+namespace League\OAuth2\Client\Token;
 
 use JsonSerializable;
 use RuntimeException;

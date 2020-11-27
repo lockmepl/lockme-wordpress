@@ -12,7 +12,7 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\Token;
+namespace League\OAuth2\Client\Token;
 
 use InvalidArgumentException;
 use RuntimeException;
@@ -21,7 +21,7 @@ use RuntimeException;
  *
  * @link http://tools.ietf.org/html/rfc6749#section-1.4 Access Token (RFC 6749, §1.4)
  */
-class AccessToken implements \LockmeDep\League\OAuth2\Client\Token\AccessTokenInterface, \LockmeDep\League\OAuth2\Client\Token\ResourceOwnerAccessTokenInterface
+class AccessToken implements \League\OAuth2\Client\Token\AccessTokenInterface, \League\OAuth2\Client\Token\ResourceOwnerAccessTokenInterface
 {
     /**
      * @var string

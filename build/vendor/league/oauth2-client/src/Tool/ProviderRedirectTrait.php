@@ -1,6 +1,6 @@
 <?php
 
-namespace LockmeDep\League\OAuth2\Client\Tool;
+namespace League\OAuth2\Client\Tool;
 
 use LockmeDep\GuzzleHttp\Exception\BadResponseException;
 use LockmeDep\GuzzleHttp\Psr7\Uri;

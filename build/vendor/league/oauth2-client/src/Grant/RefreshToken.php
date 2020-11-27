@@ -12,14 +12,14 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\Grant;
+namespace League\OAuth2\Client\Grant;
 
 /**
  * Represents a refresh token grant.
  *
  * @link http://tools.ietf.org/html/rfc6749#section-6 Refreshing an Access Token (RFC 6749, §6)
  */
-class RefreshToken extends \LockmeDep\League\OAuth2\Client\Grant\AbstractGrant
+class RefreshToken extends \League\OAuth2\Client\Grant\AbstractGrant
 {
     /**
      * @inheritdoc

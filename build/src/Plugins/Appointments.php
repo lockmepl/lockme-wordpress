@@ -3,7 +3,7 @@
 namespace LockmeDep\LockmeIntegration\Plugins;
 
 use Exception;
-use LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
@@ -55,7 +55,7 @@ class Appointments implements \LockmeDep\LockmeIntegration\PluginInterface
             if ($api) {
                 try {
                     $rooms = $api->RoomList();
-                } catch (\LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+                } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
                 }
             }
             $services = appointments_get_services();

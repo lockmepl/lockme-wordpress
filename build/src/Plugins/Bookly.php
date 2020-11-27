@@ -10,7 +10,7 @@ use Bookly\Lib\UserBookingData;
 use DateTime;
 use DateTimeZone;
 use Exception;
-use LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
@@ -304,7 +304,7 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
             if ($api) {
                 try {
                     $rooms = $api->RoomList();
-                } catch (\LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+                } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
                 }
             }
             $calendars = \Bookly\Lib\Entities\Staff::query()->sortBy('position')->fetchArray();

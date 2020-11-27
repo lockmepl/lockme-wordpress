@@ -12,7 +12,7 @@
  * @link https://packagist.org/packages/league/oauth2-client Packagist
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
-namespace LockmeDep\League\OAuth2\Client\Provider\Exception;
+namespace League\OAuth2\Client\Provider\Exception;
 
 /**
  * Exception thrown if the provider response contains errors.
