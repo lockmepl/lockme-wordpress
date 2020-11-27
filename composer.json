@@ -27,5 +27,9 @@
     "psr-4": {
       "LockmeIntegration\\": "src/"
     }
+  },
+  "scripts": {
+    "post-update-cmd": "./scoper.sh",
+    "post-install-cmd": "./scoper.sh"
   }
 }
