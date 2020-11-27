@@ -3,7 +3,7 @@
 namespace LockmeIntegration\Plugins;
 
 use Exception;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;

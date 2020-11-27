@@ -30,6 +30,16 @@ if (!class_exists('Stringable', false) && !interface_exists('Stringable', false)
 
 // Functions whitelisting. For more information see:
 // https://github.com/humbug/php-scoper/blob/master/README.md#functions-whitelisting
+if (!function_exists('booked_apply_custom_timeslots_details_filter')) {
+    function booked_apply_custom_timeslots_details_filter() {
+        return \LockmeDep\booked_apply_custom_timeslots_details_filter(...func_get_args());
+    }
+}
+if (!function_exists('booked_apply_custom_timeslots_filter')) {
+    function booked_apply_custom_timeslots_filter() {
+        return \LockmeDep\booked_apply_custom_timeslots_filter(...func_get_args());
+    }
+}
 if (!function_exists('composerRequired4cbf4ed8610848fdd2afdd92decc223')) {
     function composerRequired4cbf4ed8610848fdd2afdd92decc223() {
         return \LockmeDep\composerRequired4cbf4ed8610848fdd2afdd92decc223(...func_get_args());

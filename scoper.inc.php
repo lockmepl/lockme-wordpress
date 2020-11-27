@@ -14,6 +14,7 @@ return [
     //
     // For more see: https://github.com/humbug/php-scoper#finders-and-paths
     'finders' => [
+        Finder::create()->files()->in('src'),
         Finder::create()
             ->files()
             ->ignoreVCS(true)
@@ -29,7 +30,7 @@ return [
             ->in('vendor'),
         Finder::create()->append([
             'composer.json',
-            'composer.lock'
+            'composer.lock',
         ]),
     ],
 

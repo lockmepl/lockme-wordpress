@@ -1,6 +1,7 @@
 <?php
 
-use LockmeIntegration\Plugin;
+use LockmeDep\League\OAuth2\Client\Token\AccessToken;
+use LockmeDep\LockmeIntegration\Plugin;
 
 /*
 Plugin Name: Lockme calendars integration
@@ -15,6 +16,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 defined('ABSPATH') or die('No script kiddies please!');
 
-require_once __DIR__.'/vendor/autoload.php';
+require_once __DIR__.'/build/vendor/autoload.php';
+
+/** @noinspection PhpIgnoredClassAliasDeclaration */
+class_alias(AccessToken::class, "League\\OAuth2\\Client\\Token\\AccessToken");
 
 $lockme = new Plugin();
