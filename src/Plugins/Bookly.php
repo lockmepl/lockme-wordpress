@@ -10,7 +10,7 @@ use Bookly\Lib\UserBookingData;
 use DateTime;
 use DateTimeZone;
 use Exception;
-use LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;

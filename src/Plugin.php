@@ -2,8 +2,8 @@
 namespace LockmeIntegration;
 
 use Exception;
-use LockmeDep\League\OAuth2\Client\Token\AccessToken;
-use LockmeDep\Lockme\SDK\Lockme;
+use League\OAuth2\Client\Token\AccessToken;
+use Lockme\SDK\Lockme;
 use LockmeIntegration\Plugins\Appointments;
 use LockmeIntegration\Plugins\Booked;
 use LockmeIntegration\Plugins\Bookly;

@@ -2,11 +2,11 @@
 
 namespace LockmeDep\LockmeIntegration\Plugins;
 
-use LockmeDep\Bookly\Lib\Entities\Appointment;
-use LockmeDep\Bookly\Lib\Entities\Customer;
-use LockmeDep\Bookly\Lib\Entities\CustomerAppointment;
-use LockmeDep\Bookly\Lib\Entities\Staff;
-use LockmeDep\Bookly\Lib\UserBookingData;
+use Bookly\Lib\Entities\Appointment;
+use Bookly\Lib\Entities\Customer;
+use Bookly\Lib\Entities\CustomerAppointment;
+use Bookly\Lib\Entities\Staff;
+use Bookly\Lib\UserBookingData;
 use DateTime;
 use DateTimeZone;
 use Exception;
@@ -35,7 +35,7 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
                         case 'bookly_delete_customer_appointments':
                             $this->ajaxdata = [];
                             foreach ($_POST['data'] as $caid) {
-                                $info = \LockmeDep\Bookly\Lib\Entities\Appointment::query('a')->select('a.id, SUM( ca.number_of_persons ) AS total_number_of_persons, a.staff_id, a.service_id, a.start_date, a.end_date, a.internal_note')->leftJoin('CustomerAppointment', 'ca', 'ca.appointment_id = a.id')->where('ca.id', $caid)->fetchRow();
+                                $info = \Bookly\Lib\Entities\Appointment::query('a')->select('a.id, SUM( ca.number_of_persons ) AS total_number_of_persons, a.staff_id, a.service_id, a.start_date, a.end_date, a.internal_note')->leftJoin('CustomerAppointment', 'ca', 'ca.appointment_id = a.id')->where('ca.id', $caid)->fetchRow();
                                 $this->ajaxdata[$info['id']] = $this->AppData($info['id'], $info);
                             }
                             break;
@@ -53,13 +53,13 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
     public function AppData($id, $info = null) : array
     {
         if ($info === null) {
-            $info = \LockmeDep\Bookly\Lib\Entities\Appointment::query('a')->select('SUM( ca.number_of_persons ) AS total_number_of_persons, a.staff_id, a.service_id, a.start_date, a.end_date, a.internal_note')->leftJoin('CustomerAppointment', 'ca', 'ca.appointment_id = a.id')->where('a.id', $id)->fetchRow();
+            $info = \Bookly\Lib\Entities\Appointment::query('a')->select('SUM( ca.number_of_persons ) AS total_number_of_persons, a.staff_id, a.service_id, a.start_date, a.end_date, a.internal_note')->leftJoin('CustomerAppointment', 'ca', 'ca.appointment_id = a.id')->where('a.id', $id)->fetchRow();
         }
         return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $info['staff_id']], 'date' => \date('Y-m-d', \strtotime($info['start_date'])), 'hour' => \date('H:i:s', \strtotime($info['start_date'])), 'pricer' => 'API', 'status' => 1, 'extid' => $id]);
     }
     public function ExportToLockMe() : void
     {
-        $bookings = \LockmeDep\Bookly\Lib\Entities\CustomerAppointment::query('ca')->select('`a`.`id`,
+        $bookings = \Bookly\Lib\Entities\CustomerAppointment::query('ca')->select('`a`.`id`,
             `a`.`staff_id`,
             `a`.`service_id`,
             `a`.`start_date`,
@@ -122,7 +122,7 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
                 break;
             case 'bookly_save_appointment':
                 $form_id = $_REQUEST['form_id'];
-                $userData = new \LockmeDep\Bookly\Lib\UserBookingData($form_id);
+                $userData = new \Bookly\Lib\UserBookingData($form_id);
                 $userData->load();
                 foreach ($userData->cart->getItems() as $item) {
                     if (\method_exists($item, 'getAppointmentId')) {
@@ -131,7 +131,7 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
                         }
                     } else {
                         foreach ($item->getSlots() as [$service_id, $staff_id, $start_datetime]) {
-                            $appointment = new \LockmeDep\Bookly\Lib\Entities\Appointment();
+                            $appointment = new \Bookly\Lib\Entities\Appointment();
                             $appointment->loadBy(array('service_id' => $service_id, 'staff_id' => $staff_id, 'start_date' => $start_datetime));
                             if ($appointment->isLoaded() && $appointment->getId()) {
                                 $this->AddEditReservation($appointment->getId());
@@ -196,7 +196,7 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
         if (!$calendar_id) {
             throw new \RuntimeException('No calendar');
         }
-        $staff = new \LockmeDep\Bookly\Lib\Entities\Staff();
+        $staff = new \Bookly\Lib\Entities\Staff();
         $staff->load($calendar_id);
         $staff_id = $staff->getId();
         if (\method_exists($staff, 'getStaffServices')) {
@@ -207,14 +207,14 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
         $service_id = $service->getId();
         switch ($message['action']) {
             case 'add':
-                $customer = new \LockmeDep\Bookly\Lib\Entities\Customer();
+                $customer = new \Bookly\Lib\Entities\Customer();
                 $customer->loadBy(['full_name' => $data['name'] . ' ' . $surname, 'email' => $data['email']]);
                 $customer->setEmail($data['email']);
                 $customer->setFirstName($data['name']);
                 $customer->setLastName($surname);
                 $customer->setPhone($data['phone']);
                 $customer->save();
-                $appointment = new \LockmeDep\Bookly\Lib\Entities\Appointment();
+                $appointment = new \Bookly\Lib\Entities\Appointment();
                 $appointment->loadBy(['service_id' => $service_id, 'staff_id' => $staff_id, 'start_date' => \date('Y-m-d H:i:s', $timestamp)]);
                 if ($appointment->isLoaded() == \false) {
                     $appointment->setServiceId($service_id);
@@ -223,8 +223,8 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
                     $appointment->setEndDate(\date('Y-m-d H:i:s', $timestamp + $service->getDuration()));
                     $appointment->save();
                 }
-                $customer_appointment = new \LockmeDep\Bookly\Lib\Entities\CustomerAppointment();
-                $customer_appointment->setCustomerId($customer->getId())->setAppointmentId($appointment->getId())->setPaymentId(null)->setNumberOfPersons($this->options['one_person'] ? 1 : $data['people'])->setExtras('[]')->setCustomFields('[]')->setStatus(\LockmeDep\Bookly\Lib\Entities\CustomerAppointment::STATUS_APPROVED)->setTimeZoneOffset($offset)->setCreatedFrom('backend');
+                $customer_appointment = new \Bookly\Lib\Entities\CustomerAppointment();
+                $customer_appointment->setCustomerId($customer->getId())->setAppointmentId($appointment->getId())->setPaymentId(null)->setNumberOfPersons($this->options['one_person'] ? 1 : $data['people'])->setExtras('[]')->setCustomFields('[]')->setStatus(\Bookly\Lib\Entities\CustomerAppointment::STATUS_APPROVED)->setTimeZoneOffset($offset)->setCreatedFrom('backend');
                 if (\method_exists($customer_appointment, 'setCreated')) {
                     $customer_appointment->setCreated(\date('Y-m-d H:i:s'))->save();
                 } else {
@@ -243,7 +243,7 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
                 break;
             case 'edit':
                 if ($data['extid']) {
-                    $appointment = new \LockmeDep\Bookly\Lib\Entities\Appointment();
+                    $appointment = new \Bookly\Lib\Entities\Appointment();
                     $appointment->load($data['extid']);
                     $appointment->setStartDate(\date('Y-m-d H:i:s', $timestamp));
                     $appointment->setEndDate(\date('Y-m-d H:i:s', $timestamp + $service->getDuration()));
@@ -252,7 +252,7 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
                     foreach ($ca as $c) {
                         $c->setTimeZoneOffset($offset);
                         $c->save();
-                        $customer = new \LockmeDep\Bookly\Lib\Entities\Customer();
+                        $customer = new \Bookly\Lib\Entities\Customer();
                         $customer->load($c->getCustomerId());
                         $customer->setEmail($data['email']);
                         $customer->setLastName($surname);
@@ -264,7 +264,7 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
                 break;
             case 'delete':
                 if ($data['extid']) {
-                    $appointment = new \LockmeDep\Bookly\Lib\Entities\Appointment();
+                    $appointment = new \Bookly\Lib\Entities\Appointment();
                     $appointment->load($data['extid']);
                     $appointment->delete();
                     return \true;
@@ -275,7 +275,7 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
     }
     private function GetCalendar($roomid)
     {
-        $calendars = \LockmeDep\Bookly\Lib\Entities\Staff::query()->sortBy('position')->fetchArray();
+        $calendars = \Bookly\Lib\Entities\Staff::query()->sortBy('position')->fetchArray();
         foreach ($calendars as $calendar) {
             if ($this->options['calendar_' . $calendar['id']] == $roomid) {
                 return $calendar['id'];
@@ -307,7 +307,7 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
                 } catch (\LockmeDep\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
                 }
             }
-            $calendars = \LockmeDep\Bookly\Lib\Entities\Staff::query()->sortBy('position')->fetchArray();
+            $calendars = \Bookly\Lib\Entities\Staff::query()->sortBy('position')->fetchArray();
             foreach ($calendars as $calendar) {
                 add_settings_field('calendar_' . $calendar['id'], 'Pokój dla ' . $calendar['full_name'], function () use($rooms, $calendar) {
                     echo '<select name="lockme_bookly[calendar_' . $calendar['id'] . ']">';
