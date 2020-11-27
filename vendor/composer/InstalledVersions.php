@@ -19,19 +19,19 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '5b9d1512b1fd5ff13798823c2872afea8cc6a435',
+    'reference' => 'ca2a85fa2bf8eda647d7b9dc1954c8b24866f9a6',
     'name' => 'lustmored/lockme-wordpress',
   ),
   'versions' => 
   array (
     'guzzlehttp/guzzle' => 
     array (
-      'pretty_version' => '7.1.0',
-      'version' => '7.1.0.0',
+      'pretty_version' => '7.2.0',
+      'version' => '7.2.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => '7edeaa528fbb57123028bd5a76b9ce9540194e26',
+      'reference' => '0aa74dfb41ae110835923ef10a9d803a22d50e79',
     ),
     'guzzlehttp/promises' => 
     array (
@@ -53,12 +53,12 @@ private static $installed = array (
     ),
     'league/oauth2-client' => 
     array (
-      'pretty_version' => '2.5.0',
-      'version' => '2.5.0.0',
+      'pretty_version' => '2.6.0',
+      'version' => '2.6.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'd9f2a1e000dc14eb3c02e15d15759385ec7ff0fb',
+      'reference' => 'badb01e62383430706433191b82506b6df24ad98',
     ),
     'lustmored/lockme-sdk' => 
     array (
@@ -76,7 +76,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '5b9d1512b1fd5ff13798823c2872afea8cc6a435',
+      'reference' => 'ca2a85fa2bf8eda647d7b9dc1954c8b24866f9a6',
     ),
     'lustmored/oauth2-lockme' => 
     array (
@@ -89,12 +89,12 @@ private static $installed = array (
     ),
     'paragonie/random_compat' => 
     array (
-      'pretty_version' => 'v2.0.18',
-      'version' => '2.0.18.0',
+      'pretty_version' => 'v2.0.19',
+      'version' => '2.0.19.0',
       'aliases' => 
       array (
       ),
-      'reference' => '0a58ef6e3146256cc3dc7cc393927bcc7d1b72db',
+      'reference' => '446fc9faa5c2a9ddf65eb7121c0af7e857295241',
     ),
     'psr/http-client' => 
     array (
@@ -153,25 +153,25 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '0749ceaf15c136d085b722a5bb88141398a54142',
+      'reference' => '563faed0e5e24a5b639fbd30d8f3921bb11fccc0',
     ),
     'symfony/lock' => 
     array (
-      'pretty_version' => 'v5.1.6',
-      'version' => '5.1.6.0',
+      'pretty_version' => 'v5.1.8',
+      'version' => '5.1.8.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'b714b8347bfe5f8c5081cb1061d80797f62fe367',
+      'reference' => '9ff3c3bfc08da89d307464276aa206514a8c97e5',
     ),
     'symfony/polyfill-php80' => 
     array (
-      'pretty_version' => 'v1.18.1',
-      'version' => '1.18.1.0',
+      'pretty_version' => 'v1.20.0',
+      'version' => '1.20.0.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'd87d5766cbf48d72388a9f6b85f280c8ad51f981',
+      'reference' => 'e70aa8b064c5b72d3df2abd5ab1e90464ad009de',
     ),
   ),
 );
