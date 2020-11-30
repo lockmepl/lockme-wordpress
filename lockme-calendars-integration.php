@@ -34,7 +34,9 @@ $global = [
     'wpdevart_bc_ModelThemes',
 ];
 foreach($global as $className) {
-    class_alias($className, "LockmeDep\\{$className}");
+    if(class_exists($className)) {
+        class_alias($className, "LockmeDep\\{$className}");
+    }
 }
 
 $lockme = new Plugin();
