@@ -75,12 +75,15 @@ class Dopbsp implements PluginInterface
 
     private function Update($id, $res)
     {
-        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($res);
+        if(!$appdata['roomid']) {
+            return;
+        }
+        $api = $this->plugin->GetApi();
         $lockme_data = null;
 
         try {
-            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
 
@@ -96,7 +99,7 @@ class Dopbsp implements PluginInterface
         }
 
         try {
-            $api->EditReservation($appdata['roomid'], "ext/{$id}", $appdata);
+            $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
         } catch (Exception $e) {
         }
         return null;
@@ -145,12 +148,16 @@ class Dopbsp implements PluginInterface
             return;
         }
 
-        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($data);
+
+        if(!$appdata['roomid']) {
+            return;
+        }
+        $api = $this->plugin->GetApi();
         $lockme_data = [];
 
         try {
-            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
 
@@ -159,7 +166,7 @@ class Dopbsp implements PluginInterface
         }
 
         try {
-            $api->DeleteReservation($appdata['roomid'], "ext/{$id}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
     }

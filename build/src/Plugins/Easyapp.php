@@ -148,7 +148,7 @@ class Easyapp implements \LockmeDep\LockmeIntegration\PluginInterface
                             break;
                         case 'DELETE':
                             try {
-                                $api->DeleteReservation($this->resdata['roomid'], "ext/{$_GET['id']}");
+                                $api->DeleteReservation((int) $this->resdata['roomid'], "ext/{$_GET['id']}");
                             } catch (\Exception $e) {
                             }
                             break;
@@ -216,11 +216,14 @@ class Easyapp implements \LockmeDep\LockmeIntegration\PluginInterface
     }
     private function Update($id, $res) : void
     {
-        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($res['id']);
+        if (!$appdata['roomid']) {
+            return;
+        }
+        $api = $this->plugin->GetApi();
         $lockme_data = [];
         try {
-            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (\Exception $e) {
         }
         if (!$lockme_data) {
@@ -232,7 +235,7 @@ class Easyapp implements \LockmeDep\LockmeIntegration\PluginInterface
             return;
         }
         try {
-            $api->EditReservation($appdata['roomid'], "ext/{$id}", $appdata);
+            $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
         } catch (\Exception $e) {
         }
     }
@@ -242,18 +245,21 @@ class Easyapp implements \LockmeDep\LockmeIntegration\PluginInterface
         if (!$res) {
             return;
         }
-        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($res['id']);
+        if (!$appdata['roomid']) {
+            return;
+        }
+        $api = $this->plugin->GetApi();
         $lockme_data = [];
         try {
-            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$resid}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$resid}");
         } catch (\Exception $e) {
         }
         if (!$lockme_data) {
             return;
         }
         try {
-            $api->DeleteReservation($appdata['roomid'], "ext/{$resid}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$resid}");
         } catch (\Exception $e) {
         }
     }

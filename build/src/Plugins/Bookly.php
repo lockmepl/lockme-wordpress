@@ -80,11 +80,14 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
         if (\defined('LOCKME_MESSAGING')) {
             return;
         }
-        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($id);
+        if (!$appdata['roomid']) {
+            return;
+        }
+        $api = $this->plugin->GetApi();
         $lockme_data = [];
         try {
-            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (\Exception $e) {
         }
         try {
@@ -93,7 +96,7 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
                 $api->AddReservation($appdata);
             } else {
                 //Update
-                $api->EditReservation($appdata['roomid'], "ext/{$id}", $appdata);
+                $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
             }
         } catch (\Exception $e) {
         }
@@ -171,8 +174,11 @@ class Bookly implements \LockmeDep\LockmeIntegration\PluginInterface
         if ($appdata === null) {
             $appdata = $this->AppData($id);
         }
+        if (!$appdata['roomid']) {
+            return;
+        }
         try {
-            $api->DeleteReservation($appdata['roomid'], "ext/{$id}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (\Exception $e) {
         }
     }

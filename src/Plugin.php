@@ -118,11 +118,11 @@ class Plugin
         try {
             $messageid = $_SERVER['HTTP_X_MESSAGEID'];
             $api = $this->GetApi();
-            $message = $api->GetMessage($messageid);
+            $message = $api->GetMessage((int) $messageid);
 
             foreach ($this->available_plugins as $k=>$plugin) {
                 if ($plugin->GetMessage($message)) {
-                    $api->MarkMessageRead($messageid);
+                    $api->MarkMessageRead((int) $messageid);
                     break;
                 }
             }

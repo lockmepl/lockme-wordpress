@@ -116,11 +116,14 @@ class Cpabc implements \LockmeDep\LockmeIntegration\PluginInterface
         if ($res['is_cancelled']) {
             return $this->Delete($id);
         }
-        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($id);
+        if (!$appdata['roomid']) {
+            return null;
+        }
+        $api = $this->plugin->GetApi();
         $lockme_data = null;
         try {
-            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (\Exception $e) {
         }
         try {
@@ -129,7 +132,7 @@ class Cpabc implements \LockmeDep\LockmeIntegration\PluginInterface
                 $api->AddReservation($appdata);
             } else {
                 //Update
-                $api->EditReservation($appdata['roomid'], "ext/{$id}", $appdata);
+                $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
             }
         } catch (\Exception $e) {
         }
@@ -147,8 +150,11 @@ class Cpabc implements \LockmeDep\LockmeIntegration\PluginInterface
         }
         $api = $this->plugin->GetApi();
         $appdata = $this->AppData($id);
+        if (!$appdata['roomid']) {
+            return \false;
+        }
         try {
-            $api->DeleteReservation($appdata['roomid'], "ext/{$id}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (\Exception $e) {
         }
         return \true;

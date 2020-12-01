@@ -129,11 +129,14 @@ class Woo implements \LockmeDep\LockmeIntegration\PluginInterface
         if (\in_array($booking->status, ['cancelled', 'trash', 'was-in-cart'])) {
             return $this->Delete($postid);
         }
-        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($booking);
+        if (!$appdata['roomid']) {
+            return null;
+        }
+        $api = $this->plugin->GetApi();
         $lockme_data = null;
         try {
-            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$postid}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$postid}");
         } catch (\Exception $e) {
         }
         try {
@@ -142,7 +145,7 @@ class Woo implements \LockmeDep\LockmeIntegration\PluginInterface
                 $api->AddReservation($appdata);
             } else {
                 //Update
-                $api->EditReservation($appdata['roomid'], "ext/{$postid}", $appdata);
+                $api->EditReservation((int) $appdata['roomid'], "ext/{$postid}", $appdata);
             }
         } catch (\Exception $e) {
         }
@@ -165,10 +168,13 @@ class Woo implements \LockmeDep\LockmeIntegration\PluginInterface
         if (!\in_array($booking->status, ['cancelled', 'trash', 'was-in-cart'])) {
             return $this->AddEditReservation($postid);
         }
-        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($booking);
+        if (!$appdata['roomid']) {
+            return \false;
+        }
+        $api = $this->plugin->GetApi();
         try {
-            $api->DeleteReservation($appdata['roomid'], "ext/{$booking->get_id()}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$booking->get_id()}");
         } catch (\Exception $e) {
         }
         return null;

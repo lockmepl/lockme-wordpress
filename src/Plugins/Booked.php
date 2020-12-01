@@ -56,6 +56,9 @@ class Booked implements PluginInterface
 
         $post = get_post($id);
         $appdata = $this->AppData($post);
+        if(!$appdata['roomid']) {
+            return;
+        }
 
         if (!$post || get_post_status($id) === 'trash') {
             $this->Delete($id);
@@ -66,7 +69,7 @@ class Booked implements PluginInterface
         $lockme_data = [];
 
         try {
-            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
 
@@ -74,7 +77,7 @@ class Booked implements PluginInterface
             if (!$lockme_data) { //Add new
                 $api->AddReservation($appdata);
             } else { //Update
-                $api->EditReservation($appdata['roomid'], "ext/{$id}", $appdata);
+                $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
             }
         } catch (Exception $e) {
         }
@@ -138,11 +141,14 @@ class Booked implements PluginInterface
 
         $post = get_post($id);
         $appdata = $this->AppData($post);
+        if(!$appdata['roomid']) {
+            return;
+        }
 
         $api = $this->plugin->GetApi();
 
         try {
-            $api->DeleteReservation($appdata['roomid'], "ext/{$id}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
     }

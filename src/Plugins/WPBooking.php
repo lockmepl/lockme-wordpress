@@ -87,11 +87,14 @@ class WPBooking implements PluginInterface
 
     public function Delete($id, $appdata = null): void
     {
+        if(!$appdata['roomid']) {
+            return;
+        }
         $api = $this->plugin->GetApi();
         $lockme_data = [];
 
         try {
-            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
 
@@ -100,7 +103,7 @@ class WPBooking implements PluginInterface
         }
 
         try {
-            $api->DeleteReservation($appdata['roomid'], "ext/{$id}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
     }
@@ -446,6 +449,10 @@ class WPBooking implements PluginInterface
     {
         $appdata = $this->AppData($id, $res);
 
+        if(!$appdata['roomid']) {
+            return;
+        }
+
         if ($res['reservation_cancelled']) {
             $this->Delete($id, $appdata);
 
@@ -456,7 +463,7 @@ class WPBooking implements PluginInterface
         $lockme_data = [];
 
         try {
-            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
 
@@ -467,7 +474,7 @@ class WPBooking implements PluginInterface
         }
 
         try {
-            $api->EditReservation($appdata['roomid'], "ext/{$id}", $appdata);
+            $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
         } catch (Exception $e) {
         }
     }

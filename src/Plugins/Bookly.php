@@ -118,12 +118,16 @@ class Bookly implements PluginInterface
             return;
         }
 
-        $api = $this->plugin->GetApi();
         $appdata = $this->AppData($id);
+
+        if(!$appdata['roomid']) {
+            return;
+        }
+        $api = $this->plugin->GetApi();
         $lockme_data = [];
 
         try {
-            $lockme_data = $api->Reservation($appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
 
@@ -131,7 +135,7 @@ class Bookly implements PluginInterface
             if (!$lockme_data) { //Add new
                 $api->AddReservation($appdata);
             } else { //Update
-                $api->EditReservation($appdata['roomid'], "ext/{$id}", $appdata);
+                $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
             }
         } catch (Exception $e) {
         }
@@ -219,9 +223,12 @@ class Bookly implements PluginInterface
         if ($appdata === null) {
             $appdata = $this->AppData($id);
         }
+        if(!$appdata['roomid']) {
+            return;
+        }
 
         try {
-            $api->DeleteReservation($appdata['roomid'], "ext/{$id}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$id}");
         } catch (Exception $e) {
         }
     }
