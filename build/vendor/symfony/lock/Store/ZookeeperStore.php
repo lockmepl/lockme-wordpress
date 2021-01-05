@@ -54,6 +54,7 @@ class ZookeeperStore implements \LockmeDep\Symfony\Component\Lock\PersistingStor
         $resource = $this->getKeyResource($key);
         $token = $this->getUniqueToken($key);
         $this->createNewLock($resource, $token);
+        $key->markUnserializable();
         $this->checkNotExpired($key);
     }
     /**

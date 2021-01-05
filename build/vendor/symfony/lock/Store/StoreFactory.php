@@ -82,8 +82,14 @@ class StoreFactory
             case 0 === \strpos($connection, 'sqlite:'):
             case 0 === \strpos($connection, 'sqlite3://'):
                 return new \LockmeDep\Symfony\Component\Lock\Store\PdoStore($connection);
+            case 0 === \strpos($connection, 'pgsql+advisory:'):
+            case 0 === \strpos($connection, 'postgres+advisory://'):
+            case 0 === \strpos($connection, 'postgresql+advisory://'):
+                return new \LockmeDep\Symfony\Component\Lock\Store\PostgreSqlStore(\preg_replace('/^([^:+]+)\\+advisory/', '$1', $connection));
             case 0 === \strpos($connection, 'zookeeper://'):
                 return new \LockmeDep\Symfony\Component\Lock\Store\ZookeeperStore(\LockmeDep\Symfony\Component\Lock\Store\ZookeeperStore::createConnection($connection));
+            case 'in-memory' === $connection:
+                return new \LockmeDep\Symfony\Component\Lock\Store\InMemoryStore();
         }
         throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('Unsupported Connection: "%s".', $connection));
     }

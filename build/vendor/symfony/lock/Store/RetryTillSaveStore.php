@@ -16,12 +16,16 @@ use LockmeDep\Psr\Log\NullLogger;
 use LockmeDep\Symfony\Component\Lock\BlockingStoreInterface;
 use LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException;
 use LockmeDep\Symfony\Component\Lock\Key;
+use LockmeDep\Symfony\Component\Lock\Lock;
 use LockmeDep\Symfony\Component\Lock\PersistingStoreInterface;
+trigger_deprecation('symfony/lock', '5.2', '%s is deprecated, the "%s" class provides the logic when store is not blocking.', \LockmeDep\Symfony\Component\Lock\Store\RetryTillSaveStore::class, \LockmeDep\Symfony\Component\Lock\Lock::class);
 /**
  * RetryTillSaveStore is a PersistingStoreInterface implementation which decorate a non blocking PersistingStoreInterface to provide a
  * blocking storage.
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
+ *
+ * @deprecated since Symfony 5.2
  */
 class RetryTillSaveStore implements \LockmeDep\Symfony\Component\Lock\BlockingStoreInterface, \LockmeDep\Psr\Log\LoggerAwareInterface
 {

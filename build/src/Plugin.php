@@ -148,7 +148,10 @@ class Plugin
             echo '<input name="lockme_settings[api_domain]" type="text" value="' . $this->options['api_domain'] . '" placeholder="https://api.lock.me" />';
         }, 'lockme-admin', 'lockme_settings_section', array());
         add_settings_field('api_url', 'URL callback dla Lockme', function () {
-            echo '<input readonly type="text" value="' . get_site_url() . '/?lockme_api=' . $this->url_key . '" /> - remember to enable OAuth2 based callbacks!';
+            echo '<input readonly type="text" value="' . get_site_url() . '/?lockme_api=' . $this->url_key . '" onfocus="select()" /> - remember to enable OAuth2 based callbacks!';
+        }, 'lockme-admin', 'lockme_settings_section', array());
+        add_settings_field('redirect_uri', 'Redirect URI', function () {
+            echo '<input readonly type="text" value="' . get_admin_url() . 'options-general.php?page=lockme_integration&tab=api_options" onfocus="select()" /> - set in Lockme panel to be able to connect';
         }, 'lockme-admin', 'lockme_settings_section', array());
         foreach ($this->available_plugins as $k => $plugin) {
             $plugin->RegisterSettings();

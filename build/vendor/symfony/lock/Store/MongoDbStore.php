@@ -18,15 +18,14 @@ use MongoDB\Driver\ReadPreference;
 use LockmeDep\MongoDB\Exception\DriverRuntimeException;
 use LockmeDep\MongoDB\Exception\InvalidArgumentException as MongoInvalidArgumentException;
 use LockmeDep\MongoDB\Exception\UnsupportedException;
-use LockmeDep\Symfony\Component\Lock\BlockingStoreInterface;
 use LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException;
 use LockmeDep\Symfony\Component\Lock\Exception\InvalidTtlException;
 use LockmeDep\Symfony\Component\Lock\Exception\LockAcquiringException;
 use LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException;
 use LockmeDep\Symfony\Component\Lock\Exception\LockExpiredException;
 use LockmeDep\Symfony\Component\Lock\Exception\LockStorageException;
-use LockmeDep\Symfony\Component\Lock\Exception\NotSupportedException;
 use LockmeDep\Symfony\Component\Lock\Key;
+use LockmeDep\Symfony\Component\Lock\PersistingStoreInterface;
 /**
  * MongoDbStore is a StoreInterface implementation using MongoDB as a storage
  * engine. Support for MongoDB server >=2.2 due to use of TTL indexes.
@@ -44,7 +43,7 @@ use LockmeDep\Symfony\Component\Lock\Key;
  *
  * @author Joe Bennett <joe@assimtech.com>
  */
-class MongoDbStore implements \LockmeDep\Symfony\Component\Lock\BlockingStoreInterface
+class MongoDbStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreInterface
 {
     private $collection;
     private $client;
@@ -198,13 +197,6 @@ class MongoDbStore implements \LockmeDep\Symfony\Component\Lock\BlockingStoreInt
             $this->createTtlIndex();
         }
         $this->checkNotExpired($key);
-    }
-    /**
-     * {@inheritdoc}
-     */
-    public function waitAndSave(\LockmeDep\Symfony\Component\Lock\Key $key)
-    {
-        throw new \LockmeDep\Symfony\Component\Lock\Exception\NotSupportedException(\sprintf('The store "%s" does not support blocking locks.', __CLASS__));
     }
     /**
      * {@inheritdoc}

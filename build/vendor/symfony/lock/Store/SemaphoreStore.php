@@ -66,6 +66,7 @@ class SemaphoreStore implements \LockmeDep\Symfony\Component\Lock\BlockingStoreI
             throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
         }
         $key->setState(__CLASS__, $resource);
+        $key->markUnserializable();
     }
     /**
      * {@inheritdoc}

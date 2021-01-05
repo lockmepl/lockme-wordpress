@@ -37,7 +37,18 @@ class LockFactory implements \LockmeDep\Psr\Log\LoggerAwareInterface
      */
     public function createLock(string $resource, ?float $ttl = 300.0, bool $autoRelease = \true) : \LockmeDep\Symfony\Component\Lock\LockInterface
     {
-        $lock = new \LockmeDep\Symfony\Component\Lock\Lock(new \LockmeDep\Symfony\Component\Lock\Key($resource), $this->store, $ttl, $autoRelease);
+        return $this->createLockFromKey(new \LockmeDep\Symfony\Component\Lock\Key($resource), $ttl, $autoRelease);
+    }
+    /**
+     * Creates a lock from the given key.
+     *
+     * @param Key        $key         The key containing the lock's state
+     * @param float|null $ttl         Maximum expected lock duration in seconds
+     * @param bool       $autoRelease Whether to automatically release the lock or not when the lock instance is destroyed
+     */
+    public function createLockFromKey(\LockmeDep\Symfony\Component\Lock\Key $key, ?float $ttl = 300.0, bool $autoRelease = \true) : \LockmeDep\Symfony\Component\Lock\LockInterface
+    {
+        $lock = new \LockmeDep\Symfony\Component\Lock\Lock($key, $this->store, $ttl, $autoRelease);
         $lock->setLogger($this->logger);
         return $lock;
     }

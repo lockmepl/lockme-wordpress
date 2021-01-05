@@ -10,6 +10,7 @@
  */
 namespace LockmeDep\Symfony\Component\Lock;
 
+use LockmeDep\Symfony\Component\Lock\Exception\UnserializableKeyException;
 /**
  * Key is a container for the state of the locks in stores.
  *
@@ -20,6 +21,7 @@ final class Key
     private $resource;
     private $expiringTime;
     private $state = [];
+    private $serializable = \true;
     public function __construct(string $resource)
     {
         $this->resource = $resource;
@@ -43,6 +45,10 @@ final class Key
     public function getState(string $stateKey)
     {
         return $this->state[$stateKey];
+    }
+    public function markUnserializable() : void
+    {
+        $this->serializable = \false;
     }
     public function resetLifetime()
     {
@@ -70,5 +76,12 @@ final class Key
     public function isExpired() : bool
     {
         return null !== $this->expiringTime && $this->expiringTime <= \microtime(\true);
+    }
+    public function __sleep() : array
+    {
+        if (!$this->serializable) {
+            throw new \LockmeDep\Symfony\Component\Lock\Exception\UnserializableKeyException('The key can not be serialized.');
+        }
+        return ['resource', 'expiringTime', 'state'];
     }
 }

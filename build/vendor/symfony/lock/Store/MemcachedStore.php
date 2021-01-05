@@ -69,7 +69,7 @@ class MemcachedStore implements \LockmeDep\Symfony\Component\Lock\PersistingStor
         // Interface defines a float value but Store required an integer.
         $ttl = (int) \ceil($ttl);
         $token = $this->getUniqueToken($key);
-        list($value, $cas) = $this->getValueAndCas($key);
+        [$value, $cas] = $this->getValueAndCas($key);
         $key->reduceLifetime($ttl);
         // Could happens when we ask a putOff after a timeout but in luck nobody steal the lock
         if (\Memcached::RES_NOTFOUND === $this->memcached->getResultCode()) {
@@ -94,7 +94,7 @@ class MemcachedStore implements \LockmeDep\Symfony\Component\Lock\PersistingStor
     public function delete(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         $token = $this->getUniqueToken($key);
-        list($value, $cas) = $this->getValueAndCas($key);
+        [$value, $cas] = $this->getValueAndCas($key);
         if ($value !== $token) {
             // we are not the owner of the lock. Nothing to do.
             return;

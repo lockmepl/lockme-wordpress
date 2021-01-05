@@ -60,5 +60,10 @@ if (!function_exists('RandomCompat_intval')) {
         return \LockmeDep\RandomCompat_intval(...func_get_args());
     }
 }
+if (!function_exists('trigger_deprecation')) {
+    function trigger_deprecation() {
+        return \LockmeDep\trigger_deprecation(...func_get_args());
+    }
+}
 
 return $loader;
