@@ -18,13 +18,13 @@ class Appointments implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option('lockme_app');
 
-        if ($this->options['use'] && $this->CheckDependencies()) {
+        if (is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
             add_action('wpmudev_appointments_insert_appointment', [$this, 'AddReservation'], 10, 1);
             add_action('app-appointment-inline_edit-after_save', [$this, 'AddEditReservation'], 10, 2);
             add_action('app-appointments-appointment_cancelled', [$this, 'RemoveReservation'], 10, 1);
 
             add_action('init', function () {
-                if ($_GET['app_export']) {
+                if ($_GET['app_export'] ?? null) {
                     $this->ExportToLockMe();
                     $_SESSION['app_export'] = 1;
                     wp_redirect('?page=lockme_integration&tab=appointments_plugin');

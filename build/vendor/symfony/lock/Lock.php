@@ -43,6 +43,14 @@ final class Lock implements \LockmeDep\Symfony\Component\Lock\SharedLockInterfac
         $this->autoRelease = $autoRelease;
         $this->logger = new \LockmeDep\Psr\Log\NullLogger();
     }
+    public function __sleep()
+    {
+        throw new \BadMethodCallException('Cannot serialize ' . __CLASS__);
+    }
+    public function __wakeup()
+    {
+        throw new \BadMethodCallException('Cannot unserialize ' . __CLASS__);
+    }
     /**
      * Automatically releases the underlying lock when the object is destructed.
      */

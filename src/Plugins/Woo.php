@@ -20,7 +20,7 @@ class Woo implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option('lockme_woo');
 
-        if ($this->options['use'] && $this->CheckDependencies()) {
+        if (is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
             add_action('woocommerce_new_booking', [$this, 'AddEditReservation'], 5, 1);
             foreach (['unpaid', 'pending-confirmation', 'confirmed', 'paid', 'complete', 'in-cart'] as $action) {
                 add_action('woocommerce_booking_'.$action, [$this, 'AddEditReservation'], 5, 1);
@@ -32,7 +32,7 @@ class Woo implements PluginInterface
             add_action('edit_post', [$this, 'AddEditReservation']);
 
             add_action('init', function () {
-                if ($_GET['woo_export']) {
+                if ($_GET['woo_export'] ?? null) {
                     $this->ExportToLockMe();
                     $_SESSION['woo_export'] = 1;
                     wp_redirect('?page=lockme_integration&tab=woo_plugin');
@@ -163,7 +163,7 @@ class Woo implements PluginInterface
 //     $booking = new WC_Booking(2918);
 //     var_dump(get_post_meta(2918));
 
-        if ($_SESSION['woo_export']) {
+        if ($_SESSION['woo_export'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';

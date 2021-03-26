@@ -19,7 +19,7 @@ class Booked implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option('lockme_booked');
 
-        if ($this->options['use'] && $this->CheckDependencies()) {
+        if (is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
             add_action('booked_new_appointment_created', [$this, 'AddEditReservation'], 5);
             add_action('transition_post_status', [$this, 'AddEditReservation'], 10, 3);
             add_action('before_delete_post', [$this, 'Delete']);
@@ -29,7 +29,7 @@ class Booked implements PluginInterface
             }, 10, 2);
 
             add_action('init', function () {
-                if ($_GET['booked_export']) {
+                if ($_GET['booked_export'] ?? null) {
                     $this->ExportToLockMe();
                     $_SESSION['booked_export'] = 1;
                     wp_redirect('?page=lockme_integration&tab=booked_plugin');
@@ -123,7 +123,7 @@ class Booked implements PluginInterface
 //
 //     var_dump($timeslot);
 
-        if ($_SESSION['booked_export']) {
+        if ($_SESSION['booked_export'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';

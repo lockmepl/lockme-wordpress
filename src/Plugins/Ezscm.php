@@ -27,7 +27,7 @@ class Ezscm implements PluginInterface
             'settings_schedule' => "{$wpdb->prefix}ezscm_settings_schedule"
         );
 
-        if($this->options['use'] && $this->CheckDependencies()){
+        if(is_array($this->options) && $this->options['use'] && $this->CheckDependencies()){
             if (
                 $_POST['action'] === 'ezscm_frontend' ||
                 $_POST['action'] === 'ezscm_backend'
@@ -35,7 +35,7 @@ class Ezscm implements PluginInterface
                 parse_str($_REQUEST['data'], $data);
                 $action = $data['action'];
                 $id = $data['id'];
-                
+
                 if($action === 'entry_delete') {
                     $this->resdata = $wpdb->get_row($wpdb->prepare(
                         "SELECT * FROM {$this->tables['entries']} WHERE e_id = %d",
@@ -47,7 +47,7 @@ class Ezscm implements PluginInterface
             register_shutdown_function([$this, 'ShutDown']);
 
             add_action('init', function(){
-                if($_GET['ezscm_export']){
+                if($_GET['ezscm_export'] ?? null){
                     $this->ExportToLockMe();
                     $_SESSION['ezscm_export'] = 1;
                     wp_redirect('?page=lockme_integration&tab=ezscm_plugin');
@@ -145,7 +145,7 @@ class Ezscm implements PluginInterface
             return;
         }
 
-        if($_SESSION['ezscm_export']){
+        if($_SESSION['ezscm_export'] ?? null){
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';

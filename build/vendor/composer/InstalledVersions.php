@@ -2,17 +2,32 @@
 
 namespace LockmeDep\Composer;
 
+use LockmeDep\Composer\Autoload\ClassLoader;
 use LockmeDep\Composer\Semver\VersionParser;
 class InstalledVersions
 {
-    private static $installed = array('root' => array('pretty_version' => 'dev-master', 'version' => 'dev-master', 'aliases' => array(), 'reference' => '97d3e4007326c153075d513fd5caf59eef0e013d', 'name' => 'lustmored/lockme-wordpress'), 'versions' => array('guzzlehttp/guzzle' => array('pretty_version' => '7.2.0', 'version' => '7.2.0.0', 'aliases' => array(), 'reference' => '0aa74dfb41ae110835923ef10a9d803a22d50e79'), 'guzzlehttp/promises' => array('pretty_version' => '1.4.0', 'version' => '1.4.0.0', 'aliases' => array(), 'reference' => '60d379c243457e073cff02bc323a2a86cb355631'), 'guzzlehttp/psr7' => array('pretty_version' => '1.7.0', 'version' => '1.7.0.0', 'aliases' => array(), 'reference' => '53330f47520498c0ae1f61f7e2c90f55690c06a3'), 'league/oauth2-client' => array('pretty_version' => '2.6.0', 'version' => '2.6.0.0', 'aliases' => array(), 'reference' => 'badb01e62383430706433191b82506b6df24ad98'), 'lustmored/lockme-sdk' => array('pretty_version' => '2.0.1', 'version' => '2.0.1.0', 'aliases' => array(), 'reference' => '0fe9cd8f61576d11c9d400a372df6a700fcdd620'), 'lustmored/lockme-wordpress' => array('pretty_version' => 'dev-master', 'version' => 'dev-master', 'aliases' => array(), 'reference' => '97d3e4007326c153075d513fd5caf59eef0e013d'), 'lustmored/oauth2-lockme' => array('pretty_version' => '1.1.2', 'version' => '1.1.2.0', 'aliases' => array(), 'reference' => '9812d62ea709341c38d9e548917033a833464c10'), 'paragonie/random_compat' => array('pretty_version' => 'v2.0.19', 'version' => '2.0.19.0', 'aliases' => array(), 'reference' => '446fc9faa5c2a9ddf65eb7121c0af7e857295241'), 'psr/http-client' => array('pretty_version' => '1.0.1', 'version' => '1.0.1.0', 'aliases' => array(), 'reference' => '2dfb5f6c5eff0e91e20e913f8c5452ed95b86621'), 'psr/http-client-implementation' => array('provided' => array(0 => '1.0')), 'psr/http-message' => array('pretty_version' => '1.0.1', 'version' => '1.0.1.0', 'aliases' => array(), 'reference' => 'f6561bf28d520154e4b0ec72be95418abe6d9363'), 'psr/http-message-implementation' => array('provided' => array(0 => '1.0')), 'psr/log' => array('pretty_version' => '1.1.3', 'version' => '1.1.3.0', 'aliases' => array(), 'reference' => '0f73288fd15629204f9d42b7055f72dacbe811fc'), 'ralouphie/getallheaders' => array('pretty_version' => '3.0.3', 'version' => '3.0.3.0', 'aliases' => array(), 'reference' => '120b605dfeb996808c31b6477290a714d356e822'), 'roave/security-advisories' => array('pretty_version' => 'dev-master', 'version' => 'dev-master', 'aliases' => array(), 'reference' => 'a2c04f857299a7119e96448249a9dd5954e099c1'), 'symfony/deprecation-contracts' => array('pretty_version' => 'v2.2.0', 'version' => '2.2.0.0', 'aliases' => array(), 'reference' => '5fa56b4074d1ae755beb55617ddafe6f5d78f665'), 'symfony/lock' => array('pretty_version' => 'v5.2.1', 'version' => '5.2.1.0', 'aliases' => array(), 'reference' => 'd82e205fcfaf46df8c891136a2bf584173cb7d20'), 'symfony/polyfill-php80' => array('pretty_version' => 'v1.20.0', 'version' => '1.20.0.0', 'aliases' => array(), 'reference' => 'e70aa8b064c5b72d3df2abd5ab1e90464ad009de')));
+    private static $installed = array('root' => array('pretty_version' => 'dev-master', 'version' => 'dev-master', 'aliases' => array(), 'reference' => '826c5d2c71e8b4300304fd167f98592ab179bbdd', 'name' => 'lustmored/lockme-wordpress'), 'versions' => array('guzzlehttp/guzzle' => array('pretty_version' => '7.3.0', 'version' => '7.3.0.0', 'aliases' => array(), 'reference' => '7008573787b430c1c1f650e3722d9bba59967628'), 'guzzlehttp/promises' => array('pretty_version' => '1.4.1', 'version' => '1.4.1.0', 'aliases' => array(), 'reference' => '8e7d04f1f6450fef59366c399cfad4b9383aa30d'), 'guzzlehttp/psr7' => array('pretty_version' => '1.8.1', 'version' => '1.8.1.0', 'aliases' => array(), 'reference' => '35ea11d335fd638b5882ff1725228b3d35496ab1'), 'league/oauth2-client' => array('pretty_version' => '2.6.0', 'version' => '2.6.0.0', 'aliases' => array(), 'reference' => 'badb01e62383430706433191b82506b6df24ad98'), 'lustmored/lockme-sdk' => array('pretty_version' => '2.0.1', 'version' => '2.0.1.0', 'aliases' => array(), 'reference' => '0fe9cd8f61576d11c9d400a372df6a700fcdd620'), 'lustmored/lockme-wordpress' => array('pretty_version' => 'dev-master', 'version' => 'dev-master', 'aliases' => array(), 'reference' => '826c5d2c71e8b4300304fd167f98592ab179bbdd'), 'lustmored/oauth2-lockme' => array('pretty_version' => '1.1.2', 'version' => '1.1.2.0', 'aliases' => array(), 'reference' => '9812d62ea709341c38d9e548917033a833464c10'), 'paragonie/random_compat' => array('pretty_version' => 'v2.0.19', 'version' => '2.0.19.0', 'aliases' => array(), 'reference' => '446fc9faa5c2a9ddf65eb7121c0af7e857295241'), 'psr/http-client' => array('pretty_version' => '1.0.1', 'version' => '1.0.1.0', 'aliases' => array(), 'reference' => '2dfb5f6c5eff0e91e20e913f8c5452ed95b86621'), 'psr/http-client-implementation' => array('provided' => array(0 => '1.0')), 'psr/http-message' => array('pretty_version' => '1.0.1', 'version' => '1.0.1.0', 'aliases' => array(), 'reference' => 'f6561bf28d520154e4b0ec72be95418abe6d9363'), 'psr/http-message-implementation' => array('provided' => array(0 => '1.0')), 'psr/log' => array('pretty_version' => '1.1.3', 'version' => '1.1.3.0', 'aliases' => array(), 'reference' => '0f73288fd15629204f9d42b7055f72dacbe811fc'), 'ralouphie/getallheaders' => array('pretty_version' => '3.0.3', 'version' => '3.0.3.0', 'aliases' => array(), 'reference' => '120b605dfeb996808c31b6477290a714d356e822'), 'roave/security-advisories' => array('pretty_version' => 'dev-master', 'version' => 'dev-master', 'aliases' => array(), 'reference' => 'd113d94cd9d8bc7ec35be1179315ed06b21b26c8'), 'symfony/deprecation-contracts' => array('pretty_version' => 'v2.2.0', 'version' => '2.2.0.0', 'aliases' => array(), 'reference' => '5fa56b4074d1ae755beb55617ddafe6f5d78f665'), 'symfony/lock' => array('pretty_version' => 'v5.2.4', 'version' => '5.2.4.0', 'aliases' => array(), 'reference' => '9e8feb3141406dfc98ca57771fc00873b6f4b60e'), 'symfony/polyfill-php80' => array('pretty_version' => 'v1.22.1', 'version' => '1.22.1.0', 'aliases' => array(), 'reference' => 'dc3063ba22c2a1fd2f45ed856374d79114998f91')));
+    private static $canGetVendors;
+    private static $installedByVendor = array();
     public static function getInstalledPackages()
     {
-        return \array_keys(self::$installed['versions']);
+        $packages = array();
+        foreach (self::getInstalled() as $installed) {
+            $packages[] = \array_keys($installed['versions']);
+        }
+        if (1 === \count($packages)) {
+            return $packages[0];
+        }
+        return \array_keys(\array_flip(\call_user_func_array('array_merge', $packages)));
     }
     public static function isInstalled($packageName)
     {
-        return isset(self::$installed['versions'][$packageName]);
+        foreach (self::getInstalled() as $installed) {
+            if (isset($installed['versions'][$packageName])) {
+                return \true;
+            }
+        }
+        return \false;
     }
     public static function satisfies(\LockmeDep\Composer\Semver\VersionParser $parser, $packageName, $constraint)
     {
@@ -22,57 +37,70 @@ class InstalledVersions
     }
     public static function getVersionRanges($packageName)
     {
-        if (!isset(self::$installed['versions'][$packageName])) {
-            throw new \OutOfBoundsException('Package "' . $packageName . '" is not installed');
+        foreach (self::getInstalled() as $installed) {
+            if (!isset($installed['versions'][$packageName])) {
+                continue;
+            }
+            $ranges = array();
+            if (isset($installed['versions'][$packageName]['pretty_version'])) {
+                $ranges[] = $installed['versions'][$packageName]['pretty_version'];
+            }
+            if (\array_key_exists('aliases', $installed['versions'][$packageName])) {
+                $ranges = \array_merge($ranges, $installed['versions'][$packageName]['aliases']);
+            }
+            if (\array_key_exists('replaced', $installed['versions'][$packageName])) {
+                $ranges = \array_merge($ranges, $installed['versions'][$packageName]['replaced']);
+            }
+            if (\array_key_exists('provided', $installed['versions'][$packageName])) {
+                $ranges = \array_merge($ranges, $installed['versions'][$packageName]['provided']);
+            }
+            return \implode(' || ', $ranges);
         }
-        $ranges = array();
-        if (isset(self::$installed['versions'][$packageName]['pretty_version'])) {
-            $ranges[] = self::$installed['versions'][$packageName]['pretty_version'];
-        }
-        if (\array_key_exists('aliases', self::$installed['versions'][$packageName])) {
-            $ranges = \array_merge($ranges, self::$installed['versions'][$packageName]['aliases']);
-        }
-        if (\array_key_exists('replaced', self::$installed['versions'][$packageName])) {
-            $ranges = \array_merge($ranges, self::$installed['versions'][$packageName]['replaced']);
-        }
-        if (\array_key_exists('provided', self::$installed['versions'][$packageName])) {
-            $ranges = \array_merge($ranges, self::$installed['versions'][$packageName]['provided']);
-        }
-        return \implode(' || ', $ranges);
+        throw new \OutOfBoundsException('Package "' . $packageName . '" is not installed');
     }
     public static function getVersion($packageName)
     {
-        if (!isset(self::$installed['versions'][$packageName])) {
-            throw new \OutOfBoundsException('Package "' . $packageName . '" is not installed');
+        foreach (self::getInstalled() as $installed) {
+            if (!isset($installed['versions'][$packageName])) {
+                continue;
+            }
+            if (!isset($installed['versions'][$packageName]['version'])) {
+                return null;
+            }
+            return $installed['versions'][$packageName]['version'];
         }
-        if (!isset(self::$installed['versions'][$packageName]['version'])) {
-            return null;
-        }
-        return self::$installed['versions'][$packageName]['version'];
+        throw new \OutOfBoundsException('Package "' . $packageName . '" is not installed');
     }
     public static function getPrettyVersion($packageName)
     {
-        if (!isset(self::$installed['versions'][$packageName])) {
-            throw new \OutOfBoundsException('Package "' . $packageName . '" is not installed');
+        foreach (self::getInstalled() as $installed) {
+            if (!isset($installed['versions'][$packageName])) {
+                continue;
+            }
+            if (!isset($installed['versions'][$packageName]['pretty_version'])) {
+                return null;
+            }
+            return $installed['versions'][$packageName]['pretty_version'];
         }
-        if (!isset(self::$installed['versions'][$packageName]['pretty_version'])) {
-            return null;
-        }
-        return self::$installed['versions'][$packageName]['pretty_version'];
+        throw new \OutOfBoundsException('Package "' . $packageName . '" is not installed');
     }
     public static function getReference($packageName)
     {
-        if (!isset(self::$installed['versions'][$packageName])) {
-            throw new \OutOfBoundsException('Package "' . $packageName . '" is not installed');
+        foreach (self::getInstalled() as $installed) {
+            if (!isset($installed['versions'][$packageName])) {
+                continue;
+            }
+            if (!isset($installed['versions'][$packageName]['reference'])) {
+                return null;
+            }
+            return $installed['versions'][$packageName]['reference'];
         }
-        if (!isset(self::$installed['versions'][$packageName]['reference'])) {
-            return null;
-        }
-        return self::$installed['versions'][$packageName]['reference'];
+        throw new \OutOfBoundsException('Package "' . $packageName . '" is not installed');
     }
     public static function getRootPackage()
     {
-        return self::$installed['root'];
+        $installed = self::getInstalled();
+        return $installed[0]['root'];
     }
     public static function getRawData()
     {
@@ -81,5 +109,24 @@ class InstalledVersions
     public static function reload($data)
     {
         self::$installed = $data;
+        self::$installedByVendor = array();
+    }
+    private static function getInstalled()
+    {
+        if (null === self::$canGetVendors) {
+            self::$canGetVendors = \method_exists('LockmeDep\\Composer\\Autoload\\ClassLoader', 'getRegisteredLoaders');
+        }
+        $installed = array();
+        if (self::$canGetVendors) {
+            foreach (\LockmeDep\Composer\Autoload\ClassLoader::getRegisteredLoaders() as $vendorDir => $loader) {
+                if (isset(self::$installedByVendor[$vendorDir])) {
+                    $installed[] = self::$installedByVendor[$vendorDir];
+                } elseif (\is_file($vendorDir . '/composer/installed.php')) {
+                    $installed[] = self::$installedByVendor[$vendorDir] = (require $vendorDir . '/composer/installed.php');
+                }
+            }
+        }
+        $installed[] = self::$installed;
+        return $installed;
     }
 }

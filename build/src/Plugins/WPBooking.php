@@ -22,7 +22,7 @@ class WPBooking implements \LockmeDep\LockmeIntegration\PluginInterface
         global $wpb_path;
         $this->plugin = $plugin;
         $this->options = get_option('lockme_wpb');
-        if ($this->options['use'] && $this->CheckDependencies()) {
+        if (\is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
             $wpb_path = __DIR__ . '/../../../wp-booking-calendar/';
             /** @noinspection PhpIncludeInspection */
             include_once $wpb_path . '/admin/class/list.class.php';
@@ -37,14 +37,14 @@ class WPBooking implements \LockmeDep\LockmeIntegration\PluginInterface
                 $this->delData = $this->AppData($this->delId, $reses[$this->delId]);
             }
             add_action('init', function () {
-                if ($_POST['operation'] === 'delReservations' && is_admin()) {
+                if (isset($_POST['operation']) && $_POST['operation'] === 'delReservations' && is_admin()) {
                     foreach ($_POST['reservations'] as $id) {
                         if ($id) {
                             $this->Delete($id);
                         }
                     }
                 }
-                if ($_GET['wpb_export']) {
+                if ($_GET['wpb_export'] ?? null) {
                     $this->ExportToLockMe();
                     $_SESSION['wpb_export'] = 1;
                     wp_redirect('?page=lockme_integration&tab=wp_booking_plugin');
@@ -150,7 +150,7 @@ class WPBooking implements \LockmeDep\LockmeIntegration\PluginInterface
         //     $data = $wpdb->get_row("SELECT * FROM ".$DOPBSP->tables->reservations." WHERE `id` = 60", ARRAY_A);
         //     var_dump($data);
         //     var_dump($this->Add($data));
-        if ($_SESSION['wpb_export']) {
+        if ($_SESSION['wpb_export'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';

@@ -22,14 +22,14 @@ class Easyapp implements \LockmeDep\LockmeIntegration\PluginInterface
         global $wpdb;
         $this->plugin = $plugin;
         $this->options = get_option('lockme_easyapp');
-        if ($this->options['use'] && $this->CheckDependencies()) {
+        if (\is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
             $this->models = new \LockmeDep\EADBModels($wpdb, new \LockmeDep\EATableColumns(), []);
-            if ($_GET['action'] === 'ea_appointment' && $_GET['id']) {
+            if (isset($_GET['action'], $_GET['id']) && $_GET['action'] === 'ea_appointment' && $_GET['id']) {
                 $this->resdata = $this->AppData($_GET['id']);
             }
             \register_shutdown_function([$this, 'ShutDown']);
             add_action('init', function () {
-                if ($_GET['easyapp_export']) {
+                if ($_GET['easyapp_export'] ?? null) {
                     $this->ExportToLockMe();
                     $_SESSION['easyapp_export'] = 1;
                     wp_redirect('?page=lockme_integration&tab=easyapp_plugin');
@@ -102,12 +102,12 @@ class Easyapp implements \LockmeDep\LockmeIntegration\PluginInterface
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
             return;
         }
-        if ($_SESSION['easyapp_export']) {
+        if ($_SESSION['easyapp_export'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
             unset($_SESSION['easyapp_export']);
-        } elseif ($_SESSION['easyapp_fix']) {
+        } elseif ($_SESSION['easyapp_fix'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Ustawienia zostały naprawione. <b>Sprawdź działanie kalendarza i migrację ustawień!</b></p>';
             echo '</div>';

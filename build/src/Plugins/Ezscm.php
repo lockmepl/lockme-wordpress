@@ -19,7 +19,7 @@ class Ezscm implements \LockmeDep\LockmeIntegration\PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option('lockme_ezscm');
         $this->tables = array('entries' => "{$wpdb->prefix}ezscm_entries", 'schedules' => "{$wpdb->prefix}ezscm_schedules", 'settings' => "{$wpdb->prefix}ezscm_settings", 'settings_schedule' => "{$wpdb->prefix}ezscm_settings_schedule");
-        if ($this->options['use'] && $this->CheckDependencies()) {
+        if (\is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
             if ($_POST['action'] === 'ezscm_frontend' || $_POST['action'] === 'ezscm_backend') {
                 \parse_str($_REQUEST['data'], $data);
                 $action = $data['action'];
@@ -30,7 +30,7 @@ class Ezscm implements \LockmeDep\LockmeIntegration\PluginInterface
             }
             \register_shutdown_function([$this, 'ShutDown']);
             add_action('init', function () {
-                if ($_GET['ezscm_export']) {
+                if ($_GET['ezscm_export'] ?? null) {
                     $this->ExportToLockMe();
                     $_SESSION['ezscm_export'] = 1;
                     wp_redirect('?page=lockme_integration&tab=ezscm_plugin');
@@ -91,7 +91,7 @@ class Ezscm implements \LockmeDep\LockmeIntegration\PluginInterface
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
             return;
         }
-        if ($_SESSION['ezscm_export']) {
+        if ($_SESSION['ezscm_export'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';

@@ -26,12 +26,13 @@ class Bookly implements PluginInterface
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_bookly');
-        if ($this->options['use'] && $this->CheckDependencies()) {
+
+        if (is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
             add_filter('wp_die_ajax_handler', [$this, 'Ajax'], 15, 1);
 
             add_action('init', function () {
                 if (is_admin() && wp_doing_ajax()) {
-                    switch ($_POST['action']) {
+                    switch ($_POST['action'] ?? null) {
                         case 'bookly_delete_appointment':
                             $this->ajaxdata = $this->AppData($_POST['appointment_id']);
                             break;
@@ -49,7 +50,7 @@ class Bookly implements PluginInterface
                             break;
                     }
                 }
-                if ($_GET['bookly_export']) {
+                if ($_GET['bookly_export'] ?? null) {
                     $this->ExportToLockMe();
                     $_SESSION['bookly_export'] = 1;
                     wp_redirect('?page=lockme_integration&tab=bookly_plugin');
@@ -148,7 +149,7 @@ class Bookly implements PluginInterface
             return;
         }
 
-        if ($_SESSION['bookly_export']) {
+        if ($_SESSION['bookly_export'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';

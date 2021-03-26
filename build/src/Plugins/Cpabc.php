@@ -15,11 +15,11 @@ class Cpabc implements \LockmeDep\LockmeIntegration\PluginInterface
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_cpabc');
-        if ($this->options['use']) {
+        if (\is_array($this->options) && $this->options['use']) {
             \register_shutdown_function([$this, 'ShutDown']);
             add_action('init', function () {
                 $this->CheckAdminActions();
-                if ($_GET['cpabc_export']) {
+                if ($_GET['cpabc_export'] ?? null) {
                     $this->ExportToLockMe();
                     $_SESSION['cpabc_export'] = 1;
                     wp_redirect('?page=lockme_integration&tab=cpabc_plugin');
@@ -82,7 +82,7 @@ class Cpabc implements \LockmeDep\LockmeIntegration\PluginInterface
         //     var_dump($res);
         //     var_dump($this->AddEditReservation($row['id']));
         //     $this->Delete(3010);
-        if ($_SESSION['cpabc_export']) {
+        if ($_SESSION['cpabc_export'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';

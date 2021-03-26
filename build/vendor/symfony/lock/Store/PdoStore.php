@@ -339,7 +339,7 @@ class PdoStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreInter
         return $this->driver;
     }
     /**
-     * Provides a SQL function to get the current timestamp regarding the current connection's driver.
+     * Provides an SQL function to get the current timestamp regarding the current connection's driver.
      */
     private function getCurrentTimestampStatement() : string
     {

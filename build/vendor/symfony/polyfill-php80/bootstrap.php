@@ -54,8 +54,8 @@ if (!\function_exists('get_debug_type')) {
     }
 }
 if (!\function_exists('get_resource_id')) {
-    function get_resource_id($res) : int
+    function get_resource_id($resource) : int
     {
-        return \LockmeDep\Symfony\Polyfill\Php80\Php80::get_resource_id($res);
+        return \LockmeDep\Symfony\Polyfill\Php80\Php80::get_resource_id($resource);
     }
 }

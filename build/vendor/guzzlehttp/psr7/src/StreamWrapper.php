@@ -5,6 +5,8 @@ namespace LockmeDep\GuzzleHttp\Psr7;
 use LockmeDep\Psr\Http\Message\StreamInterface;
 /**
  * Converts Guzzle streams into PHP stream resources.
+ *
+ * @final
  */
 class StreamWrapper
 {

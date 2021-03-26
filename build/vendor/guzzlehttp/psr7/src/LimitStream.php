@@ -4,7 +4,9 @@ namespace LockmeDep\GuzzleHttp\Psr7;
 
 use LockmeDep\Psr\Http\Message\StreamInterface;
 /**
- * Decorator used to return only a subset of a stream
+ * Decorator used to return only a subset of a stream.
+ *
+ * @final
  */
 class LimitStream implements \LockmeDep\Psr\Http\Message\StreamInterface
 {

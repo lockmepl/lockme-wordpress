@@ -64,11 +64,7 @@ final class Utils
         if (\defined('STDOUT')) {
             return \STDOUT;
         }
-        $resource = \fopen('php://output', 'w');
-        if (\false === $resource) {
-            throw new \RuntimeException('Can not open php output for writing to debug the resource.');
-        }
-        return $resource;
+        return \LockmeDep\GuzzleHttp\Psr7\Utils::tryFopen('php://output', 'w');
     }
     /**
      * Chooses and creates a default handler to use based on the environment.
@@ -207,7 +203,7 @@ EOT
         // Strip port if present.
         if (\strpos($host, ':')) {
             /** @var string[] $hostParts will never be false because of the checks above */
-            $hostParts = \explode($host, ':', 2);
+            $hostParts = \explode(':', $host, 2);
             $host = $hostParts[0];
         }
         foreach ($noProxyArray as $area) {

@@ -180,7 +180,7 @@ class Client implements \LockmeDep\GuzzleHttp\ClientInterface, \LockmeDep\Psr\Ht
      */
     public function getConfig(?string $option = null)
     {
-        return $option === null ? $this->config : (isset($this->config[$option]) ? $this->config[$option] : null);
+        return $option === null ? $this->config : $this->config[$option] ?? null;
     }
     private function buildUri(\LockmeDep\Psr\Http\Message\UriInterface $uri, array $config) : \LockmeDep\Psr\Http\Message\UriInterface
     {

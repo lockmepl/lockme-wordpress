@@ -87,7 +87,7 @@ class Plugin
             }
         }
         // Proceed with API callback
-        $api = $_GET['lockme_api'];
+        $api = $_GET['lockme_api'] ?? null;
         if ($api !== $this->url_key) {
             return;
         }

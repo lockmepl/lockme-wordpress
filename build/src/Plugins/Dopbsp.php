@@ -15,13 +15,13 @@ class Dopbsp implements \LockmeDep\LockmeIntegration\PluginInterface
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_dopbsp');
-        if ($this->options['use'] && $this->CheckDependencies()) {
+        if (\is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
             add_action('dopbsp_action_book_after', [$this, 'AddReservation'], 5);
             add_action('woocommerce_payment_complete', [$this, 'AddWooReservation'], 20, 1);
             add_action('woocommerce_thankyou', [$this, 'AddWooReservation'], 20, 1);
             \register_shutdown_function([$this, 'ShutDown']);
             add_action('init', function () {
-                if ($_GET['dopbsp_export']) {
+                if ($_GET['dopbsp_export'] ?? null) {
                     $this->ExportToLockMe();
                     $_SESSION['dopbsp_export'] = 1;
                     wp_redirect('?page=lockme_integration&tab=dopbsp_plugin');
@@ -228,12 +228,12 @@ class Dopbsp implements \LockmeDep\LockmeIntegration\PluginInterface
             return;
         }
         //     var_dump($DOPBSP->classes->backend_calendar_schedule->setApproved(1740));
-        if ($_SESSION['dopbsp_export']) {
+        if ($_SESSION['dopbsp_export'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
             unset($_SESSION['dopbsp_export']);
-        } elseif ($_SESSION['dopbsp_fix']) {
+        } elseif ($_SESSION['dopbsp_fix'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Ustawienia zostały naprawione. <b>Sprawdź działanie kalendarza i migrację ustawień!</b></p>';
             echo '</div>';

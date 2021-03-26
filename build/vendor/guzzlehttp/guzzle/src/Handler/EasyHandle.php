@@ -53,16 +53,12 @@ final class EasyHandle
     /**
      * Attach a response to the easy handle based on the received headers.
      *
-     * @throws \RuntimeException if no headers have been received.
+     * @throws \RuntimeException if no headers have been received or the first
+     *                           header line is invalid.
      */
     public function createResponse() : void
     {
-        if (empty($this->headers)) {
-            throw new \RuntimeException('No headers have been received');
-        }
-        // HTTP-version SP status-code SP reason-phrase
-        $startLine = \explode(' ', \array_shift($this->headers), 3);
-        $headers = \LockmeDep\GuzzleHttp\Utils::headersFromLines($this->headers);
+        [$ver, $status, $reason, $headers] = \LockmeDep\GuzzleHttp\Handler\HeaderProcessor::parseHeaders($this->headers);
         $normalizedKeys = \LockmeDep\GuzzleHttp\Utils::normalizeHeaderKeys($headers);
         if (!empty($this->options['decode_content']) && isset($normalizedKeys['content-encoding'])) {
             $headers['x-encoded-content-encoding'] = $headers[$normalizedKeys['content-encoding']];
@@ -77,9 +73,8 @@ final class EasyHandle
                 }
             }
         }
-        $statusCode = (int) $startLine[1];
         // Attach a response to the easy handle with the parsed headers.
-        $this->response = new \LockmeDep\GuzzleHttp\Psr7\Response($statusCode, $headers, $this->sink, \substr($startLine[0], 5), isset($startLine[2]) ? (string) $startLine[2] : null);
+        $this->response = new \LockmeDep\GuzzleHttp\Psr7\Response($status, $headers, $this->sink, $ver, $reason);
     }
     /**
      * @param string $name

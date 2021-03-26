@@ -76,25 +76,27 @@ class StreamHandler
     {
         $hdrs = $this->lastHeaders;
         $this->lastHeaders = [];
-        $parts = \explode(' ', \array_shift($hdrs), 3);
-        $ver = \explode('/', $parts[0])[1];
-        $status = (int) $parts[1];
-        $reason = $parts[2] ?? null;
-        $headers = \LockmeDep\GuzzleHttp\Utils::headersFromLines($hdrs);
+        try {
+            [$ver, $status, $reason, $headers] = \LockmeDep\GuzzleHttp\Handler\HeaderProcessor::parseHeaders($hdrs);
+        } catch (\Exception $e) {
+            return \LockmeDep\GuzzleHttp\Promise\Create::rejectionFor(new \LockmeDep\GuzzleHttp\Exception\RequestException('An error was encountered while creating the response', $request, null, $e));
+        }
         [$stream, $headers] = $this->checkDecode($options, $headers, $stream);
         $stream = \LockmeDep\GuzzleHttp\Psr7\Utils::streamFor($stream);
         $sink = $stream;
         if (\strcasecmp('HEAD', $request->getMethod())) {
             $sink = $this->createSink($stream, $options);
         }
-        $response = new \LockmeDep\GuzzleHttp\Psr7\Response($status, $headers, $sink, $ver, $reason);
+        try {
+            $response = new \LockmeDep\GuzzleHttp\Psr7\Response($status, $headers, $sink, $ver, $reason);
+        } catch (\Exception $e) {
+            return \LockmeDep\GuzzleHttp\Promise\Create::rejectionFor(new \LockmeDep\GuzzleHttp\Exception\RequestException('An error was encountered while creating the response', $request, null, $e));
+        }
         if (isset($options['on_headers'])) {
             try {
                 $options['on_headers']($response);
             } catch (\Exception $e) {
-                $msg = 'An error was encountered during the on_headers event';
-                $ex = new \LockmeDep\GuzzleHttp\Exception\RequestException($msg, $request, $response, $e);
-                return \LockmeDep\GuzzleHttp\Promise\Create::rejectionFor($ex);
+                return \LockmeDep\GuzzleHttp\Promise\Create::rejectionFor(new \LockmeDep\GuzzleHttp\Exception\RequestException('An error was encountered during the on_headers event', $request, $response, $e));
             }
         }
         // Do not drain when the request is a HEAD request because they have
@@ -110,7 +112,7 @@ class StreamHandler
         if (!empty($options['stream'])) {
             return $stream;
         }
-        $sink = $options['sink'] ?? \fopen('php://temp', 'r+');
+        $sink = $options['sink'] ?? \LockmeDep\GuzzleHttp\Psr7\Utils::tryFopen('php://temp', 'r+');
         return \is_string($sink) ? new \LockmeDep\GuzzleHttp\Psr7\LazyOpenStream($sink, 'w+') : \LockmeDep\GuzzleHttp\Psr7\Utils::streamFor($sink);
     }
     /**
@@ -237,7 +239,7 @@ class StreamHandler
             return \stream_context_create($context, $params);
         });
         return $this->createResource(function () use($uri, &$http_response_header, $contextResource, $context, $options, $request) {
-            $resource = \fopen((string) $uri, 'r', \false, $contextResource);
+            $resource = @\fopen((string) $uri, 'r', \false, $contextResource);
             $this->lastHeaders = $http_response_header;
             if (\false === $resource) {
                 throw new \LockmeDep\GuzzleHttp\Exception\ConnectException(\sprintf('Connection refused for URI %s', $uri), $request, null, $context);
@@ -297,16 +299,46 @@ class StreamHandler
      */
     private function add_proxy(\LockmeDep\Psr\Http\Message\RequestInterface $request, array &$options, $value, array &$params) : void
     {
+        $uri = null;
         if (!\is_array($value)) {
-            $options['http']['proxy'] = $value;
+            $uri = $value;
         } else {
             $scheme = $request->getUri()->getScheme();
             if (isset($value[$scheme])) {
                 if (!isset($value['no']) || !\LockmeDep\GuzzleHttp\Utils::isHostInNoProxy($request->getUri()->getHost(), $value['no'])) {
-                    $options['http']['proxy'] = $value[$scheme];
+                    $uri = $value[$scheme];
                 }
             }
         }
+        if (!$uri) {
+            return;
+        }
+        $parsed = $this->parse_proxy($uri);
+        $options['http']['proxy'] = $parsed['proxy'];
+        if ($parsed['auth']) {
+            if (!isset($options['http']['header'])) {
+                $options['http']['header'] = [];
+            }
+            $options['http']['header'] .= "\r\nProxy-Authorization: {$parsed['auth']}";
+        }
+    }
+    /**
+     * Parses the given proxy URL to make it compatible with the format PHP's stream context expects.
+     */
+    private function parse_proxy(string $url) : array
+    {
+        $parsed = \parse_url($url);
+        if ($parsed !== \false && isset($parsed['scheme']) && $parsed['scheme'] === 'http') {
+            if (isset($parsed['host']) && isset($parsed['port'])) {
+                $auth = null;
+                if (isset($parsed['user']) && isset($parsed['pass'])) {
+                    $auth = \base64_encode("{$parsed['user']}:{$parsed['pass']}");
+                }
+                return ['proxy' => "tcp://{$parsed['host']}:{$parsed['port']}", 'auth' => $auth ? "Basic {$auth}" : null];
+            }
+        }
+        // Return proxy as-is.
+        return ['proxy' => $url, 'auth' => null];
     }
     /**
      * @param mixed $value as passed via Request transfer options.

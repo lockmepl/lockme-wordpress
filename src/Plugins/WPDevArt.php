@@ -28,7 +28,7 @@ class WPDevArt implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option('lockme_wpdevart');
 
-        if ($this->options['use'] && $this->CheckDependencies()) {
+        if (is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
             if ($_GET['page'] === 'wpdevart-reservations' && $_POST['task'] && $_POST['id'] && is_admin()) {
                 $this->resdata = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$wpdb->prefix.'wpdevart_reservations WHERE `id`=%d',
                     $_POST['id']), ARRAY_A);
@@ -36,7 +36,7 @@ class WPDevArt implements PluginInterface
             register_shutdown_function([$this, 'ShutDown']);
 
             add_action('init', function () {
-                if ($_GET['wpdevart_export']) {
+                if ($_GET['wpdevart_export'] ?? null) {
                     $this->ExportToLockMe();
                     $_SESSION['wpdevart_export'] = 1;
                     wp_redirect('?page=lockme_integration&tab=wpdevart_plugin');
@@ -195,7 +195,7 @@ class WPDevArt implements PluginInterface
             return;
         }
 
-        if ($_SESSION['wpdevart_export']) {
+        if ($_SESSION['wpdevart_export'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
@@ -207,7 +207,7 @@ class WPDevArt implements PluginInterface
 
     public function ShutDown(): void
     {
-        if ($_GET['page'] === 'wpdevart-reservations' && $_POST['task'] && is_admin()) {
+        if (isset($_GET['page']) && $_GET['page'] === 'wpdevart-reservations' && $_POST['task'] && is_admin()) {
             switch ($_POST['task']) {
                 case 'approve':
                     $this->AddEditReservation($this->resdata);

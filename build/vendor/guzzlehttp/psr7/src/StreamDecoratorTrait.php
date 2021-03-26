@@ -5,6 +5,7 @@ namespace LockmeDep\GuzzleHttp\Psr7;
 use LockmeDep\Psr\Http\Message\StreamInterface;
 /**
  * Stream decorator trait
+ *
  * @property StreamInterface stream
  */
 trait StreamDecoratorTrait
