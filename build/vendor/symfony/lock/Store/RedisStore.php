@@ -26,7 +26,7 @@ use LockmeDep\Symfony\Component\Lock\SharedLockStoreInterface;
  * @author Jérémy Derussé <jeremy@derusse.com>
  * @author Grégoire Pineau <lyrixx@lyrixx.info>
  */
-class RedisStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStoreInterface
+class RedisStore implements SharedLockStoreInterface
 {
     use ExpiringStoreTrait;
     private $redis;
@@ -38,11 +38,11 @@ class RedisStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStoreInt
      */
     public function __construct($redisClient, float $initialTtl = 300.0)
     {
-        if (!$redisClient instanceof \Redis && !$redisClient instanceof \RedisArray && !$redisClient instanceof \RedisCluster && !$redisClient instanceof \LockmeDep\Predis\ClientInterface && !$redisClient instanceof \LockmeDep\Symfony\Component\Cache\Traits\RedisProxy && !$redisClient instanceof \LockmeDep\Symfony\Component\Cache\Traits\RedisClusterProxy) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('"%s()" expects parameter 1 to be Redis, RedisArray, RedisCluster, RedisProxy, RedisClusterProxy or Predis\\ClientInterface, "%s" given.', __METHOD__, \get_debug_type($redisClient)));
+        if (!$redisClient instanceof \Redis && !$redisClient instanceof \RedisArray && !$redisClient instanceof \RedisCluster && !$redisClient instanceof \LockmeDep\Predis\ClientInterface && !$redisClient instanceof RedisProxy && !$redisClient instanceof RedisClusterProxy) {
+            throw new InvalidArgumentException(\sprintf('"%s()" expects parameter 1 to be Redis, RedisArray, RedisCluster, RedisProxy, RedisClusterProxy or Predis\\ClientInterface, "%s" given.', __METHOD__, \get_debug_type($redisClient)));
         }
         if ($initialTtl <= 0) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidTtlException(\sprintf('"%s()" expects a strictly positive TTL. Got %d.', __METHOD__, $initialTtl));
+            throw new InvalidTtlException(\sprintf('"%s()" expects a strictly positive TTL. Got %d.', __METHOD__, $initialTtl));
         }
         $this->redis = $redisClient;
         $this->initialTtl = $initialTtl;
@@ -50,7 +50,7 @@ class RedisStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStoreInt
     /**
      * {@inheritdoc}
      */
-    public function save(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function save(Key $key)
     {
         $script = '
             local key = KEYS[1]
@@ -88,14 +88,14 @@ class RedisStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStoreInt
         ';
         $key->reduceLifetime($this->initialTtl);
         if (!$this->evaluate($script, (string) $key, [\microtime(\true), $this->getUniqueToken($key), (int) \ceil($this->initialTtl * 1000)])) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+            throw new LockConflictedException();
         }
         $this->checkNotExpired($key);
     }
     /**
      * {@inheritdoc}
      */
-    public function saveRead(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function saveRead(Key $key)
     {
         $script = '
             local key = KEYS[1]
@@ -128,14 +128,14 @@ class RedisStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStoreInt
         ';
         $key->reduceLifetime($this->initialTtl);
         if (!$this->evaluate($script, (string) $key, [\microtime(\true), $this->getUniqueToken($key), (int) \ceil($this->initialTtl * 1000)])) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+            throw new LockConflictedException();
         }
         $this->checkNotExpired($key);
     }
     /**
      * {@inheritdoc}
      */
-    public function putOffExpiration(\LockmeDep\Symfony\Component\Lock\Key $key, float $ttl)
+    public function putOffExpiration(Key $key, float $ttl)
     {
         $script = '
             local key = KEYS[1]
@@ -168,14 +168,14 @@ class RedisStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStoreInt
         ';
         $key->reduceLifetime($ttl);
         if (!$this->evaluate($script, (string) $key, [\microtime(\true), $this->getUniqueToken($key), (int) \ceil($ttl * 1000)])) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+            throw new LockConflictedException();
         }
         $this->checkNotExpired($key);
     }
     /**
      * {@inheritdoc}
      */
-    public function delete(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function delete(Key $key)
     {
         $script = '
             local key = KEYS[1]
@@ -206,7 +206,7 @@ class RedisStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStoreInt
     /**
      * {@inheritdoc}
      */
-    public function exists(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function exists(Key $key)
     {
         $script = '
             local key = KEYS[1]
@@ -237,11 +237,11 @@ class RedisStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStoreInt
      */
     private function evaluate(string $script, string $resource, array $args)
     {
-        if ($this->redis instanceof \Redis || $this->redis instanceof \RedisCluster || $this->redis instanceof \LockmeDep\Symfony\Component\Cache\Traits\RedisProxy || $this->redis instanceof \LockmeDep\Symfony\Component\Cache\Traits\RedisClusterProxy) {
+        if ($this->redis instanceof \Redis || $this->redis instanceof \RedisCluster || $this->redis instanceof RedisProxy || $this->redis instanceof RedisClusterProxy) {
             $this->redis->clearLastError();
             $result = $this->redis->eval($script, \array_merge([$resource], $args), 1);
             if (null !== ($err = $this->redis->getLastError())) {
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\LockStorageException($err);
+                throw new LockStorageException($err);
             }
             return $result;
         }
@@ -250,7 +250,7 @@ class RedisStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStoreInt
             $client->clearLastError();
             $result = $client->eval($script, \array_merge([$resource], $args), 1);
             if (null !== ($err = $client->getLastError())) {
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\LockStorageException($err);
+                throw new LockStorageException($err);
             }
             return $result;
             return $this->redis->_instance($this->redis->_target($resource))->eval($script, \array_merge([$resource], $args), 1);
@@ -258,13 +258,13 @@ class RedisStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStoreInt
         if ($this->redis instanceof \LockmeDep\Predis\ClientInterface) {
             try {
                 return $this->redis->eval(...\array_merge([$script, 1, $resource], $args));
-            } catch (\LockmeDep\Predis\Response\ServerException $e) {
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\LockStorageException($e->getMessage(), $e->getCode(), $e);
+            } catch (ServerException $e) {
+                throw new LockStorageException($e->getMessage(), $e->getCode(), $e);
             }
         }
-        throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('"%s()" expects being initialized with a Redis, RedisArray, RedisCluster or Predis\\ClientInterface, "%s" given.', __METHOD__, \get_debug_type($this->redis)));
+        throw new InvalidArgumentException(\sprintf('"%s()" expects being initialized with a Redis, RedisArray, RedisCluster or Predis\\ClientInterface, "%s" given.', __METHOD__, \get_debug_type($this->redis)));
     }
-    private function getUniqueToken(\LockmeDep\Symfony\Component\Lock\Key $key) : string
+    private function getUniqueToken(Key $key) : string
     {
         if (!$key->hasState(__CLASS__)) {
             $token = \base64_encode(\random_bytes(32));
@@ -286,7 +286,7 @@ class RedisStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStoreInt
             ';
             try {
                 $this->supportTime = 1 === $this->evaluate($script, 'symfony_check_support_time', []);
-            } catch (\LockmeDep\Symfony\Component\Lock\Exception\LockStorageException $e) {
+            } catch (LockStorageException $e) {
                 if (\false === \strpos($e->getMessage(), 'commands not allowed after non deterministic')) {
                     throw $e;
                 }

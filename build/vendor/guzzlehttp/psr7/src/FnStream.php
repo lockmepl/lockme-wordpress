@@ -11,7 +11,7 @@ use LockmeDep\Psr\Http\Message\StreamInterface;
  *
  * @final
  */
-class FnStream implements \LockmeDep\Psr\Http\Message\StreamInterface
+class FnStream implements StreamInterface
 {
     /** @var array */
     private $methods;
@@ -64,7 +64,7 @@ class FnStream implements \LockmeDep\Psr\Http\Message\StreamInterface
      *
      * @return FnStream
      */
-    public static function decorate(\LockmeDep\Psr\Http\Message\StreamInterface $stream, array $methods)
+    public static function decorate(StreamInterface $stream, array $methods)
     {
         // If any of the required methods were not provided, then simply
         // proxy to the decorated stream.

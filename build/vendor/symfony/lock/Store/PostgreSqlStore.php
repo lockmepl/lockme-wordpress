@@ -24,7 +24,7 @@ use LockmeDep\Symfony\Component\Lock\PersistingStoreInterface;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-class PostgreSqlStore implements \LockmeDep\Symfony\Component\Lock\BlockingSharedLockStoreInterface, \LockmeDep\Symfony\Component\Lock\BlockingStoreInterface
+class PostgreSqlStore implements BlockingSharedLockStoreInterface, BlockingStoreInterface
 {
     private $conn;
     private $dsn;
@@ -53,23 +53,23 @@ class PostgreSqlStore implements \LockmeDep\Symfony\Component\Lock\BlockingShare
     {
         if ($connOrDsn instanceof \PDO) {
             if (\PDO::ERRMODE_EXCEPTION !== $connOrDsn->getAttribute(\PDO::ATTR_ERRMODE)) {
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('"%s" requires PDO error mode attribute be set to throw Exceptions (i.e. $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION)).', __METHOD__));
+                throw new InvalidArgumentException(\sprintf('"%s" requires PDO error mode attribute be set to throw Exceptions (i.e. $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION)).', __METHOD__));
             }
             $this->conn = $connOrDsn;
             $this->checkDriver();
-        } elseif ($connOrDsn instanceof \LockmeDep\Doctrine\DBAL\Connection) {
+        } elseif ($connOrDsn instanceof Connection) {
             $this->conn = $connOrDsn;
             $this->checkDriver();
         } elseif (\is_string($connOrDsn)) {
             $this->dsn = $connOrDsn;
         } else {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('"%s" requires PDO or Doctrine\\DBAL\\Connection instance or DSN string as first argument, "%s" given.', __CLASS__, \get_debug_type($connOrDsn)));
+            throw new InvalidArgumentException(\sprintf('"%s" requires PDO or Doctrine\\DBAL\\Connection instance or DSN string as first argument, "%s" given.', __CLASS__, \get_debug_type($connOrDsn)));
         }
         $this->username = $options['db_username'] ?? $this->username;
         $this->password = $options['db_password'] ?? $this->password;
         $this->connectionOptions = $options['db_connection_options'] ?? $this->connectionOptions;
     }
-    public function save(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function save(Key $key)
     {
         // prevent concurrency within the same connection
         $this->getInternalStore()->save($key);
@@ -84,9 +84,9 @@ class PostgreSqlStore implements \LockmeDep\Symfony\Component\Lock\BlockingShare
             $this->unlockShared($key);
             return;
         }
-        throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+        throw new LockConflictedException();
     }
-    public function saveRead(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function saveRead(Key $key)
     {
         // prevent concurrency within the same connection
         $this->getInternalStore()->saveRead($key);
@@ -101,17 +101,17 @@ class PostgreSqlStore implements \LockmeDep\Symfony\Component\Lock\BlockingShare
             $this->unlock($key);
             return;
         }
-        throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+        throw new LockConflictedException();
     }
-    public function putOffExpiration(\LockmeDep\Symfony\Component\Lock\Key $key, float $ttl)
+    public function putOffExpiration(Key $key, float $ttl)
     {
         // postgresql locks forever.
         // check if lock still exists
         if (!$this->exists($key)) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+            throw new LockConflictedException();
         }
     }
-    public function delete(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function delete(Key $key)
     {
         // Prevent deleting locks own by an other key in the same connection
         if (!$this->exists($key)) {
@@ -124,12 +124,12 @@ class PostgreSqlStore implements \LockmeDep\Symfony\Component\Lock\BlockingShare
             // If lock acquired = there is no other ReadLock
             $store->save($key);
             $this->unlockShared($key);
-        } catch (\LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException $e) {
+        } catch (LockConflictedException $e) {
             // an other key exists in this ReadLock
         }
         $store->delete($key);
     }
-    public function exists(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function exists(Key $key)
     {
         $sql = "SELECT count(*) FROM pg_locks WHERE locktype='advisory' AND objid=:key AND pid=pg_backend_pid()";
         $stmt = $this->getConnection()->prepare($sql);
@@ -141,7 +141,7 @@ class PostgreSqlStore implements \LockmeDep\Symfony\Component\Lock\BlockingShare
         }
         return \false;
     }
-    public function waitAndSave(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function waitAndSave(Key $key)
     {
         // prevent concurrency within the same connection
         // Internal store does not allow blocking mode, because there is no way to acquire one in a single process
@@ -153,7 +153,7 @@ class PostgreSqlStore implements \LockmeDep\Symfony\Component\Lock\BlockingShare
         // release lock in case of promotion
         $this->unlockShared($key);
     }
-    public function waitAndSaveRead(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function waitAndSaveRead(Key $key)
     {
         // prevent concurrency within the same connection
         // Internal store does not allow blocking mode, because there is no way to acquire one in a single process
@@ -168,11 +168,11 @@ class PostgreSqlStore implements \LockmeDep\Symfony\Component\Lock\BlockingShare
     /**
      * Returns a hashed version of the key.
      */
-    private function getHashedKey(\LockmeDep\Symfony\Component\Lock\Key $key) : int
+    private function getHashedKey(Key $key) : int
     {
         return \crc32((string) $key);
     }
-    private function unlock(\LockmeDep\Symfony\Component\Lock\Key $key) : void
+    private function unlock(Key $key) : void
     {
         while (\true) {
             $sql = "SELECT pg_advisory_unlock(objid::bigint) FROM pg_locks WHERE locktype='advisory' AND mode='ExclusiveLock' AND objid=:key AND pid=pg_backend_pid()";
@@ -184,7 +184,7 @@ class PostgreSqlStore implements \LockmeDep\Symfony\Component\Lock\BlockingShare
             }
         }
     }
-    private function unlockShared(\LockmeDep\Symfony\Component\Lock\Key $key) : void
+    private function unlockShared(Key $key) : void
     {
         while (\true) {
             $sql = "SELECT pg_advisory_unlock_shared(objid::bigint) FROM pg_locks WHERE locktype='advisory' AND mode='ShareLock' AND objid=:key AND pid=pg_backend_pid()";
@@ -203,10 +203,10 @@ class PostgreSqlStore implements \LockmeDep\Symfony\Component\Lock\BlockingShare
     {
         if (null === $this->conn) {
             if (\strpos($this->dsn, '://')) {
-                if (!\class_exists(\LockmeDep\Doctrine\DBAL\DriverManager::class)) {
-                    throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('Failed to parse the DSN "%s". Try running "composer require doctrine/dbal".', $this->dsn));
+                if (!\class_exists(DriverManager::class)) {
+                    throw new InvalidArgumentException(\sprintf('Failed to parse the DSN "%s". Try running "composer require doctrine/dbal".', $this->dsn));
                 }
-                $this->conn = \LockmeDep\Doctrine\DBAL\DriverManager::getConnection(['url' => $this->dsn]);
+                $this->conn = DriverManager::getConnection(['url' => $this->dsn]);
             } else {
                 $this->conn = new \PDO($this->dsn, $this->username, $this->password, $this->connectionOptions);
                 $this->conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -219,7 +219,7 @@ class PostgreSqlStore implements \LockmeDep\Symfony\Component\Lock\BlockingShare
     {
         if ($this->conn instanceof \PDO) {
             if ('pgsql' !== ($driver = $this->conn->getAttribute(\PDO::ATTR_DRIVER_NAME))) {
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('The adapter "%s" does not support the "%s" driver.', __CLASS__, $driver));
+                throw new InvalidArgumentException(\sprintf('The adapter "%s" does not support the "%s" driver.', __CLASS__, $driver));
             }
         } else {
             $driver = $this->conn->getDriver();
@@ -228,13 +228,13 @@ class PostgreSqlStore implements \LockmeDep\Symfony\Component\Lock\BlockingShare
                 case $driver instanceof \LockmeDep\Doctrine\DBAL\Driver\PDO\PgSQL\Driver:
                     break;
                 default:
-                    throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('The adapter "%s" does not support the "%s" driver.', __CLASS__, \get_class($driver)));
+                    throw new InvalidArgumentException(\sprintf('The adapter "%s" does not support the "%s" driver.', __CLASS__, \get_class($driver)));
             }
         }
     }
-    private function getInternalStore() : \LockmeDep\Symfony\Component\Lock\PersistingStoreInterface
+    private function getInternalStore() : PersistingStoreInterface
     {
         $namespace = \spl_object_hash($this->getConnection());
-        return self::$storeRegistry[$namespace] ?? (self::$storeRegistry[$namespace] = new \LockmeDep\Symfony\Component\Lock\Store\InMemoryStore());
+        return self::$storeRegistry[$namespace] ?? (self::$storeRegistry[$namespace] = new InMemoryStore());
     }
 }

@@ -15,9 +15,9 @@ use LockmeDep\Psr\Http\Message\UriInterface;
  *
  * @deprecated str will be removed in guzzlehttp/psr7:2.0. Use Message::toString instead.
  */
-function str(\LockmeDep\Psr\Http\Message\MessageInterface $message)
+function str(MessageInterface $message)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Message::toString($message);
+    return Message::toString($message);
 }
 /**
  * Returns a UriInterface for the given value.
@@ -36,7 +36,7 @@ function str(\LockmeDep\Psr\Http\Message\MessageInterface $message)
  */
 function uri_for($uri)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Utils::uriFor($uri);
+    return Utils::uriFor($uri);
 }
 /**
  * Create a new stream based on the input type.
@@ -78,7 +78,7 @@ function uri_for($uri)
  */
 function stream_for($resource = '', array $options = [])
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Utils::streamFor($resource, $options);
+    return Utils::streamFor($resource, $options);
 }
 /**
  * Parse an array of header values containing ";" separated data into an
@@ -94,7 +94,7 @@ function stream_for($resource = '', array $options = [])
  */
 function parse_header($header)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Header::parse($header);
+    return Header::parse($header);
 }
 /**
  * Converts an array of header values that may contain comma separated
@@ -108,7 +108,7 @@ function parse_header($header)
  */
 function normalize_header($header)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Header::normalize($header);
+    return Header::normalize($header);
 }
 /**
  * Clone and modify a request with the given changes.
@@ -132,9 +132,9 @@ function normalize_header($header)
  *
  * @deprecated modify_request will be removed in guzzlehttp/psr7:2.0. Use Utils::modifyRequest instead.
  */
-function modify_request(\LockmeDep\Psr\Http\Message\RequestInterface $request, array $changes)
+function modify_request(RequestInterface $request, array $changes)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Utils::modifyRequest($request, $changes);
+    return Utils::modifyRequest($request, $changes);
 }
 /**
  * Attempts to rewind a message body and throws an exception on failure.
@@ -148,9 +148,9 @@ function modify_request(\LockmeDep\Psr\Http\Message\RequestInterface $request, a
  *
  * @deprecated rewind_body will be removed in guzzlehttp/psr7:2.0. Use Message::rewindBody instead.
  */
-function rewind_body(\LockmeDep\Psr\Http\Message\MessageInterface $message)
+function rewind_body(MessageInterface $message)
 {
-    \LockmeDep\GuzzleHttp\Psr7\Message::rewindBody($message);
+    Message::rewindBody($message);
 }
 /**
  * Safely opens a PHP stream resource using a filename.
@@ -169,7 +169,7 @@ function rewind_body(\LockmeDep\Psr\Http\Message\MessageInterface $message)
  */
 function try_fopen($filename, $mode)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Utils::tryFopen($filename, $mode);
+    return Utils::tryFopen($filename, $mode);
 }
 /**
  * Copy the contents of a stream into a string until the given number of
@@ -185,9 +185,9 @@ function try_fopen($filename, $mode)
  *
  * @deprecated copy_to_string will be removed in guzzlehttp/psr7:2.0. Use Utils::copyToString instead.
  */
-function copy_to_string(\LockmeDep\Psr\Http\Message\StreamInterface $stream, $maxLen = -1)
+function copy_to_string(StreamInterface $stream, $maxLen = -1)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Utils::copyToString($stream, $maxLen);
+    return Utils::copyToString($stream, $maxLen);
 }
 /**
  * Copy the contents of a stream into another stream until the given number
@@ -202,9 +202,9 @@ function copy_to_string(\LockmeDep\Psr\Http\Message\StreamInterface $stream, $ma
  *
  * @deprecated copy_to_stream will be removed in guzzlehttp/psr7:2.0. Use Utils::copyToStream instead.
  */
-function copy_to_stream(\LockmeDep\Psr\Http\Message\StreamInterface $source, \LockmeDep\Psr\Http\Message\StreamInterface $dest, $maxLen = -1)
+function copy_to_stream(StreamInterface $source, StreamInterface $dest, $maxLen = -1)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Utils::copyToStream($source, $dest, $maxLen);
+    return Utils::copyToStream($source, $dest, $maxLen);
 }
 /**
  * Calculate a hash of a stream.
@@ -222,9 +222,9 @@ function copy_to_stream(\LockmeDep\Psr\Http\Message\StreamInterface $source, \Lo
  *
  * @deprecated hash will be removed in guzzlehttp/psr7:2.0. Use Utils::hash instead.
  */
-function hash(\LockmeDep\Psr\Http\Message\StreamInterface $stream, $algo, $rawOutput = \false)
+function hash(StreamInterface $stream, $algo, $rawOutput = \false)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Utils::hash($stream, $algo, $rawOutput);
+    return Utils::hash($stream, $algo, $rawOutput);
 }
 /**
  * Read a line from the stream up to the maximum allowed buffer length.
@@ -236,9 +236,9 @@ function hash(\LockmeDep\Psr\Http\Message\StreamInterface $stream, $algo, $rawOu
  *
  * @deprecated readline will be removed in guzzlehttp/psr7:2.0. Use Utils::readLine instead.
  */
-function readline(\LockmeDep\Psr\Http\Message\StreamInterface $stream, $maxLength = null)
+function readline(StreamInterface $stream, $maxLength = null)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Utils::readLine($stream, $maxLength);
+    return Utils::readLine($stream, $maxLength);
 }
 /**
  * Parses a request message string into a request object.
@@ -251,7 +251,7 @@ function readline(\LockmeDep\Psr\Http\Message\StreamInterface $stream, $maxLengt
  */
 function parse_request($message)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Message::parseRequest($message);
+    return Message::parseRequest($message);
 }
 /**
  * Parses a response message string into a response object.
@@ -264,7 +264,7 @@ function parse_request($message)
  */
 function parse_response($message)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Message::parseResponse($message);
+    return Message::parseResponse($message);
 }
 /**
  * Parse a query string into an associative array.
@@ -283,7 +283,7 @@ function parse_response($message)
  */
 function parse_query($str, $urlEncoding = \true)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Query::parse($str, $urlEncoding);
+    return Query::parse($str, $urlEncoding);
 }
 /**
  * Build a query string from an array of key value pairs.
@@ -303,7 +303,7 @@ function parse_query($str, $urlEncoding = \true)
  */
 function build_query(array $params, $encoding = \PHP_QUERY_RFC3986)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Query::build($params, $encoding);
+    return Query::build($params, $encoding);
 }
 /**
  * Determines the mimetype of a file by looking at its extension.
@@ -316,7 +316,7 @@ function build_query(array $params, $encoding = \PHP_QUERY_RFC3986)
  */
 function mimetype_from_filename($filename)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\MimeType::fromFilename($filename);
+    return MimeType::fromFilename($filename);
 }
 /**
  * Maps a file extensions to a mimetype.
@@ -330,7 +330,7 @@ function mimetype_from_filename($filename)
  */
 function mimetype_from_extension($extension)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\MimeType::fromExtension($extension);
+    return MimeType::fromExtension($extension);
 }
 /**
  * Parses an HTTP message into an associative array.
@@ -349,7 +349,7 @@ function mimetype_from_extension($extension)
  */
 function _parse_message($message)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Message::parseMessage($message);
+    return Message::parseMessage($message);
 }
 /**
  * Constructs a URI for an HTTP request message.
@@ -365,7 +365,7 @@ function _parse_message($message)
  */
 function _parse_request_uri($path, array $headers)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Message::parseRequestUri($path, $headers);
+    return Message::parseRequestUri($path, $headers);
 }
 /**
  * Get a short summary of the message body.
@@ -379,9 +379,9 @@ function _parse_request_uri($path, array $headers)
  *
  * @deprecated get_message_body_summary will be removed in guzzlehttp/psr7:2.0. Use Message::bodySummary instead.
  */
-function get_message_body_summary(\LockmeDep\Psr\Http\Message\MessageInterface $message, $truncateAt = 120)
+function get_message_body_summary(MessageInterface $message, $truncateAt = 120)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Message::bodySummary($message, $truncateAt);
+    return Message::bodySummary($message, $truncateAt);
 }
 /**
  * Remove the items given by the keys, case insensitively from the data.
@@ -396,5 +396,5 @@ function get_message_body_summary(\LockmeDep\Psr\Http\Message\MessageInterface $
  */
 function _caseless_remove($keys, array $data)
 {
-    return \LockmeDep\GuzzleHttp\Psr7\Utils::caselessRemove($keys, $data);
+    return Utils::caselessRemove($keys, $data);
 }

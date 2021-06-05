@@ -80,7 +80,7 @@ final class Key
     public function __sleep() : array
     {
         if (!$this->serializable) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\UnserializableKeyException('The key can not be serialized.');
+            throw new UnserializableKeyException('The key can not be serialized.');
         }
         return ['resource', 'expiringTime', 'state'];
     }

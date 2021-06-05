@@ -11,7 +11,7 @@ use LockmeDep\Psr\Http\Message\UriInterface;
 /**
  * HTTP Request exception
  */
-class RequestException extends \LockmeDep\GuzzleHttp\Exception\TransferException implements \LockmeDep\Psr\Http\Client\RequestExceptionInterface
+class RequestException extends TransferException implements RequestExceptionInterface
 {
     /**
      * @var RequestInterface
@@ -25,7 +25,7 @@ class RequestException extends \LockmeDep\GuzzleHttp\Exception\TransferException
      * @var array
      */
     private $handlerContext;
-    public function __construct(string $message, \LockmeDep\Psr\Http\Message\RequestInterface $request, \LockmeDep\Psr\Http\Message\ResponseInterface $response = null, \Throwable $previous = null, array $handlerContext = [])
+    public function __construct(string $message, RequestInterface $request, ResponseInterface $response = null, \Throwable $previous = null, array $handlerContext = [])
     {
         // Set the code of the exception if the response is set and not future.
         $code = $response ? $response->getStatusCode() : 0;
@@ -37,9 +37,9 @@ class RequestException extends \LockmeDep\GuzzleHttp\Exception\TransferException
     /**
      * Wrap non-RequestExceptions with a RequestException
      */
-    public static function wrapException(\LockmeDep\Psr\Http\Message\RequestInterface $request, \Throwable $e) : \LockmeDep\GuzzleHttp\Exception\RequestException
+    public static function wrapException(RequestInterface $request, \Throwable $e) : RequestException
     {
-        return $e instanceof \LockmeDep\GuzzleHttp\Exception\RequestException ? $e : new \LockmeDep\GuzzleHttp\Exception\RequestException($e->getMessage(), $request, null, $e);
+        return $e instanceof RequestException ? $e : new RequestException($e->getMessage(), $request, null, $e);
     }
     /**
      * Factory method to create a new exception with a normalized error message
@@ -50,7 +50,7 @@ class RequestException extends \LockmeDep\GuzzleHttp\Exception\TransferException
      * @param array                        $handlerContext Optional handler context
      * @param BodySummarizerInterface|null $bodySummarizer Optional body summarizer
      */
-    public static function create(\LockmeDep\Psr\Http\Message\RequestInterface $request, \LockmeDep\Psr\Http\Message\ResponseInterface $response = null, \Throwable $previous = null, array $handlerContext = [], \LockmeDep\GuzzleHttp\BodySummarizerInterface $bodySummarizer = null) : self
+    public static function create(RequestInterface $request, ResponseInterface $response = null, \Throwable $previous = null, array $handlerContext = [], BodySummarizerInterface $bodySummarizer = null) : self
     {
         if (!$response) {
             return new self('Error completing request', $request, null, $previous, $handlerContext);
@@ -58,10 +58,10 @@ class RequestException extends \LockmeDep\GuzzleHttp\Exception\TransferException
         $level = (int) \floor($response->getStatusCode() / 100);
         if ($level === 4) {
             $label = 'Client error';
-            $className = \LockmeDep\GuzzleHttp\Exception\ClientException::class;
+            $className = ClientException::class;
         } elseif ($level === 5) {
             $label = 'Server error';
-            $className = \LockmeDep\GuzzleHttp\Exception\ServerException::class;
+            $className = ServerException::class;
         } else {
             $label = 'Unsuccessful request';
             $className = __CLASS__;
@@ -71,7 +71,7 @@ class RequestException extends \LockmeDep\GuzzleHttp\Exception\TransferException
         // Client Error: `GET /` resulted in a `404 Not Found` response:
         // <html> ... (truncated)
         $message = \sprintf('%s: `%s %s` resulted in a `%s %s` response', $label, $request->getMethod(), $uri, $response->getStatusCode(), $response->getReasonPhrase());
-        $summary = ($bodySummarizer ?? new \LockmeDep\GuzzleHttp\BodySummarizer())->summarize($response);
+        $summary = ($bodySummarizer ?? new BodySummarizer())->summarize($response);
         if ($summary !== null) {
             $message .= ":\n{$summary}\n";
         }
@@ -80,7 +80,7 @@ class RequestException extends \LockmeDep\GuzzleHttp\Exception\TransferException
     /**
      * Obfuscates URI if there is a username and a password present
      */
-    private static function obfuscateUri(\LockmeDep\Psr\Http\Message\UriInterface $uri) : \LockmeDep\Psr\Http\Message\UriInterface
+    private static function obfuscateUri(UriInterface $uri) : UriInterface
     {
         $userInfo = $uri->getUserInfo();
         if (\false !== ($pos = \strpos($userInfo, ':'))) {
@@ -91,14 +91,14 @@ class RequestException extends \LockmeDep\GuzzleHttp\Exception\TransferException
     /**
      * Get the request that caused the exception
      */
-    public function getRequest() : \LockmeDep\Psr\Http\Message\RequestInterface
+    public function getRequest() : RequestInterface
     {
         return $this->request;
     }
     /**
      * Get the associated response
      */
-    public function getResponse() : ?\LockmeDep\Psr\Http\Message\ResponseInterface
+    public function getResponse() : ?ResponseInterface
     {
         return $this->response;
     }

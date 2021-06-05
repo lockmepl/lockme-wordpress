@@ -9,7 +9,7 @@ interface PluginInterface
      * PluginInterface constructor.
      * @param Plugin $plugin
      */
-    public function __construct(\LockmeDep\LockmeIntegration\Plugin $plugin);
+    public function __construct(Plugin $plugin);
     /**
      * @return string
      */

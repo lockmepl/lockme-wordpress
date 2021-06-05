@@ -7,11 +7,11 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
-class Appointments implements \LockmeDep\LockmeIntegration\PluginInterface
+class Appointments implements PluginInterface
 {
     private $options;
     private $plugin;
-    public function __construct(\LockmeDep\LockmeIntegration\Plugin $plugin)
+    public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_app');
@@ -55,7 +55,7 @@ class Appointments implements \LockmeDep\LockmeIntegration\PluginInterface
             if ($api) {
                 try {
                     $rooms = $api->RoomList();
-                } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+                } catch (IdentityProviderException $e) {
                 }
             }
             $services = appointments_get_services();
@@ -125,7 +125,7 @@ class Appointments implements \LockmeDep\LockmeIntegration\PluginInterface
             case 'add':
                 $result = $wpdb->insert($wpdb->prefix . 'app_appointments', ['created' => \date('Y-m-d H:i:s', $appointments->local_time), 'user' => 0, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'service' => $service->ID, 'worker' => $worker, 'price' => $data['price'], 'status' => $data['status'] ? 'paid' : 'pending', 'start' => \date('Y-m-d H:i:s', $start), 'end' => \date('Y-m-d H:i:s', $start + $service->duration * 60), 'note' => $data['comment'] . "\n\n#LOCKME!"]);
                 if ($result === \false) {
-                    throw new \RuntimeException('Error saving to database');
+                    throw new RuntimeException('Error saving to database');
                 }
                 appointments_clear_cache();
                 $row_id = $wpdb->insert_id;
@@ -133,18 +133,18 @@ class Appointments implements \LockmeDep\LockmeIntegration\PluginInterface
                     $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, ['extid' => $row_id]);
                     return \true;
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                 }
                 break;
             case 'edit':
                 if ($data['extid']) {
                     $app = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}app_appointments WHERE `ID` = " . (int) $data['extid']);
                     if (!$app) {
-                        throw new \RuntimeException('No appointment');
+                        throw new RuntimeException('No appointment');
                     }
                     $result = $wpdb->update($wpdb->prefix . 'app_appointments', ['user' => 0, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'service' => $service->ID, 'worker' => $worker, 'price' => $data['price'], 'status' => $data['status'] ? 'paid' : 'pending', 'start' => \date('Y-m-d H:i:s', $start), 'end' => \date('Y-m-d H:i:s', $start + $service->duration * 60), 'note' => $data['comment'] . "\n\n#LOCKME!"], ['ID' => $app->ID]);
                     if ($result === \false) {
-                        throw new \RuntimeException('Error saving to database');
+                        throw new RuntimeException('Error saving to database');
                     }
                     appointments_clear_cache();
                 }
@@ -153,11 +153,11 @@ class Appointments implements \LockmeDep\LockmeIntegration\PluginInterface
                 if ($data['extid']) {
                     $app = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}app_appointments WHERE `ID` = " . (int) $data['extid']);
                     if (!$app) {
-                        throw new \RuntimeException('No appointment');
+                        throw new RuntimeException('No appointment');
                     }
                     $result = $wpdb->update($wpdb->prefix . 'app_appointments', ['status' => 'removed'], ['ID' => $app->ID]);
                     if ($result === \false) {
-                        throw new \RuntimeException('Error saving to database');
+                        throw new RuntimeException('Error saving to database');
                     }
                     appointments_clear_cache();
                 }
@@ -191,7 +191,7 @@ class Appointments implements \LockmeDep\LockmeIntegration\PluginInterface
         $appdata = $this->AppData($app_id);
         try {
             $api->AddReservation($appdata);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
     }
     private function Update($app_id, $app)
@@ -208,7 +208,7 @@ class Appointments implements \LockmeDep\LockmeIntegration\PluginInterface
         $lockme_data = [];
         try {
             $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$app_id}");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
         try {
             if (!$lockme_data) {
@@ -218,7 +218,7 @@ class Appointments implements \LockmeDep\LockmeIntegration\PluginInterface
                 //Update
                 $api->EditReservation((int) $appdata['roomid'], "ext/{$app_id}", $appdata);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
         return null;
     }
@@ -231,7 +231,7 @@ class Appointments implements \LockmeDep\LockmeIntegration\PluginInterface
         }
         try {
             $api->DeleteReservation((int) $appdata['roomid'], "ext/{$app_id}");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
     }
     /**
@@ -250,6 +250,6 @@ class Appointments implements \LockmeDep\LockmeIntegration\PluginInterface
                 }
             }
         }
-        throw new \RuntimeException('No service');
+        throw new RuntimeException('No service');
     }
 }

@@ -19,11 +19,11 @@ use LockmeDep\Symfony\Component\Lock\SharedLockStoreInterface;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-class InMemoryStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStoreInterface
+class InMemoryStore implements SharedLockStoreInterface
 {
     private $locks = [];
     private $readLocks = [];
-    public function save(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function save(Key $key)
     {
         $hashKey = (string) $key;
         $token = $this->getUniqueToken($key);
@@ -32,7 +32,7 @@ class InMemoryStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStore
             if ($this->locks[$hashKey] === $token) {
                 return;
             }
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+            throw new LockConflictedException();
         }
         // check for promotion
         if (isset($this->readLocks[$hashKey][$token]) && 1 === \count($this->readLocks[$hashKey])) {
@@ -41,11 +41,11 @@ class InMemoryStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStore
             return;
         }
         if (\count($this->readLocks[$hashKey] ?? []) > 0) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+            throw new LockConflictedException();
         }
         $this->locks[$hashKey] = $token;
     }
-    public function saveRead(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function saveRead(Key $key)
     {
         $hashKey = (string) $key;
         $token = $this->getUniqueToken($key);
@@ -57,17 +57,17 @@ class InMemoryStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStore
         // check for demotion
         if (isset($this->locks[$hashKey])) {
             if ($this->locks[$hashKey] !== $token) {
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+                throw new LockConflictedException();
             }
             unset($this->locks[$hashKey]);
         }
         $this->readLocks[$hashKey][$token] = \true;
     }
-    public function putOffExpiration(\LockmeDep\Symfony\Component\Lock\Key $key, float $ttl)
+    public function putOffExpiration(Key $key, float $ttl)
     {
         // do nothing, memory locks forever.
     }
-    public function delete(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function delete(Key $key)
     {
         $hashKey = (string) $key;
         $token = $this->getUniqueToken($key);
@@ -76,13 +76,13 @@ class InMemoryStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStore
             unset($this->locks[$hashKey]);
         }
     }
-    public function exists(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function exists(Key $key)
     {
         $hashKey = (string) $key;
         $token = $this->getUniqueToken($key);
         return isset($this->readLocks[$hashKey][$token]) || ($this->locks[$hashKey] ?? null) === $token;
     }
-    private function getUniqueToken(\LockmeDep\Symfony\Component\Lock\Key $key) : string
+    private function getUniqueToken(Key $key) : string
     {
         if (!$key->hasState(__CLASS__)) {
             $token = \base64_encode(\random_bytes(32));

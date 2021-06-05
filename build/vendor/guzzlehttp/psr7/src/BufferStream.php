@@ -13,7 +13,7 @@ use LockmeDep\Psr\Http\Message\StreamInterface;
  *
  * @final
  */
-class BufferStream implements \LockmeDep\Psr\Http\Message\StreamInterface
+class BufferStream implements StreamInterface
 {
     private $hwm;
     private $buffer = '';

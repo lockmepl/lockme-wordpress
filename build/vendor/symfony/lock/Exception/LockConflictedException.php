@@ -10,11 +10,14 @@
  */
 namespace LockmeDep\Symfony\Component\Lock\Exception;
 
+use LockmeDep\Symfony\Component\Lock\Lock;
 /**
  * LockConflictedException is thrown when a lock is acquired by someone else.
  *
+ * In non-blocking mode it is caught by {@see Lock::acquire()} and {@see Lock::acquireRead()}.
+ *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-class LockConflictedException extends \RuntimeException implements \LockmeDep\Symfony\Component\Lock\Exception\ExceptionInterface
+class LockConflictedException extends \RuntimeException implements ExceptionInterface
 {
 }

@@ -8,7 +8,7 @@ use LockmeDep\Psr\Http\Message\StreamInterface;
  *
  * @final
  */
-class LimitStream implements \LockmeDep\Psr\Http\Message\StreamInterface
+class LimitStream implements StreamInterface
 {
     use StreamDecoratorTrait;
     /** @var int Offset to start reading from */
@@ -22,7 +22,7 @@ class LimitStream implements \LockmeDep\Psr\Http\Message\StreamInterface
      * @param int             $offset Position to seek to before reading (only
      *                                works on seekable streams).
      */
-    public function __construct(\LockmeDep\Psr\Http\Message\StreamInterface $stream, $limit = -1, $offset = 0)
+    public function __construct(StreamInterface $stream, $limit = -1, $offset = 0)
     {
         $this->stream = $stream;
         $this->setLimit($limit);

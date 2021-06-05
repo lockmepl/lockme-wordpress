@@ -15,6 +15,6 @@ namespace LockmeDep\Symfony\Component\Lock\Exception;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-class LockStorageException extends \RuntimeException implements \LockmeDep\Symfony\Component\Lock\Exception\ExceptionInterface
+class LockStorageException extends \RuntimeException implements ExceptionInterface
 {
 }

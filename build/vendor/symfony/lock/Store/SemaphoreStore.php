@@ -19,7 +19,7 @@ use LockmeDep\Symfony\Component\Lock\Key;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-class SemaphoreStore implements \LockmeDep\Symfony\Component\Lock\BlockingStoreInterface
+class SemaphoreStore implements BlockingStoreInterface
 {
     /**
      * Returns whether or not the store is supported.
@@ -33,24 +33,24 @@ class SemaphoreStore implements \LockmeDep\Symfony\Component\Lock\BlockingStoreI
     public function __construct()
     {
         if (!static::isSupported()) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException('Semaphore extension (sysvsem) is required.');
+            throw new InvalidArgumentException('Semaphore extension (sysvsem) is required.');
         }
     }
     /**
      * {@inheritdoc}
      */
-    public function save(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function save(Key $key)
     {
         $this->lock($key, \false);
     }
     /**
      * {@inheritdoc}
      */
-    public function waitAndSave(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function waitAndSave(Key $key)
     {
         $this->lock($key, \true);
     }
-    private function lock(\LockmeDep\Symfony\Component\Lock\Key $key, bool $blocking)
+    private function lock(Key $key, bool $blocking)
     {
         if ($key->hasState(__CLASS__)) {
             return;
@@ -63,7 +63,7 @@ class SemaphoreStore implements \LockmeDep\Symfony\Component\Lock\BlockingStoreI
             $acquired = @\sem_acquire($resource);
         }
         if (!$acquired) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+            throw new LockConflictedException();
         }
         $key->setState(__CLASS__, $resource);
         $key->markUnserializable();
@@ -71,7 +71,7 @@ class SemaphoreStore implements \LockmeDep\Symfony\Component\Lock\BlockingStoreI
     /**
      * {@inheritdoc}
      */
-    public function delete(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function delete(Key $key)
     {
         // The lock is maybe not acquired.
         if (!$key->hasState(__CLASS__)) {
@@ -84,14 +84,14 @@ class SemaphoreStore implements \LockmeDep\Symfony\Component\Lock\BlockingStoreI
     /**
      * {@inheritdoc}
      */
-    public function putOffExpiration(\LockmeDep\Symfony\Component\Lock\Key $key, float $ttl)
+    public function putOffExpiration(Key $key, float $ttl)
     {
         // do nothing, the semaphore locks forever.
     }
     /**
      * {@inheritdoc}
      */
-    public function exists(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function exists(Key $key)
     {
         return $key->hasState(__CLASS__);
     }

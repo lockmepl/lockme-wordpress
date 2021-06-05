@@ -8,7 +8,7 @@ use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use LockmeDep\Lockme\OAuth2\Client\Provider\Exception\LockmeIdentityProviderException;
 use LockmeDep\Psr\Http\Message\ResponseInterface;
-class Lockme extends \League\OAuth2\Client\Provider\AbstractProvider
+class Lockme extends AbstractProvider
 {
     use BearerAuthorizationTrait;
     /**
@@ -43,7 +43,7 @@ class Lockme extends \League\OAuth2\Client\Provider\AbstractProvider
     {
         return $this->apiDomain . '/access_token';
     }
-    public function getResourceOwnerDetailsUrl(\League\OAuth2\Client\Token\AccessToken $token)
+    public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
         return $this->apiDomain . '/' . $this->version . '/me';
     }
@@ -51,18 +51,18 @@ class Lockme extends \League\OAuth2\Client\Provider\AbstractProvider
     {
         return [];
     }
-    protected function checkResponse(\LockmeDep\Psr\Http\Message\ResponseInterface $response, $data)
+    protected function checkResponse(ResponseInterface $response, $data)
     {
         if ($response->getStatusCode() >= 400) {
-            throw \LockmeDep\Lockme\OAuth2\Client\Provider\Exception\LockmeIdentityProviderException::clientException($response, $data);
+            throw LockmeIdentityProviderException::clientException($response, $data);
         }
         if (isset($data['error'])) {
-            throw \LockmeDep\Lockme\OAuth2\Client\Provider\Exception\LockmeIdentityProviderException::oauthException($response, $data);
+            throw LockmeIdentityProviderException::oauthException($response, $data);
         }
     }
-    protected function createResourceOwner(array $response, \League\OAuth2\Client\Token\AccessToken $token)
+    protected function createResourceOwner(array $response, AccessToken $token)
     {
-        return new \LockmeDep\Lockme\OAuth2\Client\Provider\LockmeUser($response);
+        return new LockmeUser($response);
     }
     /**
      * Generate request, execute it and return parsed response

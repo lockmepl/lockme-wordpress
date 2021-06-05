@@ -17,7 +17,7 @@ use LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-interface SharedLockInterface extends \LockmeDep\Symfony\Component\Lock\LockInterface
+interface SharedLockInterface extends LockInterface
 {
     /**
      * Acquires the lock for reading. If the lock is acquired by someone else in write mode, the parameter `blocking`

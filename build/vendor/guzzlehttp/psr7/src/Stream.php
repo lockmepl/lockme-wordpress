@@ -8,7 +8,7 @@ use LockmeDep\Psr\Http\Message\StreamInterface;
  *
  * @var $stream
  */
-class Stream implements \LockmeDep\Psr\Http\Message\StreamInterface
+class Stream implements StreamInterface
 {
     /**
      * Resource modes.

@@ -27,9 +27,11 @@ class WPBooking implements PluginInterface
         $this->options = get_option('lockme_wpb');
 
         if (is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
-            $wpb_path = __DIR__.'/../../../wp-booking-calendar/';
+            $wpb_path = __DIR__.'/../../../../wp-booking-calendar/';
             /** @noinspection PhpIncludeInspection */
             include_once $wpb_path.'/admin/class/list.class.php';
+
+            aliasDeps();
 
             register_shutdown_function([$this, 'ShutDown']);
 

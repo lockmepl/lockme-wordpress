@@ -18,7 +18,7 @@ use LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException;
 use LockmeDep\Symfony\Component\Lock\Key;
 use LockmeDep\Symfony\Component\Lock\Lock;
 use LockmeDep\Symfony\Component\Lock\PersistingStoreInterface;
-trigger_deprecation('symfony/lock', '5.2', '%s is deprecated, the "%s" class provides the logic when store is not blocking.', \LockmeDep\Symfony\Component\Lock\Store\RetryTillSaveStore::class, \LockmeDep\Symfony\Component\Lock\Lock::class);
+trigger_deprecation('symfony/lock', '5.2', '%s is deprecated, the "%s" class provides the logic when store is not blocking.', RetryTillSaveStore::class, Lock::class);
 /**
  * RetryTillSaveStore is a PersistingStoreInterface implementation which decorate a non blocking PersistingStoreInterface to provide a
  * blocking storage.
@@ -27,7 +27,7 @@ trigger_deprecation('symfony/lock', '5.2', '%s is deprecated, the "%s" class pro
  *
  * @deprecated since Symfony 5.2
  */
-class RetryTillSaveStore implements \LockmeDep\Symfony\Component\Lock\BlockingStoreInterface, \LockmeDep\Psr\Log\LoggerAwareInterface
+class RetryTillSaveStore implements BlockingStoreInterface, LoggerAwareInterface
 {
     use LoggerAwareTrait;
     private $decorated;
@@ -37,24 +37,24 @@ class RetryTillSaveStore implements \LockmeDep\Symfony\Component\Lock\BlockingSt
      * @param int $retrySleep Duration in ms between 2 retry
      * @param int $retryCount Maximum amount of retry
      */
-    public function __construct(\LockmeDep\Symfony\Component\Lock\PersistingStoreInterface $decorated, int $retrySleep = 100, int $retryCount = \PHP_INT_MAX)
+    public function __construct(PersistingStoreInterface $decorated, int $retrySleep = 100, int $retryCount = \PHP_INT_MAX)
     {
         $this->decorated = $decorated;
         $this->retrySleep = $retrySleep;
         $this->retryCount = $retryCount;
-        $this->logger = new \LockmeDep\Psr\Log\NullLogger();
+        $this->logger = new NullLogger();
     }
     /**
      * {@inheritdoc}
      */
-    public function save(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function save(Key $key)
     {
         $this->decorated->save($key);
     }
     /**
      * {@inheritdoc}
      */
-    public function waitAndSave(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function waitAndSave(Key $key)
     {
         $retry = 0;
         $sleepRandomness = (int) ($this->retrySleep / 10);
@@ -62,31 +62,31 @@ class RetryTillSaveStore implements \LockmeDep\Symfony\Component\Lock\BlockingSt
             try {
                 $this->decorated->save($key);
                 return;
-            } catch (\LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException $e) {
+            } catch (LockConflictedException $e) {
                 \usleep(($this->retrySleep + \random_int(-$sleepRandomness, $sleepRandomness)) * 1000);
             }
         } while (++$retry < $this->retryCount);
         $this->logger->warning('Failed to store the "{resource}" lock. Abort after {retry} retry.', ['resource' => $key, 'retry' => $retry]);
-        throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+        throw new LockConflictedException();
     }
     /**
      * {@inheritdoc}
      */
-    public function putOffExpiration(\LockmeDep\Symfony\Component\Lock\Key $key, float $ttl)
+    public function putOffExpiration(Key $key, float $ttl)
     {
         $this->decorated->putOffExpiration($key, $ttl);
     }
     /**
      * {@inheritdoc}
      */
-    public function delete(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function delete(Key $key)
     {
         $this->decorated->delete($key);
     }
     /**
      * {@inheritdoc}
      */
-    public function exists(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function exists(Key $key)
     {
         return $this->decorated->exists($key);
     }

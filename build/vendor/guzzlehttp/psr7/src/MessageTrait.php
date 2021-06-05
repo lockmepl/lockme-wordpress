@@ -92,11 +92,11 @@ trait MessageTrait
     public function getBody()
     {
         if (!$this->stream) {
-            $this->stream = \LockmeDep\GuzzleHttp\Psr7\Utils::streamFor('');
+            $this->stream = Utils::streamFor('');
         }
         return $this->stream;
     }
-    public function withBody(\LockmeDep\Psr\Http\Message\StreamInterface $body)
+    public function withBody(StreamInterface $body)
     {
         if ($body === $this->stream) {
             return $this;

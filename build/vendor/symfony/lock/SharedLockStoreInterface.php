@@ -14,12 +14,12 @@ use LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException;
 /**
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-interface SharedLockStoreInterface extends \LockmeDep\Symfony\Component\Lock\PersistingStoreInterface
+interface SharedLockStoreInterface extends PersistingStoreInterface
 {
     /**
      * Stores the resource if it's not locked for reading by someone else.
      *
      * @throws LockConflictedException
      */
-    public function saveRead(\LockmeDep\Symfony\Component\Lock\Key $key);
+    public function saveRead(Key $key);
 }

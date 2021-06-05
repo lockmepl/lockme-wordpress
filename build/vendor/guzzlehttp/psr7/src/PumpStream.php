@@ -15,7 +15,7 @@ use LockmeDep\Psr\Http\Message\StreamInterface;
  *
  * @final
  */
-class PumpStream implements \LockmeDep\Psr\Http\Message\StreamInterface
+class PumpStream implements StreamInterface
 {
     /** @var callable */
     private $source;
@@ -42,12 +42,12 @@ class PumpStream implements \LockmeDep\Psr\Http\Message\StreamInterface
         $this->source = $source;
         $this->size = isset($options['size']) ? $options['size'] : null;
         $this->metadata = isset($options['metadata']) ? $options['metadata'] : [];
-        $this->buffer = new \LockmeDep\GuzzleHttp\Psr7\BufferStream();
+        $this->buffer = new BufferStream();
     }
     public function __toString()
     {
         try {
-            return \LockmeDep\GuzzleHttp\Psr7\Utils::copyToString($this);
+            return Utils::copyToString($this);
         } catch (\Exception $e) {
             return '';
         }

@@ -17,26 +17,32 @@ defined('ABSPATH') or die('No script kiddies please!');
 
 require_once __DIR__.'/build/vendor/autoload.php';
 
-$global = [
-    'WP_Query',
-    'EADBModels',
-    'EATableColumns',
-    'WC_Booking',
-    'wp_booking_calendar_lists',
-    'wp_booking_calendar_public_reservation',
-    'wp_booking_calendar_reservation',
-    'wp_booking_calendar_slot',
-    'wpdevart_bc_BookingCalendar',
-    'wpdevart_bc_ControllerReservations',
-    'wpdevart_bc_ModelCalendars',
-    'wpdevart_bc_ModelExtras',
-    'wpdevart_bc_ModelForms',
-    'wpdevart_bc_ModelThemes',
-];
-foreach($global as $className) {
-    if(class_exists($className)) {
-        class_alias($className, "LockmeDep\\{$className}");
+function aliasDeps()
+{
+    $global = [
+        'WP_Query',
+        'EADBModels',
+        'EATableColumns',
+        'WC_Booking',
+        'wp_booking_calendar_lists',
+        'wp_booking_calendar_public_reservation',
+        'wp_booking_calendar_reservation',
+        'wp_booking_calendar_slot',
+        'wpdevart_bc_BookingCalendar',
+        'wpdevart_bc_ControllerReservations',
+        'wpdevart_bc_ModelCalendars',
+        'wpdevart_bc_ModelExtras',
+        'wpdevart_bc_ModelForms',
+        'wpdevart_bc_ModelThemes',
+    ];
+    foreach ($global as $className) {
+        $alias = "LockmeDep\\{$className}";
+        if (class_exists($className) && !class_exists($alias)) {
+            class_alias($className, "LockmeDep\\{$className}");
+        }
     }
 }
+
+aliasDeps();
 
 $lockme = new Plugin();

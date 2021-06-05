@@ -10,7 +10,7 @@ use LockmeDep\Psr\Http\Message\UriInterface;
  * @author Tobias Schultze
  * @author Matthew Weier O'Phinney
  */
-class Uri implements \LockmeDep\Psr\Http\Message\UriInterface
+class Uri implements UriInterface
 {
     /**
      * Absolute http and https URIs require a host per RFC 7230 Section 2.7
@@ -144,7 +144,7 @@ class Uri implements \LockmeDep\Psr\Http\Message\UriInterface
      *
      * @return bool
      */
-    public static function isDefaultPort(\LockmeDep\Psr\Http\Message\UriInterface $uri)
+    public static function isDefaultPort(UriInterface $uri)
     {
         return $uri->getPort() === null || isset(self::$defaultPorts[$uri->getScheme()]) && $uri->getPort() === self::$defaultPorts[$uri->getScheme()];
     }
@@ -167,7 +167,7 @@ class Uri implements \LockmeDep\Psr\Http\Message\UriInterface
      * @see Uri::isRelativePathReference
      * @link https://tools.ietf.org/html/rfc3986#section-4
      */
-    public static function isAbsolute(\LockmeDep\Psr\Http\Message\UriInterface $uri)
+    public static function isAbsolute(UriInterface $uri)
     {
         return $uri->getScheme() !== '';
     }
@@ -182,7 +182,7 @@ class Uri implements \LockmeDep\Psr\Http\Message\UriInterface
      *
      * @link https://tools.ietf.org/html/rfc3986#section-4.2
      */
-    public static function isNetworkPathReference(\LockmeDep\Psr\Http\Message\UriInterface $uri)
+    public static function isNetworkPathReference(UriInterface $uri)
     {
         return $uri->getScheme() === '' && $uri->getAuthority() !== '';
     }
@@ -197,7 +197,7 @@ class Uri implements \LockmeDep\Psr\Http\Message\UriInterface
      *
      * @link https://tools.ietf.org/html/rfc3986#section-4.2
      */
-    public static function isAbsolutePathReference(\LockmeDep\Psr\Http\Message\UriInterface $uri)
+    public static function isAbsolutePathReference(UriInterface $uri)
     {
         return $uri->getScheme() === '' && $uri->getAuthority() === '' && isset($uri->getPath()[0]) && $uri->getPath()[0] === '/';
     }
@@ -212,7 +212,7 @@ class Uri implements \LockmeDep\Psr\Http\Message\UriInterface
      *
      * @link https://tools.ietf.org/html/rfc3986#section-4.2
      */
-    public static function isRelativePathReference(\LockmeDep\Psr\Http\Message\UriInterface $uri)
+    public static function isRelativePathReference(UriInterface $uri)
     {
         return $uri->getScheme() === '' && $uri->getAuthority() === '' && (!isset($uri->getPath()[0]) || $uri->getPath()[0] !== '/');
     }
@@ -230,10 +230,10 @@ class Uri implements \LockmeDep\Psr\Http\Message\UriInterface
      *
      * @link https://tools.ietf.org/html/rfc3986#section-4.4
      */
-    public static function isSameDocumentReference(\LockmeDep\Psr\Http\Message\UriInterface $uri, \LockmeDep\Psr\Http\Message\UriInterface $base = null)
+    public static function isSameDocumentReference(UriInterface $uri, UriInterface $base = null)
     {
         if ($base !== null) {
-            $uri = \LockmeDep\GuzzleHttp\Psr7\UriResolver::resolve($base, $uri);
+            $uri = UriResolver::resolve($base, $uri);
             return $uri->getScheme() === $base->getScheme() && $uri->getAuthority() === $base->getAuthority() && $uri->getPath() === $base->getPath() && $uri->getQuery() === $base->getQuery();
         }
         return $uri->getScheme() === '' && $uri->getAuthority() === '' && $uri->getPath() === '' && $uri->getQuery() === '';
@@ -250,7 +250,7 @@ class Uri implements \LockmeDep\Psr\Http\Message\UriInterface
      */
     public static function removeDotSegments($path)
     {
-        return \LockmeDep\GuzzleHttp\Psr7\UriResolver::removeDotSegments($path);
+        return UriResolver::removeDotSegments($path);
     }
     /**
      * Converts the relative URI into a new URI that is resolved against the base URI.
@@ -263,12 +263,12 @@ class Uri implements \LockmeDep\Psr\Http\Message\UriInterface
      * @deprecated since version 1.4. Use UriResolver::resolve instead.
      * @see UriResolver::resolve
      */
-    public static function resolve(\LockmeDep\Psr\Http\Message\UriInterface $base, $rel)
+    public static function resolve(UriInterface $base, $rel)
     {
-        if (!$rel instanceof \LockmeDep\Psr\Http\Message\UriInterface) {
+        if (!$rel instanceof UriInterface) {
             $rel = new self($rel);
         }
-        return \LockmeDep\GuzzleHttp\Psr7\UriResolver::resolve($base, $rel);
+        return UriResolver::resolve($base, $rel);
     }
     /**
      * Creates a new URI with a specific query string value removed.
@@ -281,7 +281,7 @@ class Uri implements \LockmeDep\Psr\Http\Message\UriInterface
      *
      * @return UriInterface
      */
-    public static function withoutQueryValue(\LockmeDep\Psr\Http\Message\UriInterface $uri, $key)
+    public static function withoutQueryValue(UriInterface $uri, $key)
     {
         $result = self::getFilteredQueryString($uri, [$key]);
         return $uri->withQuery(\implode('&', $result));
@@ -301,7 +301,7 @@ class Uri implements \LockmeDep\Psr\Http\Message\UriInterface
      *
      * @return UriInterface
      */
-    public static function withQueryValue(\LockmeDep\Psr\Http\Message\UriInterface $uri, $key, $value)
+    public static function withQueryValue(UriInterface $uri, $key, $value)
     {
         $result = self::getFilteredQueryString($uri, [$key]);
         $result[] = self::generateQueryString($key, $value);
@@ -317,7 +317,7 @@ class Uri implements \LockmeDep\Psr\Http\Message\UriInterface
      *
      * @return UriInterface
      */
-    public static function withQueryValues(\LockmeDep\Psr\Http\Message\UriInterface $uri, array $keyValueArray)
+    public static function withQueryValues(UriInterface $uri, array $keyValueArray)
     {
         $result = self::getFilteredQueryString($uri, \array_keys($keyValueArray));
         foreach ($keyValueArray as $key => $value) {
@@ -547,7 +547,7 @@ class Uri implements \LockmeDep\Psr\Http\Message\UriInterface
      *
      * @return array
      */
-    private static function getFilteredQueryString(\LockmeDep\Psr\Http\Message\UriInterface $uri, array $keys)
+    private static function getFilteredQueryString(UriInterface $uri, array $keys)
     {
         $current = $uri->getQuery();
         if ($current === '') {

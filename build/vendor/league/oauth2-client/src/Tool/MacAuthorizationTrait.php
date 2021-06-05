@@ -29,7 +29,7 @@ trait MacAuthorizationTrait
      * @param  AccessToken $token
      * @return string
      */
-    protected abstract function getTokenId(\League\OAuth2\Client\Token\AccessToken $token);
+    protected abstract function getTokenId(AccessToken $token);
     /**
      * Returns the MAC signature for the current request.
      *

@@ -2,6 +2,6 @@
 
 namespace LockmeDep\GuzzleHttp\Exception;
 
-class TransferException extends \RuntimeException implements \LockmeDep\GuzzleHttp\Exception\GuzzleException
+class TransferException extends \RuntimeException implements GuzzleException
 {
 }

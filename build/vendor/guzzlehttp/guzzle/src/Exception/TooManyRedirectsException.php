@@ -2,6 +2,6 @@
 
 namespace LockmeDep\GuzzleHttp\Exception;
 
-class TooManyRedirectsException extends \LockmeDep\GuzzleHttp\Exception\RequestException
+class TooManyRedirectsException extends RequestException
 {
 }

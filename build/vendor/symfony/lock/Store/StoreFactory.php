@@ -38,37 +38,37 @@ class StoreFactory
             case $connection instanceof \RedisArray:
             case $connection instanceof \RedisCluster:
             case $connection instanceof \LockmeDep\Predis\ClientInterface:
-            case $connection instanceof \LockmeDep\Symfony\Component\Cache\Traits\RedisProxy:
-            case $connection instanceof \LockmeDep\Symfony\Component\Cache\Traits\RedisClusterProxy:
-                return new \LockmeDep\Symfony\Component\Lock\Store\RedisStore($connection);
+            case $connection instanceof RedisProxy:
+            case $connection instanceof RedisClusterProxy:
+                return new RedisStore($connection);
             case $connection instanceof \Memcached:
-                return new \LockmeDep\Symfony\Component\Lock\Store\MemcachedStore($connection);
+                return new MemcachedStore($connection);
             case $connection instanceof \LockmeDep\MongoDB\Collection:
-                return new \LockmeDep\Symfony\Component\Lock\Store\MongoDbStore($connection);
+                return new MongoDbStore($connection);
             case $connection instanceof \PDO:
-            case $connection instanceof \LockmeDep\Doctrine\DBAL\Connection:
-                return new \LockmeDep\Symfony\Component\Lock\Store\PdoStore($connection);
+            case $connection instanceof Connection:
+                return new PdoStore($connection);
             case $connection instanceof \Zookeeper:
-                return new \LockmeDep\Symfony\Component\Lock\Store\ZookeeperStore($connection);
+                return new ZookeeperStore($connection);
             case !\is_string($connection):
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('Unsupported Connection: "%s".', \get_debug_type($connection)));
+                throw new InvalidArgumentException(\sprintf('Unsupported Connection: "%s".', \get_debug_type($connection)));
             case 'flock' === $connection:
-                return new \LockmeDep\Symfony\Component\Lock\Store\FlockStore();
+                return new FlockStore();
             case 0 === \strpos($connection, 'flock://'):
-                return new \LockmeDep\Symfony\Component\Lock\Store\FlockStore(\substr($connection, 8));
+                return new FlockStore(\substr($connection, 8));
             case 'semaphore' === $connection:
-                return new \LockmeDep\Symfony\Component\Lock\Store\SemaphoreStore();
+                return new SemaphoreStore();
             case 0 === \strpos($connection, 'redis:'):
             case 0 === \strpos($connection, 'rediss:'):
             case 0 === \strpos($connection, 'memcached:'):
-                if (!\class_exists(\LockmeDep\Symfony\Component\Cache\Adapter\AbstractAdapter::class)) {
-                    throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('Unsupported DSN "%s". Try running "composer require symfony/cache".', $connection));
+                if (!\class_exists(AbstractAdapter::class)) {
+                    throw new InvalidArgumentException(\sprintf('Unsupported DSN "%s". Try running "composer require symfony/cache".', $connection));
                 }
-                $storeClass = 0 === \strpos($connection, 'memcached:') ? \LockmeDep\Symfony\Component\Lock\Store\MemcachedStore::class : \LockmeDep\Symfony\Component\Lock\Store\RedisStore::class;
-                $connection = \LockmeDep\Symfony\Component\Cache\Adapter\AbstractAdapter::createConnection($connection, ['lazy' => \true]);
+                $storeClass = 0 === \strpos($connection, 'memcached:') ? MemcachedStore::class : RedisStore::class;
+                $connection = AbstractAdapter::createConnection($connection, ['lazy' => \true]);
                 return new $storeClass($connection);
             case 0 === \strpos($connection, 'mongodb'):
-                return new \LockmeDep\Symfony\Component\Lock\Store\MongoDbStore($connection);
+                return new MongoDbStore($connection);
             case 0 === \strpos($connection, 'mssql://'):
             case 0 === \strpos($connection, 'mysql:'):
             case 0 === \strpos($connection, 'mysql2://'):
@@ -81,16 +81,16 @@ class StoreFactory
             case 0 === \strpos($connection, 'sqlsrv:'):
             case 0 === \strpos($connection, 'sqlite:'):
             case 0 === \strpos($connection, 'sqlite3://'):
-                return new \LockmeDep\Symfony\Component\Lock\Store\PdoStore($connection);
+                return new PdoStore($connection);
             case 0 === \strpos($connection, 'pgsql+advisory:'):
             case 0 === \strpos($connection, 'postgres+advisory://'):
             case 0 === \strpos($connection, 'postgresql+advisory://'):
-                return new \LockmeDep\Symfony\Component\Lock\Store\PostgreSqlStore(\preg_replace('/^([^:+]+)\\+advisory/', '$1', $connection));
+                return new PostgreSqlStore(\preg_replace('/^([^:+]+)\\+advisory/', '$1', $connection));
             case 0 === \strpos($connection, 'zookeeper://'):
-                return new \LockmeDep\Symfony\Component\Lock\Store\ZookeeperStore(\LockmeDep\Symfony\Component\Lock\Store\ZookeeperStore::createConnection($connection));
+                return new ZookeeperStore(ZookeeperStore::createConnection($connection));
             case 'in-memory' === $connection:
-                return new \LockmeDep\Symfony\Component\Lock\Store\InMemoryStore();
+                return new InMemoryStore();
         }
-        throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('Unsupported Connection: "%s".', $connection));
+        throw new InvalidArgumentException(\sprintf('Unsupported Connection: "%s".', $connection));
     }
 }

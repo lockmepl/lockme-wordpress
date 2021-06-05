@@ -9,7 +9,7 @@ use LockmeDep\Psr\Http\Message\StreamInterface;
  *
  * @final
  */
-class LazyOpenStream implements \LockmeDep\Psr\Http\Message\StreamInterface
+class LazyOpenStream implements StreamInterface
 {
     use StreamDecoratorTrait;
     /** @var string File to open */
@@ -32,6 +32,6 @@ class LazyOpenStream implements \LockmeDep\Psr\Http\Message\StreamInterface
      */
     protected function createStream()
     {
-        return \LockmeDep\GuzzleHttp\Psr7\Utils::streamFor(\LockmeDep\GuzzleHttp\Psr7\Utils::tryFopen($this->filename, $this->mode));
+        return Utils::streamFor(Utils::tryFopen($this->filename, $this->mode));
     }
 }

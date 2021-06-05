@@ -14,12 +14,12 @@ use LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException;
 /**
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-interface BlockingSharedLockStoreInterface extends \LockmeDep\Symfony\Component\Lock\SharedLockStoreInterface
+interface BlockingSharedLockStoreInterface extends SharedLockStoreInterface
 {
     /**
      * Waits until a key becomes free for reading, then stores the resource.
      *
      * @throws LockConflictedException
      */
-    public function waitAndSaveRead(\LockmeDep\Symfony\Component\Lock\Key $key);
+    public function waitAndSaveRead(Key $key);
 }

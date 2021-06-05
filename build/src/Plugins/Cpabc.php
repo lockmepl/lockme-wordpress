@@ -7,11 +7,11 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
-class Cpabc implements \LockmeDep\LockmeIntegration\PluginInterface
+class Cpabc implements PluginInterface
 {
     private $options;
     private $plugin;
-    public function __construct(\LockmeDep\LockmeIntegration\Plugin $plugin)
+    public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_cpabc');
@@ -52,7 +52,7 @@ class Cpabc implements \LockmeDep\LockmeIntegration\PluginInterface
             if ($api) {
                 try {
                     $rooms = $api->RoomList();
-                } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+                } catch (IdentityProviderException $e) {
                 }
             }
             $calendars = $wpdb->get_results('SELECT * FROM ' . CPABC_APPOINTMENTS_CONFIG_TABLE_NAME);
@@ -124,7 +124,7 @@ class Cpabc implements \LockmeDep\LockmeIntegration\PluginInterface
         $lockme_data = null;
         try {
             $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
         try {
             if (!$lockme_data) {
@@ -134,7 +134,7 @@ class Cpabc implements \LockmeDep\LockmeIntegration\PluginInterface
                 //Update
                 $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
         return \true;
     }
@@ -155,7 +155,7 @@ class Cpabc implements \LockmeDep\LockmeIntegration\PluginInterface
         }
         try {
             $api->DeleteReservation((int) $appdata['roomid'], "ext/{$id}");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
         return \true;
     }
@@ -231,19 +231,19 @@ class Cpabc implements \LockmeDep\LockmeIntegration\PluginInterface
             case 'add':
                 $rows_affected = $wpdb->insert(CPABC_APPOINTMENTS_TABLE_NAME, array('calendar' => $calendar_id, 'time' => current_time('mysql'), 'booked_time' => \date('Y-m-d H:i:s', $datetime), 'booked_time_customer' => \date('Y-m-d H:i:s', $datetime), 'booked_time_unformatted' => \date('Y-m-d H:i:s', $datetime), 'name' => $data['name'] . ' ' . $data['surname'], 'email' => $data['email'], 'phone' => $data['phone'], 'question' => "Źródło: LockMe\nIlość osób: {$data['people']}\nCena: {$data['price']}", 'quantity' => 1, 'quantity_a' => $data['people'], 'quantity_s' => 0, 'buffered_date' => \serialize($data), 'who_added' => 0));
                 if (!$rows_affected) {
-                    throw new \RuntimeException('Błąd zapisu: ' . $wpdb->last_error);
+                    throw new RuntimeException('Błąd zapisu: ' . $wpdb->last_error);
                 }
                 $tid = $wpdb->insert_id;
                 $rows_affected = $wpdb->insert(CPABC_TDEAPP_CALENDAR_DATA_TABLE, array('appointment_calendar_id' => $calendar_id, 'datatime' => \date('Y-m-d H:i:s', $datetime), 'title' => $data['email'], 'reminder' => 0, 'quantity' => 1, 'quantity_a' => $data['people'], 'quantity_s' => 0, 'description' => "Źródło: LockMe<br/>\nIlość osób: {$data['people']}<br/>\nCena: {$data['price']}", 'description_customer' => "Źródło: LockMe<br/>\nIlość osób: {$data['people']}<br/>\nCena: {$data['price']}", 'reference' => $tid, 'who_added' => 0));
                 if (!$rows_affected) {
-                    throw new \RuntimeException('Błąd zapisu 2: ' . $wpdb->last_error);
+                    throw new RuntimeException('Błąd zapisu 2: ' . $wpdb->last_error);
                 }
                 $id = $wpdb->insert_id;
                 try {
                     $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, array('extid' => $id));
                     return \true;
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                 }
                 break;
             case 'edit':

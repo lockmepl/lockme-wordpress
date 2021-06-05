@@ -16,7 +16,7 @@ use LockmeDep\Psr\Http\Message\RequestInterface;
  *
  * @final
  */
-class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
+class CurlFactory implements CurlFactoryInterface
 {
     public const CURL_VERSION_STR = 'curl_version';
     /**
@@ -38,13 +38,13 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
     {
         $this->maxHandles = $maxHandles;
     }
-    public function create(\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options) : \LockmeDep\GuzzleHttp\Handler\EasyHandle
+    public function create(RequestInterface $request, array $options) : EasyHandle
     {
         if (isset($options['curl']['body_as_string'])) {
             $options['_body_as_string'] = $options['curl']['body_as_string'];
             unset($options['curl']['body_as_string']);
         }
-        $easy = new \LockmeDep\GuzzleHttp\Handler\EasyHandle();
+        $easy = new EasyHandle();
         $easy->request = $request;
         $easy->options = $options;
         $conf = $this->getDefaultConf($easy);
@@ -61,7 +61,7 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
         \curl_setopt_array($easy->handle, $conf);
         return $easy;
     }
-    public function release(\LockmeDep\GuzzleHttp\Handler\EasyHandle $easy) : void
+    public function release(EasyHandle $easy) : void
     {
         $resource = $easy->handle;
         unset($easy->handle);
@@ -87,7 +87,7 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
      * @param callable(RequestInterface, array): PromiseInterface $handler
      * @param CurlFactoryInterface                                $factory Dictates how the handle is released
      */
-    public static function finish(callable $handler, \LockmeDep\GuzzleHttp\Handler\EasyHandle $easy, \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface $factory) : \LockmeDep\GuzzleHttp\Promise\PromiseInterface
+    public static function finish(callable $handler, EasyHandle $easy, CurlFactoryInterface $factory) : PromiseInterface
     {
         if (isset($easy->options['on_stats'])) {
             self::invokeStats($easy);
@@ -102,19 +102,19 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
         if ($body->isSeekable()) {
             $body->rewind();
         }
-        return new \LockmeDep\GuzzleHttp\Promise\FulfilledPromise($easy->response);
+        return new FulfilledPromise($easy->response);
     }
-    private static function invokeStats(\LockmeDep\GuzzleHttp\Handler\EasyHandle $easy) : void
+    private static function invokeStats(EasyHandle $easy) : void
     {
         $curlStats = \curl_getinfo($easy->handle);
         $curlStats['appconnect_time'] = \curl_getinfo($easy->handle, \CURLINFO_APPCONNECT_TIME);
-        $stats = new \LockmeDep\GuzzleHttp\TransferStats($easy->request, $easy->response, $curlStats['total_time'], $easy->errno, $curlStats);
+        $stats = new TransferStats($easy->request, $easy->response, $curlStats['total_time'], $easy->errno, $curlStats);
         $easy->options['on_stats']($stats);
     }
     /**
      * @param callable(RequestInterface, array): PromiseInterface $handler
      */
-    private static function finishError(callable $handler, \LockmeDep\GuzzleHttp\Handler\EasyHandle $easy, \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface $factory) : \LockmeDep\GuzzleHttp\Promise\PromiseInterface
+    private static function finishError(callable $handler, EasyHandle $easy, CurlFactoryInterface $factory) : PromiseInterface
     {
         // Get error information and release the handle to the factory.
         $ctx = ['errno' => $easy->errno, 'error' => \curl_error($easy->handle), 'appconnect_time' => \curl_getinfo($easy->handle, \CURLINFO_APPCONNECT_TIME)] + \curl_getinfo($easy->handle);
@@ -126,16 +126,16 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
         }
         return self::createRejection($easy, $ctx);
     }
-    private static function createRejection(\LockmeDep\GuzzleHttp\Handler\EasyHandle $easy, array $ctx) : \LockmeDep\GuzzleHttp\Promise\PromiseInterface
+    private static function createRejection(EasyHandle $easy, array $ctx) : PromiseInterface
     {
         static $connectionErrors = [\CURLE_OPERATION_TIMEOUTED => \true, \CURLE_COULDNT_RESOLVE_HOST => \true, \CURLE_COULDNT_CONNECT => \true, \CURLE_SSL_CONNECT_ERROR => \true, \CURLE_GOT_NOTHING => \true];
         if ($easy->createResponseException) {
-            return \LockmeDep\GuzzleHttp\Promise\Create::rejectionFor(new \LockmeDep\GuzzleHttp\Exception\RequestException('An error was encountered while creating the response', $easy->request, $easy->response, $easy->createResponseException, $ctx));
+            return P\Create::rejectionFor(new RequestException('An error was encountered while creating the response', $easy->request, $easy->response, $easy->createResponseException, $ctx));
         }
         // If an exception was encountered during the onHeaders event, then
         // return a rejected promise that wraps that exception.
         if ($easy->onHeadersException) {
-            return \LockmeDep\GuzzleHttp\Promise\Create::rejectionFor(new \LockmeDep\GuzzleHttp\Exception\RequestException('An error was encountered during the on_headers event', $easy->request, $easy->response, $easy->onHeadersException, $ctx));
+            return P\Create::rejectionFor(new RequestException('An error was encountered during the on_headers event', $easy->request, $easy->response, $easy->onHeadersException, $ctx));
         }
         $message = \sprintf('cURL error %s: %s (%s)', $ctx['errno'], $ctx['error'], 'see https://curl.haxx.se/libcurl/c/libcurl-errors.html');
         $uriString = (string) $easy->request->getUri();
@@ -143,13 +143,13 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
             $message .= \sprintf(' for %s', $uriString);
         }
         // Create a connection exception if it was a specific error code.
-        $error = isset($connectionErrors[$easy->errno]) ? new \LockmeDep\GuzzleHttp\Exception\ConnectException($message, $easy->request, null, $ctx) : new \LockmeDep\GuzzleHttp\Exception\RequestException($message, $easy->request, $easy->response, null, $ctx);
-        return \LockmeDep\GuzzleHttp\Promise\Create::rejectionFor($error);
+        $error = isset($connectionErrors[$easy->errno]) ? new ConnectException($message, $easy->request, null, $ctx) : new RequestException($message, $easy->request, $easy->response, null, $ctx);
+        return P\Create::rejectionFor($error);
     }
     /**
      * @return array<int|string, mixed>
      */
-    private function getDefaultConf(\LockmeDep\GuzzleHttp\Handler\EasyHandle $easy) : array
+    private function getDefaultConf(EasyHandle $easy) : array
     {
         $conf = ['_headers' => $easy->request->getHeaders(), \CURLOPT_CUSTOMREQUEST => $easy->request->getMethod(), \CURLOPT_URL => (string) $easy->request->getUri()->withFragment(''), \CURLOPT_RETURNTRANSFER => \false, \CURLOPT_HEADER => \false, \CURLOPT_CONNECTTIMEOUT => 150];
         if (\defined('CURLOPT_PROTOCOLS')) {
@@ -165,7 +165,7 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
         }
         return $conf;
     }
-    private function applyMethod(\LockmeDep\GuzzleHttp\Handler\EasyHandle $easy, array &$conf) : void
+    private function applyMethod(EasyHandle $easy, array &$conf) : void
     {
         $body = $easy->request->getBody();
         $size = $body->getSize();
@@ -184,7 +184,7 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
             unset($conf[\CURLOPT_WRITEFUNCTION], $conf[\CURLOPT_READFUNCTION], $conf[\CURLOPT_FILE], $conf[\CURLOPT_INFILE]);
         }
     }
-    private function applyBody(\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options, array &$conf) : void
+    private function applyBody(RequestInterface $request, array $options, array &$conf) : void
     {
         $size = $request->hasHeader('Content-Length') ? (int) $request->getHeaderLine('Content-Length') : null;
         // Send the body as a string if the size is less than 1MB OR if the
@@ -217,7 +217,7 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
             $conf[\CURLOPT_HTTPHEADER][] = 'Content-Type:';
         }
     }
-    private function applyHeaders(\LockmeDep\GuzzleHttp\Handler\EasyHandle $easy, array &$conf) : void
+    private function applyHeaders(EasyHandle $easy, array &$conf) : void
     {
         foreach ($conf['_headers'] as $name => $values) {
             foreach ($values as $value) {
@@ -251,7 +251,7 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
             }
         }
     }
-    private function applyHandlerOptions(\LockmeDep\GuzzleHttp\Handler\EasyHandle $easy, array &$conf) : void
+    private function applyHandlerOptions(EasyHandle $easy, array &$conf) : void
     {
         $options = $easy->options;
         if (isset($options['verify'])) {
@@ -298,7 +298,7 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
             // Ensure that the directory exists before failing in curl.
             throw new \RuntimeException(\sprintf('Directory %s does not exist for sink value of %s', \dirname($sink), $sink));
         } else {
-            $sink = new \LockmeDep\GuzzleHttp\Psr7\LazyOpenStream($sink, 'w+');
+            $sink = new LazyOpenStream($sink, 'w+');
         }
         $easy->sink = $sink;
         $conf[\CURLOPT_WRITEFUNCTION] = static function ($ch, $write) use($sink) : int {
@@ -331,7 +331,7 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
                 $scheme = $easy->request->getUri()->getScheme();
                 if (isset($options['proxy'][$scheme])) {
                     $host = $easy->request->getUri()->getHost();
-                    if (!isset($options['proxy']['no']) || !\LockmeDep\GuzzleHttp\Utils::isHostInNoProxy($host, $options['proxy']['no'])) {
+                    if (!isset($options['proxy']['no']) || !Utils::isHostInNoProxy($host, $options['proxy']['no'])) {
                         $conf[\CURLOPT_PROXY] = $options['proxy'][$scheme];
                     }
                 }
@@ -379,7 +379,7 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
             };
         }
         if (!empty($options['debug'])) {
-            $conf[\CURLOPT_STDERR] = \LockmeDep\GuzzleHttp\Utils::debugResource($options['debug']);
+            $conf[\CURLOPT_STDERR] = Utils::debugResource($options['debug']);
             $conf[\CURLOPT_VERBOSE] = \true;
         }
     }
@@ -394,7 +394,7 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
      *
      * @param callable(RequestInterface, array): PromiseInterface $handler
      */
-    private static function retryFailedRewind(callable $handler, \LockmeDep\GuzzleHttp\Handler\EasyHandle $easy, array $ctx) : \LockmeDep\GuzzleHttp\Promise\PromiseInterface
+    private static function retryFailedRewind(callable $handler, EasyHandle $easy, array $ctx) : PromiseInterface
     {
         try {
             // Only rewind if the body has been read from.
@@ -417,7 +417,7 @@ class CurlFactory implements \LockmeDep\GuzzleHttp\Handler\CurlFactoryInterface
         }
         return $handler($easy->request, $easy->options);
     }
-    private function createHeaderFn(\LockmeDep\GuzzleHttp\Handler\EasyHandle $easy) : callable
+    private function createHeaderFn(EasyHandle $easy) : callable
     {
         if (isset($easy->options['on_headers'])) {
             $onHeaders = $easy->options['on_headers'];

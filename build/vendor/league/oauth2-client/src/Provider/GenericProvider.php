@@ -111,7 +111,7 @@ class GenericProvider extends \League\OAuth2\Client\Provider\AbstractProvider
     {
         $missing = \array_diff_key(\array_flip($this->getRequiredOptions()), $options);
         if (!empty($missing)) {
-            throw new \InvalidArgumentException('Required options not defined: ' . \implode(', ', \array_keys($missing)));
+            throw new InvalidArgumentException('Required options not defined: ' . \implode(', ', \array_keys($missing)));
         }
     }
     /**
@@ -131,7 +131,7 @@ class GenericProvider extends \League\OAuth2\Client\Provider\AbstractProvider
     /**
      * @inheritdoc
      */
-    public function getResourceOwnerDetailsUrl(\League\OAuth2\Client\Token\AccessToken $token)
+    public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
         return $this->urlResourceOwnerDetails;
     }
@@ -166,7 +166,7 @@ class GenericProvider extends \League\OAuth2\Client\Provider\AbstractProvider
     /**
      * @inheritdoc
      */
-    protected function checkResponse(\LockmeDep\Psr\Http\Message\ResponseInterface $response, $data)
+    protected function checkResponse(ResponseInterface $response, $data)
     {
         if (!empty($data[$this->responseError])) {
             $error = $data[$this->responseError];
@@ -177,13 +177,13 @@ class GenericProvider extends \League\OAuth2\Client\Provider\AbstractProvider
             if (!\is_int($code)) {
                 $code = \intval($code);
             }
-            throw new \League\OAuth2\Client\Provider\Exception\IdentityProviderException($error, $code, $data);
+            throw new IdentityProviderException($error, $code, $data);
         }
     }
     /**
      * @inheritdoc
      */
-    protected function createResourceOwner(array $response, \League\OAuth2\Client\Token\AccessToken $token)
+    protected function createResourceOwner(array $response, AccessToken $token)
     {
         return new \League\OAuth2\Client\Provider\GenericResourceOwner($response, $this->responseResourceOwnerId);
     }

@@ -9,7 +9,7 @@ use LockmeDep\Psr\Http\Message\StreamInterface;
  *
  * @final
  */
-class DroppingStream implements \LockmeDep\Psr\Http\Message\StreamInterface
+class DroppingStream implements StreamInterface
 {
     use StreamDecoratorTrait;
     private $maxLength;
@@ -17,7 +17,7 @@ class DroppingStream implements \LockmeDep\Psr\Http\Message\StreamInterface
      * @param StreamInterface $stream    Underlying stream to decorate.
      * @param int             $maxLength Maximum size before dropping data.
      */
-    public function __construct(\LockmeDep\Psr\Http\Message\StreamInterface $stream, $maxLength)
+    public function __construct(StreamInterface $stream, $maxLength)
     {
         $this->stream = $stream;
         $this->maxLength = $maxLength;

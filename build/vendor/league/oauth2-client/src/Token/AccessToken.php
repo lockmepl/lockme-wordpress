@@ -83,7 +83,7 @@ class AccessToken implements \League\OAuth2\Client\Token\AccessTokenInterface, \
     public function __construct(array $options = [])
     {
         if (empty($options['access_token'])) {
-            throw new \InvalidArgumentException('Required option not passed: "access_token"');
+            throw new InvalidArgumentException('Required option not passed: "access_token"');
         }
         $this->accessToken = $options['access_token'];
         if (!empty($options['resource_owner_id'])) {
@@ -163,7 +163,7 @@ class AccessToken implements \League\OAuth2\Client\Token\AccessTokenInterface, \
     {
         $expires = $this->getExpires();
         if (empty($expires)) {
-            throw new \RuntimeException('"expires" is not set on the token');
+            throw new RuntimeException('"expires" is not set on the token');
         }
         return $expires < \time();
     }

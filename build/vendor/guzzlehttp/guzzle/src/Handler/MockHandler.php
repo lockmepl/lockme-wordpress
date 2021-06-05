@@ -46,9 +46,9 @@ class MockHandler implements \Countable
      * @param callable|null $onFulfilled Callback to invoke when the return value is fulfilled.
      * @param callable|null $onRejected  Callback to invoke when the return value is rejected.
      */
-    public static function createWithMiddleware(array $queue = null, callable $onFulfilled = null, callable $onRejected = null) : \LockmeDep\GuzzleHttp\HandlerStack
+    public static function createWithMiddleware(array $queue = null, callable $onFulfilled = null, callable $onRejected = null) : HandlerStack
     {
-        return \LockmeDep\GuzzleHttp\HandlerStack::create(new self($queue, $onFulfilled, $onRejected));
+        return HandlerStack::create(new self($queue, $onFulfilled, $onRejected));
     }
     /**
      * The passed in value must be an array of
@@ -68,7 +68,7 @@ class MockHandler implements \Countable
             $this->append(...\array_values($queue));
         }
     }
-    public function __invoke(\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options) : \LockmeDep\GuzzleHttp\Promise\PromiseInterface
+    public function __invoke(RequestInterface $request, array $options) : PromiseInterface
     {
         if (!$this->queue) {
             throw new \OutOfBoundsException('Mock queue is empty');
@@ -87,14 +87,14 @@ class MockHandler implements \Countable
                 $options['on_headers']($response);
             } catch (\Exception $e) {
                 $msg = 'An error was encountered during the on_headers event';
-                $response = new \LockmeDep\GuzzleHttp\Exception\RequestException($msg, $request, $response, $e);
+                $response = new RequestException($msg, $request, $response, $e);
             }
         }
         if (\is_callable($response)) {
             $response = $response($request, $options);
         }
-        $response = $response instanceof \Throwable ? \LockmeDep\GuzzleHttp\Promise\Create::rejectionFor($response) : \LockmeDep\GuzzleHttp\Promise\Create::promiseFor($response);
-        return $response->then(function (?\LockmeDep\Psr\Http\Message\ResponseInterface $value) use($request, $options) {
+        $response = $response instanceof \Throwable ? P\Create::rejectionFor($response) : P\Create::promiseFor($response);
+        return $response->then(function (?ResponseInterface $value) use($request, $options) {
             $this->invokeStats($request, $options, $value);
             if ($this->onFulfilled) {
                 ($this->onFulfilled)($value);
@@ -106,7 +106,7 @@ class MockHandler implements \Countable
                     \fwrite($sink, $contents);
                 } elseif (\is_string($sink)) {
                     \file_put_contents($sink, $contents);
-                } elseif ($sink instanceof \LockmeDep\Psr\Http\Message\StreamInterface) {
+                } elseif ($sink instanceof StreamInterface) {
                     $sink->write($contents);
                 }
             }
@@ -116,7 +116,7 @@ class MockHandler implements \Countable
             if ($this->onRejected) {
                 ($this->onRejected)($reason);
             }
-            return \LockmeDep\GuzzleHttp\Promise\Create::rejectionFor($reason);
+            return P\Create::rejectionFor($reason);
         });
     }
     /**
@@ -128,17 +128,17 @@ class MockHandler implements \Countable
     public function append(...$values) : void
     {
         foreach ($values as $value) {
-            if ($value instanceof \LockmeDep\Psr\Http\Message\ResponseInterface || $value instanceof \Throwable || $value instanceof \LockmeDep\GuzzleHttp\Promise\PromiseInterface || \is_callable($value)) {
+            if ($value instanceof ResponseInterface || $value instanceof \Throwable || $value instanceof PromiseInterface || \is_callable($value)) {
                 $this->queue[] = $value;
             } else {
-                throw new \TypeError('Expected a Response, Promise, Throwable or callable. Found ' . \LockmeDep\GuzzleHttp\Utils::describeType($value));
+                throw new \TypeError('Expected a Response, Promise, Throwable or callable. Found ' . Utils::describeType($value));
             }
         }
     }
     /**
      * Get the last received request.
      */
-    public function getLastRequest() : ?\LockmeDep\Psr\Http\Message\RequestInterface
+    public function getLastRequest() : ?RequestInterface
     {
         return $this->lastRequest;
     }
@@ -163,11 +163,11 @@ class MockHandler implements \Countable
     /**
      * @param mixed $reason Promise or reason.
      */
-    private function invokeStats(\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options, \LockmeDep\Psr\Http\Message\ResponseInterface $response = null, $reason = null) : void
+    private function invokeStats(RequestInterface $request, array $options, ResponseInterface $response = null, $reason = null) : void
     {
         if (isset($options['on_stats'])) {
             $transferTime = $options['transfer_time'] ?? 0;
-            $stats = new \LockmeDep\GuzzleHttp\TransferStats($request, $response, $transferTime, $reason);
+            $stats = new TransferStats($request, $response, $transferTime, $reason);
             $options['on_stats']($stats);
         }
     }
