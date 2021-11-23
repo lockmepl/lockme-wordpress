@@ -238,7 +238,7 @@ class PdoStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreInter
             $schema = new \LockmeDep\Doctrine\DBAL\Schema\Schema();
             $this->addTableToSchema($schema);
             foreach ($schema->toSql($conn->getDatabasePlatform()) as $sql) {
-                if (\method_exists($conn, 'executeStatement')) {
+                if ($conn instanceof \LockmeDep\Doctrine\DBAL\Connection && \method_exists($conn, 'executeStatement')) {
                     $conn->executeStatement($sql);
                 } else {
                     $conn->exec($sql);
@@ -265,7 +265,7 @@ class PdoStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreInter
             default:
                 throw new \DomainException(\sprintf('Creating the lock table is currently not implemented for PDO driver "%s".', $driver));
         }
-        if (\method_exists($conn, 'executeStatement')) {
+        if ($conn instanceof \LockmeDep\Doctrine\DBAL\Connection && \method_exists($conn, 'executeStatement')) {
             $conn->executeStatement($sql);
         } else {
             $conn->exec($sql);
@@ -291,7 +291,7 @@ class PdoStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreInter
     {
         $sql = "DELETE FROM {$this->table} WHERE {$this->expirationCol} <= {$this->getCurrentTimestampStatement()}";
         $conn = $this->getConnection();
-        if (\method_exists($conn, 'executeStatement')) {
+        if ($conn instanceof \LockmeDep\Doctrine\DBAL\Connection && \method_exists($conn, 'executeStatement')) {
             $conn->executeStatement($sql);
         } else {
             $conn->exec($sql);

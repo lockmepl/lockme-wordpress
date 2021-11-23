@@ -55,7 +55,7 @@ class SemaphoreStore implements \LockmeDep\Symfony\Component\Lock\BlockingStoreI
         if ($key->hasState(__CLASS__)) {
             return;
         }
-        $keyId = \crc32($key);
+        $keyId = \unpack('i', \md5($key, \true))[1];
         $resource = \sem_get($keyId);
         $acquired = @\sem_acquire($resource, !$blocking);
         while ($blocking && !$acquired) {

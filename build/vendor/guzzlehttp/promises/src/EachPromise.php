@@ -6,7 +6,7 @@ namespace LockmeDep\GuzzleHttp\Promise;
  * Represents a promise that iterates over many promises and invokes
  * side-effect functions in the process.
  */
-class EachPromise implements PromisorInterface
+class EachPromise implements \LockmeDep\GuzzleHttp\Promise\PromisorInterface
 {
     private $pending = [];
     private $nextPendingIndex = 0;
@@ -45,7 +45,7 @@ class EachPromise implements PromisorInterface
      */
     public function __construct($iterable, array $config = [])
     {
-        $this->iterable = Create::iterFor($iterable);
+        $this->iterable = \LockmeDep\GuzzleHttp\Promise\Create::iterFor($iterable);
         if (isset($config['concurrency'])) {
             $this->concurrency = $config['concurrency'];
         }
@@ -66,9 +66,7 @@ class EachPromise implements PromisorInterface
             $this->createPromise();
             /** @psalm-assert Promise $this->aggregate */
             $this->iterable->rewind();
-            if (!$this->checkIfFinished()) {
-                $this->refillPending();
-            }
+            $this->refillPending();
         } catch (\Throwable $e) {
             /**
              * @psalm-suppress NullReference
@@ -91,14 +89,17 @@ class EachPromise implements PromisorInterface
     private function createPromise()
     {
         $this->mutex = \false;
-        $this->aggregate = new Promise(function () {
+        $this->aggregate = new \LockmeDep\GuzzleHttp\Promise\Promise(function () {
+            if ($this->checkIfFinished()) {
+                return;
+            }
             \reset($this->pending);
             // Consume a potentially fluctuating list of promises while
             // ensuring that indexes are maintained (precluding array_shift).
             while ($promise = \current($this->pending)) {
                 \next($this->pending);
                 $promise->wait();
-                if (Is::settled($this->aggregate)) {
+                if (\LockmeDep\GuzzleHttp\Promise\Is::settled($this->aggregate)) {
                     return;
                 }
             }
@@ -140,7 +141,7 @@ class EachPromise implements PromisorInterface
         if (!$this->iterable || !$this->iterable->valid()) {
             return \false;
         }
-        $promise = Create::promiseFor($this->iterable->current());
+        $promise = \LockmeDep\GuzzleHttp\Promise\Create::promiseFor($this->iterable->current());
         $key = $this->iterable->key();
         // Iterable keys may not be unique, so we use a counter to
         // guarantee uniqueness
@@ -183,7 +184,7 @@ class EachPromise implements PromisorInterface
     private function step($idx)
     {
         // If the promise was already resolved, then ignore this step.
-        if (Is::settled($this->aggregate)) {
+        if (\LockmeDep\GuzzleHttp\Promise\Is::settled($this->aggregate)) {
             return;
         }
         unset($this->pending[$idx]);

@@ -1,15 +1,14 @@
 <?php
 
+declare (strict_types=1);
 namespace LockmeDep\GuzzleHttp\Psr7;
 
 use LockmeDep\Psr\Http\Message\StreamInterface;
 /**
  * Stream decorator that can cache previously read bytes from a sequentially
  * read stream.
- *
- * @final
  */
-class CachingStream implements StreamInterface
+final class CachingStream implements \LockmeDep\Psr\Http\Message\StreamInterface
 {
     use StreamDecoratorTrait;
     /** @var StreamInterface Stream being wrapped */
@@ -22,26 +21,30 @@ class CachingStream implements StreamInterface
      * @param StreamInterface $stream Stream to cache. The cursor is assumed to be at the beginning of the stream.
      * @param StreamInterface $target Optionally specify where data is cached
      */
-    public function __construct(StreamInterface $stream, StreamInterface $target = null)
+    public function __construct(\LockmeDep\Psr\Http\Message\StreamInterface $stream, \LockmeDep\Psr\Http\Message\StreamInterface $target = null)
     {
         $this->remoteStream = $stream;
-        $this->stream = $target ?: new Stream(Utils::tryFopen('php://temp', 'r+'));
+        $this->stream = $target ?: new \LockmeDep\GuzzleHttp\Psr7\Stream(\LockmeDep\GuzzleHttp\Psr7\Utils::tryFopen('php://temp', 'r+'));
     }
-    public function getSize()
+    public function getSize() : ?int
     {
-        return \max($this->stream->getSize(), $this->remoteStream->getSize());
+        $remoteSize = $this->remoteStream->getSize();
+        if (null === $remoteSize) {
+            return null;
+        }
+        return \max($this->stream->getSize(), $remoteSize);
     }
-    public function rewind()
+    public function rewind() : void
     {
         $this->seek(0);
     }
-    public function seek($offset, $whence = \SEEK_SET)
+    public function seek($offset, $whence = \SEEK_SET) : void
     {
-        if ($whence == \SEEK_SET) {
+        if ($whence === \SEEK_SET) {
             $byte = $offset;
-        } elseif ($whence == \SEEK_CUR) {
+        } elseif ($whence === \SEEK_CUR) {
             $byte = $offset + $this->tell();
-        } elseif ($whence == \SEEK_END) {
+        } elseif ($whence === \SEEK_END) {
             $size = $this->remoteStream->getSize();
             if ($size === null) {
                 $size = $this->cacheEntireStream();
@@ -63,7 +66,7 @@ class CachingStream implements StreamInterface
             $this->stream->seek($byte);
         }
     }
-    public function read($length)
+    public function read($length) : string
     {
         // Perform a regular read on any previously read data from the buffer
         $data = $this->stream->read($length);
@@ -85,7 +88,7 @@ class CachingStream implements StreamInterface
         }
         return $data;
     }
-    public function write($string)
+    public function write($string) : int
     {
         // When appending to the end of the currently read stream, you'll want
         // to skip bytes from being read from the remote stream to emulate
@@ -97,21 +100,22 @@ class CachingStream implements StreamInterface
         }
         return $this->stream->write($string);
     }
-    public function eof()
+    public function eof() : bool
     {
         return $this->stream->eof() && $this->remoteStream->eof();
     }
     /**
      * Close both the remote stream and buffer stream
      */
-    public function close()
+    public function close() : void
     {
-        $this->remoteStream->close() && $this->stream->close();
+        $this->remoteStream->close();
+        $this->stream->close();
     }
-    private function cacheEntireStream()
+    private function cacheEntireStream() : int
     {
-        $target = new FnStream(['write' => 'strlen']);
-        Utils::copyToStream($this, $target);
+        $target = new \LockmeDep\GuzzleHttp\Psr7\FnStream(['write' => 'strlen']);
+        \LockmeDep\GuzzleHttp\Psr7\Utils::copyToStream($this, $target);
         return $this->tell();
     }
 }

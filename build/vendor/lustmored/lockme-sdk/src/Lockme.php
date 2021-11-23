@@ -37,17 +37,16 @@ class Lockme
      */
     public function __construct(array $options = [])
     {
-        $this->provider = new LockmeProvider($options);
-        $this->lockFactory = new LockFactory(new FlockStore());
+        $this->provider = new \LockmeDep\Lockme\OAuth2\Client\Provider\Lockme($options);
+        $this->lockFactory = new \LockmeDep\Symfony\Component\Lock\LockFactory(new \LockmeDep\Symfony\Component\Lock\Store\FlockStore());
     }
     /**
      * Generate authorization URL
      * @param  array  $scopes Array of requested scopes
      * @return string         Redirect URL
      */
-    public function getAuthorizationUrl($scopes = []) : string
+    public function getAuthorizationUrl(array $scopes = []) : string
     {
-        $this->provider;
         $authorizationUrl = $this->provider->getAuthorizationUrl(['scope' => \implode(' ', $scopes)]);
         $_SESSION['oauth2_lockme_state'] = $this->provider->getState();
         return $authorizationUrl;
@@ -59,11 +58,11 @@ class Lockme
      * @return AccessToken       Access Token
      * @throws Exception
      */
-    public function getTokenForCode(string $code, string $state) : AccessToken
+    public function getTokenForCode(string $code, string $state) : \League\OAuth2\Client\Token\AccessToken
     {
         if ($state !== $_SESSION['oauth2_lockme_state']) {
             unset($_SESSION['oauth2_lockme_state']);
-            throw new RuntimeException("Wrong state");
+            throw new \RuntimeException("Wrong state");
         }
         unset($_SESSION['oauth2_lockme_state']);
         $this->accessToken = $this->provider->getAccessToken('authorization_code', ['code' => $code]);
@@ -75,7 +74,7 @@ class Lockme
      * @return AccessToken        Refreshed token
      * @throws IdentityProviderException
      */
-    public function refreshToken($accessToken = null) : AccessToken
+    public function refreshToken(?\League\OAuth2\Client\Token\AccessToken $accessToken = null) : \League\OAuth2\Client\Token\AccessToken
     {
         $accessToken = $accessToken ?: $this->accessToken;
         $this->accessToken = $this->provider->getAccessToken('refresh_token', ['refresh_token' => $accessToken->getRefreshToken()]);
@@ -88,14 +87,14 @@ class Lockme
      * @throws Exception
      * @deprecated use loadAccessToken to solve race conditions on token refreshing
      */
-    public function setDefaultAccessToken($token) : AccessToken
+    public function setDefaultAccessToken($token) : \League\OAuth2\Client\Token\AccessToken
     {
         if (\is_string($token)) {
-            $this->accessToken = new AccessToken(\json_decode($token, \true));
-        } elseif ($token instanceof AccessToken) {
+            $this->accessToken = new \League\OAuth2\Client\Token\AccessToken(\json_decode($token, \true));
+        } elseif ($token instanceof \League\OAuth2\Client\Token\AccessToken) {
             $this->accessToken = $token;
         } else {
-            throw new RuntimeException("Incorrect access token");
+            throw new \RuntimeException("Incorrect access token");
         }
         if ($this->accessToken->hasExpired()) {
             $this->refreshToken();
@@ -106,18 +105,18 @@ class Lockme
      * @param  callable  $load
      * @return AccessToken
      */
-    private function reloadToken(callable $load) : AccessToken
+    private function reloadToken(callable $load) : \League\OAuth2\Client\Token\AccessToken
     {
-        if (is_callable($load)) {
+        if (\is_callable($load)) {
             $token = $load();
             if (\is_string($token)) {
-                $this->accessToken = new AccessToken(\json_decode($token, \true));
-            } elseif ($token instanceof AccessToken) {
+                $this->accessToken = new \League\OAuth2\Client\Token\AccessToken(\json_decode($token, \true));
+            } elseif ($token instanceof \League\OAuth2\Client\Token\AccessToken) {
                 $this->accessToken = $token;
             }
         }
         if (!$this->accessToken) {
-            throw new RuntimeException("Incorrect access token");
+            throw new \RuntimeException("Incorrect access token");
         }
         return $this->accessToken;
     }
@@ -127,7 +126,7 @@ class Lockme
      * @return AccessToken
      * @throws Exception
      */
-    public function loadAccessToken(callable $load, ?callable $save = null) : AccessToken
+    public function loadAccessToken(callable $load, ?callable $save = null) : \League\OAuth2\Client\Token\AccessToken
     {
         $this->reloadToken($load);
         if ($this->accessToken->hasExpired()) {
@@ -137,7 +136,7 @@ class Lockme
             /** @noinspection NotOptimalIfConditionsInspection */
             if ($this->accessToken->hasExpired()) {
                 $this->refreshToken();
-                if (is_callable($save)) {
+                if (\is_callable($save)) {
                     $save($this->accessToken);
                 }
             }
@@ -187,13 +186,13 @@ class Lockme
     public function AddReservation(array $data, $accessToken = null) : int
     {
         if (!$data['roomid']) {
-            throw new RuntimeException("No room ID");
+            throw new \RuntimeException("No room ID");
         }
         if (!$data["date"]) {
-            throw new RuntimeException("No date");
+            throw new \RuntimeException("No date");
         }
         if (!$data["hour"]) {
-            throw new RuntimeException("No hour");
+            throw new \RuntimeException("No hour");
         }
         return $this->provider->executeRequest("PUT", "/room/{$data['roomid']}/reservation", $accessToken ?: $this->accessToken, $data);
     }
@@ -241,7 +240,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function GetReservations(int $roomId, DateTime $date, $accessToken = null) : array
+    public function GetReservations(int $roomId, \DateTime $date, $accessToken = null) : array
     {
         return $this->provider->executeRequest("GET", "/room/{$roomId}/reservations/" . $date->format("Y-m-d"), $accessToken ?: $this->accessToken);
     }
@@ -250,7 +249,7 @@ class Lockme
      * @param  string|AccessToken|null $accessToken Access token
      * @return ResourceOwnerInterface              Resource owner
      */
-    public function getResourceOwner($accessToken = null) : ResourceOwnerInterface
+    public function getResourceOwner($accessToken = null) : \League\OAuth2\Client\Provider\ResourceOwnerInterface
     {
         return $this->provider->getResourceOwner($accessToken ?: $this->accessToken);
     }
@@ -283,7 +282,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function GetDateSettings(int $roomId, DateTime $date, $accessToken = null) : array
+    public function GetDateSettings(int $roomId, \DateTime $date, $accessToken = null) : array
     {
         return $this->provider->executeRequest("GET", "/room/{$roomId}/date/" . $date->format("Y-m-d"), $accessToken ?: $this->accessToken);
     }
@@ -295,7 +294,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function SetDateSettings(int $roomId, DateTime $date, array $settings, $accessToken = null) : array
+    public function SetDateSettings(int $roomId, \DateTime $date, array $settings, $accessToken = null) : array
     {
         return $this->provider->executeRequest("POST", "/room/{$roomId}/date/" . $date->format("Y-m-d"), $accessToken ?: $this->accessToken, $settings);
     }
@@ -306,7 +305,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function RemoveDateSettings(int $roomId, DateTime $date, $accessToken = null) : array
+    public function RemoveDateSettings(int $roomId, \DateTime $date, $accessToken = null) : array
     {
         return $this->provider->executeRequest("DELETE", "/room/{$roomId}/date/" . $date->format("Y-m-d"), $accessToken ?: $this->accessToken);
     }

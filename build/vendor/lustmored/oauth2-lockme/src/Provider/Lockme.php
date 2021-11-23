@@ -2,6 +2,7 @@
 
 namespace LockmeDep\Lockme\OAuth2\Client\Provider;
 
+use LockmeDep\GuzzleHttp\Client as HttpClient;
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
@@ -21,19 +22,23 @@ class Lockme extends \League\OAuth2\Client\Provider\AbstractProvider
      * API version
      * @var string
      */
-    public $version = 'v2.0';
+    public $version = 'v2.1';
     public function __construct($options)
     {
-        if (isset($options['beta'])) {
-            $this->apiDomain = 'https://api.lock.me.spjbnteggq-6s2dfxbi5xbfm.eu.s5y.io';
-        }
+        $collaborators = [];
         if (isset($options['api_domain'])) {
             $this->apiDomain = $options['api_domain'];
         }
         if (isset($options['apiDomain'])) {
             $this->apiDomain = $options['apiDomain'];
         }
-        parent::__construct($options);
+        if (isset($options['version'])) {
+            $this->version = $options['version'];
+        }
+        if (isset($options['ignoreSslErrors']) && $options['ignoreSslErrors']) {
+            $collaborators['httpClient'] = new \LockmeDep\GuzzleHttp\Client(['verify' => \false]);
+        }
+        parent::__construct($options, $collaborators);
     }
     public function getBaseAuthorizationUrl()
     {

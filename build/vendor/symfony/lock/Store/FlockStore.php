@@ -26,7 +26,7 @@ use LockmeDep\Symfony\Component\Lock\SharedLockStoreInterface;
  * @author Romain Neutron <imprec@gmail.com>
  * @author Nicolas Grekas <p@tchwork.com>
  */
-class FlockStore implements BlockingStoreInterface, SharedLockStoreInterface
+class FlockStore implements \LockmeDep\Symfony\Component\Lock\BlockingStoreInterface, \LockmeDep\Symfony\Component\Lock\SharedLockStoreInterface
 {
     private $lockPath;
     /**
@@ -41,42 +41,42 @@ class FlockStore implements BlockingStoreInterface, SharedLockStoreInterface
         }
         if (!\is_dir($lockPath)) {
             if (\false === @\mkdir($lockPath, 0777, \true) && !\is_dir($lockPath)) {
-                throw new InvalidArgumentException(\sprintf('The FlockStore directory "%s" does not exists and cannot be created.', $lockPath));
+                throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('The FlockStore directory "%s" does not exists and cannot be created.', $lockPath));
             }
         } elseif (!\is_writable($lockPath)) {
-            throw new InvalidArgumentException(\sprintf('The FlockStore directory "%s" is not writable.', $lockPath));
+            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('The FlockStore directory "%s" is not writable.', $lockPath));
         }
         $this->lockPath = $lockPath;
     }
     /**
      * {@inheritdoc}
      */
-    public function save(Key $key)
+    public function save(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         $this->lock($key, \false, \false);
     }
     /**
      * {@inheritdoc}
      */
-    public function saveRead(Key $key)
+    public function saveRead(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         $this->lock($key, \true, \false);
     }
     /**
      * {@inheritdoc}
      */
-    public function waitAndSave(Key $key)
+    public function waitAndSave(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         $this->lock($key, \false, \true);
     }
     /**
      * {@inheritdoc}
      */
-    public function waitAndSaveRead(Key $key)
+    public function waitAndSaveRead(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         $this->lock($key, \true, \true);
     }
-    private function lock(Key $key, bool $read, bool $blocking)
+    private function lock(\LockmeDep\Symfony\Component\Lock\Key $key, bool $read, bool $blocking)
     {
         $handle = null;
         // The lock is maybe already acquired.
@@ -88,7 +88,7 @@ class FlockStore implements BlockingStoreInterface, SharedLockStoreInterface
             }
         }
         if (!$handle) {
-            $fileName = \sprintf('%s/sf.%s.%s.lock', $this->lockPath, \preg_replace('/[^a-z0-9\\._-]+/i', '-', $key), \strtr(\substr(\base64_encode(\hash('sha256', $key, \true)), 0, 7), '/', '_'));
+            $fileName = \sprintf('%s/sf.%s.%s.lock', $this->lockPath, \substr(\preg_replace('/[^a-z0-9\\._-]+/i', '-', $key), 0, 50), \strtr(\substr(\base64_encode(\hash('sha256', $key, \true)), 0, 7), '/', '_'));
             // Silence error reporting
             \set_error_handler(function ($type, $msg) use(&$error) {
                 $error = $msg;
@@ -105,13 +105,13 @@ class FlockStore implements BlockingStoreInterface, SharedLockStoreInterface
             \restore_error_handler();
         }
         if (!$handle) {
-            throw new LockStorageException($error, 0, null);
+            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockStorageException($error, 0, null);
         }
         // On Windows, even if PHP doc says the contrary, LOCK_NB works, see
         // https://bugs.php.net/54129
         if (!\flock($handle, ($read ? \LOCK_SH : \LOCK_EX) | ($blocking ? 0 : \LOCK_NB))) {
             \fclose($handle);
-            throw new LockConflictedException();
+            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
         }
         $key->setState(__CLASS__, [$read, $handle]);
         $key->markUnserializable();
@@ -119,14 +119,14 @@ class FlockStore implements BlockingStoreInterface, SharedLockStoreInterface
     /**
      * {@inheritdoc}
      */
-    public function putOffExpiration(Key $key, float $ttl)
+    public function putOffExpiration(\LockmeDep\Symfony\Component\Lock\Key $key, float $ttl)
     {
         // do nothing, the flock locks forever.
     }
     /**
      * {@inheritdoc}
      */
-    public function delete(Key $key)
+    public function delete(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         // The lock is maybe not acquired.
         if (!$key->hasState(__CLASS__)) {
@@ -140,7 +140,7 @@ class FlockStore implements BlockingStoreInterface, SharedLockStoreInterface
     /**
      * {@inheritdoc}
      */
-    public function exists(Key $key)
+    public function exists(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         return $key->hasState(__CLASS__);
     }

@@ -16,7 +16,7 @@
     "paragonie/random_compat": "<9.99"
   },
   "require-dev": {
-    "roave/security-advisories": "dev-master"
+    "roave/security-advisories": "dev-latest"
   },
   "license": "GPLv2",
   "authors": [
