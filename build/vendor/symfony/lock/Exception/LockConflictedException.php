@@ -18,6 +18,6 @@ use LockmeDep\Symfony\Component\Lock\Lock;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-class LockConflictedException extends \RuntimeException implements ExceptionInterface
+class LockConflictedException extends \RuntimeException implements \LockmeDep\Symfony\Component\Lock\Exception\ExceptionInterface
 {
 }

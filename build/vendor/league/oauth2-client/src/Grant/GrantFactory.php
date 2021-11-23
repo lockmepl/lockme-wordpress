@@ -85,7 +85,7 @@ class GrantFactory
     public function checkGrant($class)
     {
         if (!$this->isGrant($class)) {
-            throw new InvalidGrantException(\sprintf('Grant "%s" must extend AbstractGrant', \is_object($class) ? \get_class($class) : $class));
+            throw new \League\OAuth2\Client\Grant\Exception\InvalidGrantException(\sprintf('Grant "%s" must extend AbstractGrant', \is_object($class) ? \get_class($class) : $class));
         }
     }
 }

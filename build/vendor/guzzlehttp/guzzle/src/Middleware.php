@@ -28,12 +28,12 @@ final class Middleware
             return static function ($request, array $options) use($handler) {
                 if (empty($options['cookies'])) {
                     return $handler($request, $options);
-                } elseif (!$options['cookies'] instanceof CookieJarInterface) {
+                } elseif (!$options['cookies'] instanceof \LockmeDep\GuzzleHttp\Cookie\CookieJarInterface) {
                     throw new \InvalidArgumentException('LockmeDep\\cookies must be an instance of GuzzleHttp\\Cookie\\CookieJarInterface');
                 }
                 $cookieJar = $options['cookies'];
                 $request = $cookieJar->withCookieHeader($request);
-                return $handler($request, $options)->then(static function (ResponseInterface $response) use($cookieJar, $request) : ResponseInterface {
+                return $handler($request, $options)->then(static function (\LockmeDep\Psr\Http\Message\ResponseInterface $response) use($cookieJar, $request) : ResponseInterface {
                     $cookieJar->extractCookies($request, $response);
                     return $response;
                 });
@@ -48,19 +48,19 @@ final class Middleware
      *
      * @return callable(callable): callable Returns a function that accepts the next handler.
      */
-    public static function httpErrors(BodySummarizerInterface $bodySummarizer = null) : callable
+    public static function httpErrors(\LockmeDep\GuzzleHttp\BodySummarizerInterface $bodySummarizer = null) : callable
     {
         return static function (callable $handler) use($bodySummarizer) : callable {
             return static function ($request, array $options) use($handler, $bodySummarizer) {
                 if (empty($options['http_errors'])) {
                     return $handler($request, $options);
                 }
-                return $handler($request, $options)->then(static function (ResponseInterface $response) use($request, $bodySummarizer) {
+                return $handler($request, $options)->then(static function (\LockmeDep\Psr\Http\Message\ResponseInterface $response) use($request, $bodySummarizer) {
                     $code = $response->getStatusCode();
                     if ($code < 400) {
                         return $response;
                     }
-                    throw RequestException::create($request, $response, null, [], $bodySummarizer);
+                    throw \LockmeDep\GuzzleHttp\Exception\RequestException::create($request, $response, null, [], $bodySummarizer);
                 });
             };
         };
@@ -80,13 +80,13 @@ final class Middleware
             throw new \InvalidArgumentException('history container must be an array or object implementing ArrayAccess');
         }
         return static function (callable $handler) use(&$container) : callable {
-            return static function (RequestInterface $request, array $options) use($handler, &$container) {
+            return static function (\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options) use($handler, &$container) {
                 return $handler($request, $options)->then(static function ($value) use($request, &$container, $options) {
                     $container[] = ['request' => $request, 'response' => $value, 'error' => null, 'options' => $options];
                     return $value;
                 }, static function ($reason) use($request, &$container, $options) {
                     $container[] = ['request' => $request, 'response' => null, 'error' => $reason, 'options' => $options];
-                    return P\Create::rejectionFor($reason);
+                    return \LockmeDep\GuzzleHttp\Promise\Create::rejectionFor($reason);
                 });
             };
         };
@@ -107,7 +107,7 @@ final class Middleware
     public static function tap(callable $before = null, callable $after = null) : callable
     {
         return static function (callable $handler) use($before, $after) : callable {
-            return static function (RequestInterface $request, array $options) use($handler, $before, $after) {
+            return static function (\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options) use($handler, $before, $after) {
                 if ($before) {
                     $before($request, $options);
                 }
@@ -127,7 +127,7 @@ final class Middleware
     public static function redirect() : callable
     {
         return static function (callable $handler) : RedirectMiddleware {
-            return new RedirectMiddleware($handler);
+            return new \LockmeDep\GuzzleHttp\RedirectMiddleware($handler);
         };
     }
     /**
@@ -148,7 +148,7 @@ final class Middleware
     public static function retry(callable $decider, callable $delay = null) : callable
     {
         return static function (callable $handler) use($decider, $delay) : RetryMiddleware {
-            return new RetryMiddleware($decider, $handler, $delay);
+            return new \LockmeDep\GuzzleHttp\RetryMiddleware($decider, $handler, $delay);
         };
     }
     /**
@@ -163,23 +163,23 @@ final class Middleware
      *
      * @return callable Returns a function that accepts the next handler.
      */
-    public static function log(LoggerInterface $logger, $formatter, string $logLevel = 'info') : callable
+    public static function log(\LockmeDep\Psr\Log\LoggerInterface $logger, $formatter, string $logLevel = 'info') : callable
     {
         // To be compatible with Guzzle 7.1.x we need to allow users to pass a MessageFormatter
-        if (!$formatter instanceof MessageFormatter && !$formatter instanceof MessageFormatterInterface) {
-            throw new \LogicException(\sprintf('Argument 2 to %s::log() must be of type %s', self::class, MessageFormatterInterface::class));
+        if (!$formatter instanceof \LockmeDep\GuzzleHttp\MessageFormatter && !$formatter instanceof \LockmeDep\GuzzleHttp\MessageFormatterInterface) {
+            throw new \LogicException(\sprintf('Argument 2 to %s::log() must be of type %s', self::class, \LockmeDep\GuzzleHttp\MessageFormatterInterface::class));
         }
         return static function (callable $handler) use($logger, $formatter, $logLevel) : callable {
-            return static function (RequestInterface $request, array $options = []) use($handler, $logger, $formatter, $logLevel) {
+            return static function (\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options = []) use($handler, $logger, $formatter, $logLevel) {
                 return $handler($request, $options)->then(static function ($response) use($logger, $request, $formatter, $logLevel) : ResponseInterface {
                     $message = $formatter->format($request, $response);
                     $logger->log($logLevel, $message);
                     return $response;
                 }, static function ($reason) use($logger, $request, $formatter) : PromiseInterface {
-                    $response = $reason instanceof RequestException ? $reason->getResponse() : null;
-                    $message = $formatter->format($request, $response, P\Create::exceptionFor($reason));
+                    $response = $reason instanceof \LockmeDep\GuzzleHttp\Exception\RequestException ? $reason->getResponse() : null;
+                    $message = $formatter->format($request, $response, \LockmeDep\GuzzleHttp\Promise\Create::exceptionFor($reason));
                     $logger->error($message);
-                    return P\Create::rejectionFor($reason);
+                    return \LockmeDep\GuzzleHttp\Promise\Create::rejectionFor($reason);
                 });
             };
         };
@@ -191,7 +191,7 @@ final class Middleware
     public static function prepareBody() : callable
     {
         return static function (callable $handler) : PrepareBodyMiddleware {
-            return new PrepareBodyMiddleware($handler);
+            return new \LockmeDep\GuzzleHttp\PrepareBodyMiddleware($handler);
         };
     }
     /**
@@ -204,7 +204,7 @@ final class Middleware
     public static function mapRequest(callable $fn) : callable
     {
         return static function (callable $handler) use($fn) : callable {
-            return static function (RequestInterface $request, array $options) use($handler, $fn) {
+            return static function (\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options) use($handler, $fn) {
                 return $handler($fn($request), $options);
             };
         };
@@ -219,7 +219,7 @@ final class Middleware
     public static function mapResponse(callable $fn) : callable
     {
         return static function (callable $handler) use($fn) : callable {
-            return static function (RequestInterface $request, array $options) use($handler, $fn) {
+            return static function (\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options) use($handler, $fn) {
                 return $handler($request, $options)->then($fn);
             };
         };

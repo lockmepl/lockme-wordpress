@@ -41,7 +41,7 @@ use Throwable;
  *
  * @link https://github.com/petkaantonov/bluebird/blob/master/API.md#generators inspiration
  */
-final class Coroutine implements PromiseInterface
+final class Coroutine implements \LockmeDep\GuzzleHttp\Promise\PromiseInterface
 {
     /**
      * @var PromiseInterface|null
@@ -58,7 +58,7 @@ final class Coroutine implements PromiseInterface
     public function __construct(callable $generatorFn)
     {
         $this->generator = $generatorFn();
-        $this->result = new Promise(function () {
+        $this->result = new \LockmeDep\GuzzleHttp\Promise\Promise(function () {
             while (isset($this->currentPromise)) {
                 $this->currentPromise->wait();
             }
@@ -67,7 +67,7 @@ final class Coroutine implements PromiseInterface
             $this->nextCoroutine($this->generator->current());
         } catch (\Exception $exception) {
             $this->result->reject($exception);
-        } catch (Throwable $throwable) {
+        } catch (\Throwable $throwable) {
             $this->result->reject($throwable);
         }
     }
@@ -111,7 +111,7 @@ final class Coroutine implements PromiseInterface
     }
     private function nextCoroutine($yielded)
     {
-        $this->currentPromise = Create::promiseFor($yielded)->then([$this, '_handleSuccess'], [$this, '_handleFailure']);
+        $this->currentPromise = \LockmeDep\GuzzleHttp\Promise\Create::promiseFor($yielded)->then([$this, '_handleSuccess'], [$this, '_handleFailure']);
     }
     /**
      * @internal
@@ -126,9 +126,9 @@ final class Coroutine implements PromiseInterface
             } else {
                 $this->result->resolve($value);
             }
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             $this->result->reject($exception);
-        } catch (Throwable $throwable) {
+        } catch (\Throwable $throwable) {
             $this->result->reject($throwable);
         }
     }
@@ -139,12 +139,12 @@ final class Coroutine implements PromiseInterface
     {
         unset($this->currentPromise);
         try {
-            $nextYield = $this->generator->throw(Create::exceptionFor($reason));
+            $nextYield = $this->generator->throw(\LockmeDep\GuzzleHttp\Promise\Create::exceptionFor($reason));
             // The throw was caught, so keep iterating on the coroutine
             $this->nextCoroutine($nextYield);
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             $this->result->reject($exception);
-        } catch (Throwable $throwable) {
+        } catch (\Throwable $throwable) {
             $this->result->reject($throwable);
         }
     }

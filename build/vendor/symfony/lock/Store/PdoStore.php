@@ -33,7 +33,7 @@ use LockmeDep\Symfony\Component\Lock\PersistingStoreInterface;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-class PdoStore implements PersistingStoreInterface
+class PdoStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreInterface
 {
     use ExpiringStoreTrait;
     private $conn;
@@ -74,22 +74,22 @@ class PdoStore implements PersistingStoreInterface
     public function __construct($connOrDsn, array $options = [], float $gcProbability = 0.01, int $initialTtl = 300)
     {
         if ($gcProbability < 0 || $gcProbability > 1) {
-            throw new InvalidArgumentException(\sprintf('"%s" requires gcProbability between 0 and 1, "%f" given.', __METHOD__, $gcProbability));
+            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('"%s" requires gcProbability between 0 and 1, "%f" given.', __METHOD__, $gcProbability));
         }
         if ($initialTtl < 1) {
-            throw new InvalidTtlException(\sprintf('"%s()" expects a strictly positive TTL, "%d" given.', __METHOD__, $initialTtl));
+            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidTtlException(\sprintf('"%s()" expects a strictly positive TTL, "%d" given.', __METHOD__, $initialTtl));
         }
         if ($connOrDsn instanceof \PDO) {
             if (\PDO::ERRMODE_EXCEPTION !== $connOrDsn->getAttribute(\PDO::ATTR_ERRMODE)) {
-                throw new InvalidArgumentException(\sprintf('"%s" requires PDO error mode attribute be set to throw Exceptions (i.e. $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION)).', __METHOD__));
+                throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('"%s" requires PDO error mode attribute be set to throw Exceptions (i.e. $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION)).', __METHOD__));
             }
             $this->conn = $connOrDsn;
-        } elseif ($connOrDsn instanceof Connection) {
+        } elseif ($connOrDsn instanceof \LockmeDep\Doctrine\DBAL\Connection) {
             $this->conn = $connOrDsn;
         } elseif (\is_string($connOrDsn)) {
             $this->dsn = $connOrDsn;
         } else {
-            throw new InvalidArgumentException(\sprintf('"%s" requires PDO or Doctrine\\DBAL\\Connection instance or DSN string as first argument, "%s" given.', __CLASS__, \get_debug_type($connOrDsn)));
+            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('"%s" requires PDO or Doctrine\\DBAL\\Connection instance or DSN string as first argument, "%s" given.', __CLASS__, \get_debug_type($connOrDsn)));
         }
         $this->table = $options['db_table'] ?? $this->table;
         $this->idCol = $options['db_id_col'] ?? $this->idCol;
@@ -104,14 +104,14 @@ class PdoStore implements PersistingStoreInterface
     /**
      * {@inheritdoc}
      */
-    public function save(Key $key)
+    public function save(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         $key->reduceLifetime($this->initialTtl);
         $sql = "INSERT INTO {$this->table} ({$this->idCol}, {$this->tokenCol}, {$this->expirationCol}) VALUES (:id, :token, {$this->getCurrentTimestampStatement()} + {$this->initialTtl})";
         $conn = $this->getConnection();
         try {
             $stmt = $conn->prepare($sql);
-        } catch (TableNotFoundException $e) {
+        } catch (\LockmeDep\Doctrine\DBAL\Exception\TableNotFoundException $e) {
             if (!$conn->isTransactionActive() || \in_array($this->driver, ['pgsql', 'sqlite', 'sqlsrv'], \true)) {
                 $this->createTable();
             }
@@ -126,12 +126,12 @@ class PdoStore implements PersistingStoreInterface
         $stmt->bindValue(':token', $this->getUniqueToken($key));
         try {
             $stmt->execute();
-        } catch (TableNotFoundException $e) {
+        } catch (\LockmeDep\Doctrine\DBAL\Exception\TableNotFoundException $e) {
             if (!$conn->isTransactionActive() || \in_array($this->driver, ['pgsql', 'sqlite', 'sqlsrv'], \true)) {
                 $this->createTable();
             }
             $stmt->execute();
-        } catch (DBALException|Exception $e) {
+        } catch (\LockmeDep\Doctrine\DBAL\DBALException|\LockmeDep\Doctrine\DBAL\Exception $e) {
             // the lock is already acquired. It could be us. Let's try to put off.
             $this->putOffExpiration($key, $this->initialTtl);
         } catch (\PDOException $e) {
@@ -146,10 +146,10 @@ class PdoStore implements PersistingStoreInterface
     /**
      * {@inheritdoc}
      */
-    public function putOffExpiration(Key $key, float $ttl)
+    public function putOffExpiration(\LockmeDep\Symfony\Component\Lock\Key $key, float $ttl)
     {
         if ($ttl < 1) {
-            throw new InvalidTtlException(\sprintf('"%s()" expects a TTL greater or equals to 1 second. Got "%s".', __METHOD__, $ttl));
+            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidTtlException(\sprintf('"%s()" expects a TTL greater or equals to 1 second. Got "%s".', __METHOD__, $ttl));
         }
         $key->reduceLifetime($ttl);
         $sql = "UPDATE {$this->table} SET {$this->expirationCol} = {$this->getCurrentTimestampStatement()} + {$ttl}, {$this->tokenCol} = :token1 WHERE {$this->idCol} = :id AND ({$this->tokenCol} = :token2 OR {$this->expirationCol} <= {$this->getCurrentTimestampStatement()})";
@@ -161,14 +161,14 @@ class PdoStore implements PersistingStoreInterface
         $result = $stmt->execute();
         // If this method is called twice in the same second, the row wouldn't be updated. We have to call exists to know if we are the owner
         if (!(\is_object($result) ? $result : $stmt)->rowCount() && !$this->exists($key)) {
-            throw new LockConflictedException();
+            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
         }
         $this->checkNotExpired($key);
     }
     /**
      * {@inheritdoc}
      */
-    public function delete(Key $key)
+    public function delete(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         $sql = "DELETE FROM {$this->table} WHERE {$this->idCol} = :id AND {$this->tokenCol} = :token";
         $stmt = $this->getConnection()->prepare($sql);
@@ -179,7 +179,7 @@ class PdoStore implements PersistingStoreInterface
     /**
      * {@inheritdoc}
      */
-    public function exists(Key $key)
+    public function exists(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         $sql = "SELECT 1 FROM {$this->table} WHERE {$this->idCol} = :id AND {$this->tokenCol} = :token AND {$this->expirationCol} > {$this->getCurrentTimestampStatement()}";
         $stmt = $this->getConnection()->prepare($sql);
@@ -191,11 +191,11 @@ class PdoStore implements PersistingStoreInterface
     /**
      * Returns a hashed version of the key.
      */
-    private function getHashedKey(Key $key) : string
+    private function getHashedKey(\LockmeDep\Symfony\Component\Lock\Key $key) : string
     {
         return \hash('sha256', (string) $key);
     }
-    private function getUniqueToken(Key $key) : string
+    private function getUniqueToken(\LockmeDep\Symfony\Component\Lock\Key $key) : string
     {
         if (!$key->hasState(__CLASS__)) {
             $token = \base64_encode(\random_bytes(32));
@@ -210,10 +210,10 @@ class PdoStore implements PersistingStoreInterface
     {
         if (null === $this->conn) {
             if (\strpos($this->dsn, '://')) {
-                if (!\class_exists(DriverManager::class)) {
-                    throw new InvalidArgumentException(\sprintf('Failed to parse the DSN "%s". Try running "composer require doctrine/dbal".', $this->dsn));
+                if (!\class_exists(\LockmeDep\Doctrine\DBAL\DriverManager::class)) {
+                    throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('Failed to parse the DSN "%s". Try running "composer require doctrine/dbal".', $this->dsn));
                 }
-                $this->conn = DriverManager::getConnection(['url' => $this->dsn]);
+                $this->conn = \LockmeDep\Doctrine\DBAL\DriverManager::getConnection(['url' => $this->dsn]);
             } else {
                 $this->conn = new \PDO($this->dsn, $this->username, $this->password, $this->connectionOptions);
                 $this->conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -234,8 +234,8 @@ class PdoStore implements PersistingStoreInterface
         // connect if we are not yet
         $conn = $this->getConnection();
         $driver = $this->getDriver();
-        if ($conn instanceof Connection) {
-            $schema = new Schema();
+        if ($conn instanceof \LockmeDep\Doctrine\DBAL\Connection) {
+            $schema = new \LockmeDep\Doctrine\DBAL\Schema\Schema();
             $this->addTableToSchema($schema);
             foreach ($schema->toSql($conn->getDatabasePlatform()) as $sql) {
                 if (\method_exists($conn, 'executeStatement')) {
@@ -274,9 +274,9 @@ class PdoStore implements PersistingStoreInterface
     /**
      * Adds the Table to the Schema if it doesn't exist.
      */
-    public function configureSchema(Schema $schema) : void
+    public function configureSchema(\LockmeDep\Doctrine\DBAL\Schema\Schema $schema) : void
     {
-        if (!$this->getConnection() instanceof Connection) {
+        if (!$this->getConnection() instanceof \LockmeDep\Doctrine\DBAL\Connection) {
             throw new \BadMethodCallException(\sprintf('"%s::%s()" is only supported when using a doctrine/dbal Connection.', __CLASS__, __METHOD__));
         }
         if ($schema->hasTable($this->table)) {
@@ -358,7 +358,7 @@ class PdoStore implements PersistingStoreInterface
                 return \time();
         }
     }
-    private function addTableToSchema(Schema $schema) : void
+    private function addTableToSchema(\LockmeDep\Doctrine\DBAL\Schema\Schema $schema) : void
     {
         $table = $schema->createTable($this->table);
         $table->addColumn($this->idCol, 'string', ['length' => 64]);

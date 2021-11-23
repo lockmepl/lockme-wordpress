@@ -5,7 +5,7 @@ namespace LockmeDep\GuzzleHttp\Promise;
 /**
  * Exception thrown when too many errors occur in the some() or any() methods.
  */
-class AggregateException extends RejectionException
+class AggregateException extends \LockmeDep\GuzzleHttp\Promise\RejectionException
 {
     public function __construct($msg, array $reasons)
     {

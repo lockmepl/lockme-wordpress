@@ -21,7 +21,7 @@ class Plugin
     public $options;
     public $tab;
     private $url_key;
-    private $plugins = ['appointments' => Appointments::class, 'booked' => Booked::class, 'bookly' => Bookly::class, 'cpabc' => Cpabc::class, 'dopbsp' => Dopbsp::class, 'easyapp' => Easyapp::class, 'ezscm' => Ezscm::class, 'woo' => Woo::class, 'wpdevart' => WPDevArt::class, 'wp_booking' => WPBooking::class];
+    private $plugins = ['appointments' => \LockmeDep\LockmeIntegration\Plugins\Appointments::class, 'booked' => \LockmeDep\LockmeIntegration\Plugins\Booked::class, 'bookly' => \LockmeDep\LockmeIntegration\Plugins\Bookly::class, 'cpabc' => \LockmeDep\LockmeIntegration\Plugins\Cpabc::class, 'dopbsp' => \LockmeDep\LockmeIntegration\Plugins\Dopbsp::class, 'easyapp' => \LockmeDep\LockmeIntegration\Plugins\Easyapp::class, 'ezscm' => \LockmeDep\LockmeIntegration\Plugins\Ezscm::class, 'woo' => \LockmeDep\LockmeIntegration\Plugins\Woo::class, 'wpdevart' => \LockmeDep\LockmeIntegration\Plugins\WPDevArt::class, 'wp_booking' => \LockmeDep\LockmeIntegration\Plugins\WPBooking::class];
     /**
      * @var PluginInterface[]
      */
@@ -36,7 +36,7 @@ class Plugin
         if (!$this->url_key) {
             try {
                 $this->url_key = \bin2hex(\random_bytes(10));
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->url_key = '39836295616564325481';
             }
             update_option('lockme_url_key', $this->url_key);
@@ -64,12 +64,12 @@ class Plugin
             try {
                 $api = $this->GetApi();
                 $token = $api->getTokenForCode($code, $state);
-                if ($token instanceof AccessToken) {
+                if ($token instanceof \League\OAuth2\Client\Token\AccessToken) {
                     update_option('lockme_oauth2_token', $token);
                 }
                 wp_redirect('options-general.php?page=lockme_integration&tab=api_options');
                 exit;
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 wp_redirect('options-general.php?page=lockme_integration&tab=api_options');
                 exit;
             }
@@ -83,7 +83,7 @@ class Plugin
                 }, function ($token) {
                     update_option('lockme_oauth2_token', $token);
                 });
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
             }
         }
         // Proceed with API callback
@@ -103,22 +103,22 @@ class Plugin
                 }
             }
             echo 'OK';
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             echo $e->getMessage();
         }
         die;
     }
-    public function GetApi() : ?Lockme
+    public function GetApi() : ?\LockmeDep\Lockme\SDK\Lockme
     {
         if ($this->options['client_id'] && $this->options['client_secret']) {
-            $lm = new Lockme(['clientId' => $this->options['client_id'], 'clientSecret' => $this->options['client_secret'], 'redirectUri' => get_admin_url() . 'options-general.php?page=lockme_integration&tab=api_options', 'api_domain' => $this->options['api_domain'] ?: 'https://api.lock.me']);
+            $lm = new \LockmeDep\Lockme\SDK\Lockme(['clientId' => $this->options['client_id'], 'clientSecret' => $this->options['client_secret'], 'redirectUri' => get_admin_url() . 'options-general.php?page=lockme_integration&tab=api_options', 'api_domain' => $this->options['api_domain'] ?: 'https://api.lock.me']);
             try {
                 $lm->loadAccessToken(function () {
                     return get_option('lockme_oauth2_token');
                 }, function ($token) {
                     update_option('lockme_oauth2_token', $token);
                 });
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 return $lm;
             }
             return $lm;
@@ -185,7 +185,7 @@ class Plugin
                     } else {
                         echo '<p><strong>BŁĄD</strong> odpowiedzi.</p>';
                     }
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     echo '<p><strong>BŁĄD API: ' . $e->getMessage() . '.</p>';
                 }
                 $authorizationUrl = $api->getAuthorizationUrl(['rooms_manage']);
@@ -203,7 +203,7 @@ class Plugin
                 if ($this->tab === $k . '_plugin') {
                     try {
                         $plugin->DrawForm();
-                    } catch (Exception $e) {
+                    } catch (\Exception $e) {
                         echo '<p>Configuration error. Details: ' . $e->getMessage() . '</p>';
                     }
                 }

@@ -51,7 +51,7 @@ class RetryMiddleware
     {
         return (int) \pow(2, $retries - 1) * 1000;
     }
-    public function __invoke(RequestInterface $request, array $options) : PromiseInterface
+    public function __invoke(\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options) : \LockmeDep\GuzzleHttp\Promise\PromiseInterface
     {
         if (!isset($options['retries'])) {
             $options['retries'] = 0;
@@ -62,7 +62,7 @@ class RetryMiddleware
     /**
      * Execute fulfilled closure
      */
-    private function onFulfilled(RequestInterface $request, array $options) : callable
+    private function onFulfilled(\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options) : callable
     {
         return function ($value) use($request, $options) {
             if (!($this->decider)($options['retries'], $request, $value, null)) {
@@ -74,16 +74,16 @@ class RetryMiddleware
     /**
      * Execute rejected closure
      */
-    private function onRejected(RequestInterface $req, array $options) : callable
+    private function onRejected(\LockmeDep\Psr\Http\Message\RequestInterface $req, array $options) : callable
     {
         return function ($reason) use($req, $options) {
             if (!($this->decider)($options['retries'], $req, null, $reason)) {
-                return P\Create::rejectionFor($reason);
+                return \LockmeDep\GuzzleHttp\Promise\Create::rejectionFor($reason);
             }
             return $this->doRetry($req, $options);
         };
     }
-    private function doRetry(RequestInterface $request, array $options, ResponseInterface $response = null) : PromiseInterface
+    private function doRetry(\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options, \LockmeDep\Psr\Http\Message\ResponseInterface $response = null) : \LockmeDep\GuzzleHttp\Promise\PromiseInterface
     {
         $options['delay'] = ($this->delay)(++$options['retries'], $response);
         return $this($request, $options);

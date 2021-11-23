@@ -11,19 +11,19 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
-class Easyapp implements PluginInterface
+class Easyapp implements \LockmeDep\LockmeIntegration\PluginInterface
 {
     private $options;
     private $models;
     private $resdata;
     private $plugin;
-    public function __construct(Plugin $plugin)
+    public function __construct(\LockmeDep\LockmeIntegration\Plugin $plugin)
     {
         global $wpdb;
         $this->plugin = $plugin;
         $this->options = get_option('lockme_easyapp');
         if (\is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
-            $this->models = new EADBModels($wpdb, new EATableColumns(), []);
+            $this->models = new \LockmeDep\EADBModels($wpdb, new \LockmeDep\EATableColumns(), []);
             if (isset($_GET['action'], $_GET['id']) && $_GET['action'] === 'ea_appointment' && $_GET['id']) {
                 $this->resdata = $this->AppData($_GET['id']);
             }
@@ -50,9 +50,9 @@ class Easyapp implements PluginInterface
     public function ExportToLockMe() : void
     {
         \set_time_limit(0);
-        $start = new DateTime();
-        $end = new DateTime();
-        $end->add(new DateInterval('P1Y'));
+        $start = new \DateTime();
+        $end = new \DateTime();
+        $end->add(new \DateInterval('P1Y'));
         $rows = $this->models->get_all_appointments(['from' => $start->format('Y-m-d'), 'to' => $end->format('Y-m-d')]);
         foreach ($rows as $row) {
             $this->Update($row->id, (array) $row);
@@ -77,7 +77,7 @@ class Easyapp implements PluginInterface
             if ($api) {
                 try {
                     $rooms = $api->RoomList();
-                } catch (IdentityProviderException $e) {
+                } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
                 }
             }
             $calendars = $wpdb->get_results('SELECT DISTINCT concat(l.`id`,"_",s.`id`,"_",ss.`id`) `id`, concat(l.`name`," - ",s.`name`," - ",ss.`name`) `name` FROM ' . $wpdb->prefix . 'ea_locations l join ' . $wpdb->prefix . 'ea_services s join ' . $wpdb->prefix . 'ea_staff ss');
@@ -149,7 +149,7 @@ class Easyapp implements PluginInterface
                         case 'DELETE':
                             try {
                                 $api->DeleteReservation((int) $this->resdata['roomid'], "ext/{$_GET['id']}");
-                            } catch (Exception $e) {
+                            } catch (\Exception $e) {
                             }
                             break;
                         default:
@@ -183,7 +183,7 @@ class Easyapp implements PluginInterface
                     $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, ['extid' => $id->id]);
                     return \true;
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                 }
                 break;
             case 'edit':
@@ -211,7 +211,7 @@ class Easyapp implements PluginInterface
         $api = $this->plugin->GetApi();
         try {
             $api->AddReservation($this->AppData($res['id']));
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
     }
     private function Update($id, $res) : void
@@ -224,7 +224,7 @@ class Easyapp implements PluginInterface
         $lockme_data = [];
         try {
             $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
         if (!$lockme_data) {
             $this->Add($res);
@@ -236,7 +236,7 @@ class Easyapp implements PluginInterface
         }
         try {
             $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
     }
     private function Delete($resid) : void
@@ -253,14 +253,14 @@ class Easyapp implements PluginInterface
         $lockme_data = [];
         try {
             $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$resid}");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
         if (!$lockme_data) {
             return;
         }
         try {
             $api->DeleteReservation((int) $appdata['roomid'], "ext/{$resid}");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
     }
     /**
@@ -277,7 +277,7 @@ class Easyapp implements PluginInterface
                 return $calendar->id;
             }
         }
-        throw new RuntimeException('No calendar');
+        throw new \RuntimeException('No calendar');
     }
     public function getPluginName() : string
     {

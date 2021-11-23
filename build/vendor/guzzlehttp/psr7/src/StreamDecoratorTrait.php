@@ -13,7 +13,7 @@ trait StreamDecoratorTrait
     /**
      * @param StreamInterface $stream Stream to decorate
      */
-    public function __construct(StreamInterface $stream)
+    public function __construct(\LockmeDep\Psr\Http\Message\StreamInterface $stream)
     {
         $this->stream = $stream;
     }
@@ -48,7 +48,7 @@ trait StreamDecoratorTrait
     }
     public function getContents()
     {
-        return Utils::copyToString($this);
+        return \LockmeDep\GuzzleHttp\Psr7\Utils::copyToString($this);
     }
     /**
      * Allow decorators to implement custom methods

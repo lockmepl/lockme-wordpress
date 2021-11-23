@@ -55,7 +55,7 @@ final class Php80
         if (\false === \strpos($class, '@')) {
             return $class;
         }
-        return ((\get_parent_class($class) ?: \key(\class_implements($class))) ?: 'class') . '@anonymous';
+        return (\get_parent_class($class) ?: \key(\class_implements($class)) ?: 'class') . '@anonymous';
     }
     public static function get_resource_id($res) : int
     {

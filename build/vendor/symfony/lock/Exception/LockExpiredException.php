@@ -15,6 +15,6 @@ namespace LockmeDep\Symfony\Component\Lock\Exception;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-class LockExpiredException extends \RuntimeException implements ExceptionInterface
+class LockExpiredException extends \RuntimeException implements \LockmeDep\Symfony\Component\Lock\Exception\ExceptionInterface
 {
 }

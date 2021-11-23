@@ -6,7 +6,7 @@ use LockmeDep\GuzzleHttp\Utils;
 /**
  * Persists non-session cookies using a JSON formatted file
  */
-class FileCookieJar extends CookieJar
+class FileCookieJar extends \LockmeDep\GuzzleHttp\Cookie\CookieJar
 {
     /**
      * @var string filename
@@ -53,11 +53,11 @@ class FileCookieJar extends CookieJar
         $json = [];
         /** @var SetCookie $cookie */
         foreach ($this as $cookie) {
-            if (CookieJar::shouldPersist($cookie, $this->storeSessionCookies)) {
+            if (\LockmeDep\GuzzleHttp\Cookie\CookieJar::shouldPersist($cookie, $this->storeSessionCookies)) {
                 $json[] = $cookie->toArray();
             }
         }
-        $jsonStr = Utils::jsonEncode($json);
+        $jsonStr = \LockmeDep\GuzzleHttp\Utils::jsonEncode($json);
         if (\false === \file_put_contents($filename, $jsonStr, \LOCK_EX)) {
             throw new \RuntimeException("Unable to save file {$filename}");
         }
@@ -80,10 +80,10 @@ class FileCookieJar extends CookieJar
         if ($json === '') {
             return;
         }
-        $data = Utils::jsonDecode($json, \true);
+        $data = \LockmeDep\GuzzleHttp\Utils::jsonDecode($json, \true);
         if (\is_array($data)) {
             foreach ($data as $cookie) {
-                $this->setCookie(new SetCookie($cookie));
+                $this->setCookie(new \LockmeDep\GuzzleHttp\Cookie\SetCookie($cookie));
             }
         } elseif (\is_scalar($data) && !empty($data)) {
             throw new \RuntimeException("Invalid cookie file: {$filename}");

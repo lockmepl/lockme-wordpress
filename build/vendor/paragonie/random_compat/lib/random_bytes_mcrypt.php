@@ -45,7 +45,7 @@ if (!\is_callable('random_bytes')) {
     {
         try {
             /** @var int $bytes */
-            $bytes = RandomCompat_intval($bytes);
+            $bytes = \LockmeDep\RandomCompat_intval($bytes);
         } catch (\TypeError $ex) {
             throw new \TypeError('random_bytes(): $bytes must be an integer');
         }
@@ -54,7 +54,7 @@ if (!\is_callable('random_bytes')) {
         }
         /** @var string|bool $buf */
         $buf = @\mcrypt_create_iv((int) $bytes, (int) \MCRYPT_DEV_URANDOM);
-        if (\is_string($buf) && RandomCompat_strlen($buf) === $bytes) {
+        if (\is_string($buf) && \LockmeDep\RandomCompat_strlen($buf) === $bytes) {
             /**
              * Return our random entropy buffer here:
              */

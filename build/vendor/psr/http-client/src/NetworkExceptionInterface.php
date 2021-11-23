@@ -10,7 +10,7 @@ use LockmeDep\Psr\Http\Message\RequestInterface;
  *
  * Example: the target host name can not be resolved or the connection failed.
  */
-interface NetworkExceptionInterface extends ClientExceptionInterface
+interface NetworkExceptionInterface extends \LockmeDep\Psr\Http\Client\ClientExceptionInterface
 {
     /**
      * Returns the request.
@@ -19,5 +19,5 @@ interface NetworkExceptionInterface extends ClientExceptionInterface
      *
      * @return RequestInterface
      */
-    public function getRequest() : RequestInterface;
+    public function getRequest() : \LockmeDep\Psr\Http\Message\RequestInterface;
 }

@@ -11,7 +11,7 @@ namespace LockmeDep\GuzzleHttp\Promise;
  *
  *     GuzzleHttp\Promise\Utils::queue()->run();
  */
-class TaskQueue implements TaskQueueInterface
+class TaskQueue implements \LockmeDep\GuzzleHttp\Promise\TaskQueueInterface
 {
     private $enableShutdown = \true;
     private $queue = [];

@@ -8,7 +8,7 @@ use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use LockmeDep\Lockme\OAuth2\Client\Provider\Exception\LockmeIdentityProviderException;
 use LockmeDep\Psr\Http\Message\ResponseInterface;
-class Lockme extends AbstractProvider
+class Lockme extends \League\OAuth2\Client\Provider\AbstractProvider
 {
     use BearerAuthorizationTrait;
     /**
@@ -43,7 +43,7 @@ class Lockme extends AbstractProvider
     {
         return $this->apiDomain . '/access_token';
     }
-    public function getResourceOwnerDetailsUrl(AccessToken $token)
+    public function getResourceOwnerDetailsUrl(\League\OAuth2\Client\Token\AccessToken $token)
     {
         return $this->apiDomain . '/' . $this->version . '/me';
     }
@@ -51,18 +51,18 @@ class Lockme extends AbstractProvider
     {
         return [];
     }
-    protected function checkResponse(ResponseInterface $response, $data)
+    protected function checkResponse(\LockmeDep\Psr\Http\Message\ResponseInterface $response, $data)
     {
         if ($response->getStatusCode() >= 400) {
-            throw LockmeIdentityProviderException::clientException($response, $data);
+            throw \LockmeDep\Lockme\OAuth2\Client\Provider\Exception\LockmeIdentityProviderException::clientException($response, $data);
         }
         if (isset($data['error'])) {
-            throw LockmeIdentityProviderException::oauthException($response, $data);
+            throw \LockmeDep\Lockme\OAuth2\Client\Provider\Exception\LockmeIdentityProviderException::oauthException($response, $data);
         }
     }
-    protected function createResourceOwner(array $response, AccessToken $token)
+    protected function createResourceOwner(array $response, \League\OAuth2\Client\Token\AccessToken $token)
     {
-        return new LockmeUser($response);
+        return new \LockmeDep\Lockme\OAuth2\Client\Provider\LockmeUser($response);
     }
     /**
      * Generate request, execute it and return parsed response

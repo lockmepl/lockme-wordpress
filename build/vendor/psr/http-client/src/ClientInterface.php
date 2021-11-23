@@ -15,5 +15,5 @@ interface ClientInterface
      *
      * @throws \Psr\Http\Client\ClientExceptionInterface If an error happens while processing the request.
      */
-    public function sendRequest(RequestInterface $request) : ResponseInterface;
+    public function sendRequest(\LockmeDep\Psr\Http\Message\RequestInterface $request) : \LockmeDep\Psr\Http\Message\ResponseInterface;
 }

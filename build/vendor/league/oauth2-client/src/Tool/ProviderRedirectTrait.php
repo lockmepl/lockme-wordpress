@@ -23,7 +23,7 @@ trait ProviderRedirectTrait
      * @return ResponseInterface
      * @throws BadResponseException
      */
-    protected function followRequestRedirects(RequestInterface $request)
+    protected function followRequestRedirects(\LockmeDep\Psr\Http\Message\RequestInterface $request)
     {
         $response = null;
         $attempts = 0;
@@ -31,7 +31,7 @@ trait ProviderRedirectTrait
             $attempts++;
             $response = $this->getHttpClient()->send($request, ['allow_redirects' => \false]);
             if ($this->isRedirect($response)) {
-                $redirectUrl = new Uri($response->getHeader('Location')[0]);
+                $redirectUrl = new \LockmeDep\GuzzleHttp\Psr7\Uri($response->getHeader('Location')[0]);
                 $request = $request->withUri($redirectUrl);
             } else {
                 break;
@@ -61,7 +61,7 @@ trait ProviderRedirectTrait
      *
      * @return boolean
      */
-    protected function isRedirect(ResponseInterface $response)
+    protected function isRedirect(\LockmeDep\Psr\Http\Message\ResponseInterface $response)
     {
         $statusCode = $response->getStatusCode();
         return $statusCode > 300 && $statusCode < 400 && $response->hasHeader('Location');
@@ -75,11 +75,11 @@ trait ProviderRedirectTrait
      * @param  RequestInterface $request
      * @return ResponseInterface
      */
-    public function getResponse(RequestInterface $request)
+    public function getResponse(\LockmeDep\Psr\Http\Message\RequestInterface $request)
     {
         try {
             $response = $this->followRequestRedirects($request);
-        } catch (BadResponseException $e) {
+        } catch (\LockmeDep\GuzzleHttp\Exception\BadResponseException $e) {
             $response = $e->getResponse();
         }
         return $response;
@@ -94,10 +94,10 @@ trait ProviderRedirectTrait
     public function setRedirectLimit($limit)
     {
         if (!\is_int($limit)) {
-            throw new InvalidArgumentException('redirectLimit must be an integer.');
+            throw new \InvalidArgumentException('redirectLimit must be an integer.');
         }
         if ($limit < 1) {
-            throw new InvalidArgumentException('redirectLimit must be greater than or equal to one.');
+            throw new \InvalidArgumentException('redirectLimit must be greater than or equal to one.');
         }
         $this->redirectLimit = $limit;
         return $this;

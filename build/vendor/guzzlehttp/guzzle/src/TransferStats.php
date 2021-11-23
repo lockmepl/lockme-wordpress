@@ -38,7 +38,7 @@ final class TransferStats
      * @param mixed                  $handlerErrorData Handler error data.
      * @param array                  $handlerStats     Handler specific stats.
      */
-    public function __construct(RequestInterface $request, ?ResponseInterface $response = null, ?float $transferTime = null, $handlerErrorData = null, array $handlerStats = [])
+    public function __construct(\LockmeDep\Psr\Http\Message\RequestInterface $request, ?\LockmeDep\Psr\Http\Message\ResponseInterface $response = null, ?float $transferTime = null, $handlerErrorData = null, array $handlerStats = [])
     {
         $this->request = $request;
         $this->response = $response;
@@ -46,14 +46,14 @@ final class TransferStats
         $this->handlerErrorData = $handlerErrorData;
         $this->handlerStats = $handlerStats;
     }
-    public function getRequest() : RequestInterface
+    public function getRequest() : \LockmeDep\Psr\Http\Message\RequestInterface
     {
         return $this->request;
     }
     /**
      * Returns the response that was received (if any).
      */
-    public function getResponse() : ?ResponseInterface
+    public function getResponse() : ?\LockmeDep\Psr\Http\Message\ResponseInterface
     {
         return $this->response;
     }
@@ -80,7 +80,7 @@ final class TransferStats
     /**
      * Get the effective URI the request was sent to.
      */
-    public function getEffectiveUri() : UriInterface
+    public function getEffectiveUri() : \LockmeDep\Psr\Http\Message\UriInterface
     {
         return $this->request->getUri();
     }

@@ -52,13 +52,13 @@ if (!\is_callable('random_int')) {
          */
         try {
             /** @var int $min */
-            $min = RandomCompat_intval($min);
+            $min = \LockmeDep\RandomCompat_intval($min);
         } catch (\TypeError $ex) {
             throw new \TypeError('random_int(): $min must be an integer');
         }
         try {
             /** @var int $max */
-            $max = RandomCompat_intval($max);
+            $max = \LockmeDep\RandomCompat_intval($max);
         } catch (\TypeError $ex) {
             throw new \TypeError('random_int(): $max must be an integer');
         }

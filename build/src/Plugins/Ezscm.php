@@ -7,13 +7,13 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
-class Ezscm implements PluginInterface
+class Ezscm implements \LockmeDep\LockmeIntegration\PluginInterface
 {
     private $options;
     private $tables;
     private $plugin;
     private $resdata;
-    public function __construct(Plugin $plugin)
+    public function __construct(\LockmeDep\LockmeIntegration\Plugin $plugin)
     {
         global $wpdb;
         $this->plugin = $plugin;
@@ -63,7 +63,7 @@ class Ezscm implements PluginInterface
             if ($api) {
                 try {
                     $rooms = $api->RoomList();
-                } catch (IdentityProviderException $e) {
+                } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
                 }
             }
             $calendars = $wpdb->get_results('
@@ -110,7 +110,7 @@ class Ezscm implements PluginInterface
         $api = $this->plugin->GetApi();
         try {
             $api->AddReservation($this->AppData($res));
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
     }
     private function Update($id, $res) : void
@@ -123,7 +123,7 @@ class Ezscm implements PluginInterface
         $lockme_data = null;
         try {
             $lockme_data = $api->Reservation((int) $data['roomid'], "ext/{$id}");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
         if (!$lockme_data) {
             $this->Add($res);
@@ -131,7 +131,7 @@ class Ezscm implements PluginInterface
         }
         try {
             $api->EditReservation((int) $data['roomid'], "ext/{$id}", $data);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
     }
     private function Delete($id, $res) : void
@@ -144,14 +144,14 @@ class Ezscm implements PluginInterface
         $lockme_data = null;
         try {
             $lockme_data = $api->Reservation((int) $data['roomid'], "ext/{$id}");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
         if (!$lockme_data) {
             return;
         }
         try {
             $api->DeleteReservation((int) $data['roomid'], "ext/{$id}");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
     }
     public function AddReservation($save_data) : void
@@ -201,7 +201,7 @@ class Ezscm implements PluginInterface
                 return $calendar->s_id;
             }
         }
-        throw new RuntimeException('No calendar');
+        throw new \RuntimeException('No calendar');
     }
     public function GetMessage(array $message) : bool
     {
@@ -224,7 +224,7 @@ class Ezscm implements PluginInterface
                     $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, array('extid' => $id));
                     return \true;
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                 }
                 break;
             case 'edit':

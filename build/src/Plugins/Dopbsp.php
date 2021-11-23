@@ -7,11 +7,11 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
-class Dopbsp implements PluginInterface
+class Dopbsp implements \LockmeDep\LockmeIntegration\PluginInterface
 {
     private $options;
     private $plugin;
-    public function __construct(Plugin $plugin)
+    public function __construct(\LockmeDep\LockmeIntegration\Plugin $plugin)
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_dopbsp');
@@ -69,7 +69,7 @@ class Dopbsp implements PluginInterface
         $lockme_data = null;
         try {
             $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
         if (!$lockme_data) {
             $this->Add($res);
@@ -81,7 +81,7 @@ class Dopbsp implements PluginInterface
         }
         try {
             $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
         return null;
     }
@@ -97,7 +97,7 @@ class Dopbsp implements PluginInterface
         $api = $this->plugin->GetApi();
         try {
             $api->AddReservation($this->AppData($res));
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
     }
     private function Delete($id) : void
@@ -115,14 +115,14 @@ class Dopbsp implements PluginInterface
         $lockme_data = [];
         try {
             $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
         if (!$lockme_data) {
             return;
         }
         try {
             $api->DeleteReservation((int) $appdata['roomid'], "ext/{$id}");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
     }
     public function FixSettings() : void
@@ -195,7 +195,7 @@ class Dopbsp implements PluginInterface
             if ($api) {
                 try {
                     $rooms = $api->RoomList();
-                } catch (IdentityProviderException $e) {
+                } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
                 }
             }
             $calendars = $wpdb->get_results('SELECT * FROM ' . $DOPBSP->tables->calendars . ' ORDER BY id DESC');
@@ -306,7 +306,7 @@ class Dopbsp implements PluginInterface
                 $history = [$hour => $day->hours->{$hour}];
                 $result = $wpdb->insert($DOPBSP->tables->reservations, ['calendar_id' => $calendar_id, 'language' => 'pl', 'currency' => 'zł', 'currency_code' => 'PLN', 'check_in' => $data['date'], 'check_out' => '', 'start_hour' => $hour, 'end_hour' => '', 'no_items' => 1, 'price' => $data['price'], 'price_total' => $data['price'], 'extras' => '', 'extras_price' => 0, 'discount' => '{}', 'discount_price' => 0, 'coupon' => '{}', 'coupon_price' => 0, 'fees' => '{}', 'fees_price' => 0, 'deposit' => '{}', 'deposit_price' => 0, 'days_hours_history' => \json_encode($history), 'form' => \json_encode($form), 'email' => $data['email'] ?: '', 'status' => $data['status'] ? 'approved' : 'pending', 'payment_method' => 'none', 'token' => '', 'transaction_id' => '']);
                 if ($result === \false) {
-                    throw new RuntimeException('Error saving to database - ' . $wpdb->last_error);
+                    throw new \RuntimeException('Error saving to database - ' . $wpdb->last_error);
                 }
                 $id = $wpdb->insert_id;
                 $DOPBSP->classes->backend_calendar_schedule->setApproved($id);
@@ -314,14 +314,14 @@ class Dopbsp implements PluginInterface
                     $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, ['extid' => $id]);
                     return \true;
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                 }
                 break;
             case 'edit':
                 if ($data['extid']) {
                     $res = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $DOPBSP->tables->reservations . ' WHERE `id` = %d', $data['extid']));
                     if (!$res) {
-                        throw new RuntimeException('No reservation');
+                        throw new \RuntimeException('No reservation');
                     }
                     if ($data['from_date'] && $data['from_hour'] && ($data['from_date'] != $data['date'] || $data['from_hour'] != $data['hour'])) {
                         $DOPBSP->classes->backend_calendar_schedule->setCanceled($res->id);
@@ -330,13 +330,13 @@ class Dopbsp implements PluginInterface
                         $history = [$hour => $day->hours->{$hour}];
                         $result = $wpdb->update($DOPBSP->tables->reservations, ['check_in' => $data['date'], 'start_hour' => $hour, 'days_hours_history' => \json_encode($history)], ['id' => $res->id]);
                         if ($result === \false) {
-                            throw new RuntimeException('Error saving to database 1 ');
+                            throw new \RuntimeException('Error saving to database 1 ');
                         }
                         $DOPBSP->classes->backend_calendar_schedule->setApproved($res->id);
                     }
                     $result = $wpdb->update($DOPBSP->tables->reservations, ['email' => $data['email'], 'form' => \json_encode($form), 'price' => $data['price'], 'price_total' => $data['price'], 'status' => $data['status'] ? 'approved' : 'pending'], ['id' => $res->id]);
                     if ($result === \false) {
-                        throw new RuntimeException('Error saving to database 2 ');
+                        throw new \RuntimeException('Error saving to database 2 ');
                     }
                     return \true;
                 }
@@ -345,11 +345,11 @@ class Dopbsp implements PluginInterface
                 if ($data['extid']) {
                     $res = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $DOPBSP->tables->reservations . ' WHERE `id` = %d', $data['extid']));
                     if (!$res) {
-                        throw new RuntimeException('No reservation');
+                        throw new \RuntimeException('No reservation');
                     }
                     $result = $wpdb->update($DOPBSP->tables->reservations, ['status' => 'canceled'], ['id' => $res->id]);
                     if ($result === \false) {
-                        throw new RuntimeException('Error saving to database');
+                        throw new \RuntimeException('Error saving to database');
                     }
                     $DOPBSP->classes->backend_calendar_schedule->setCanceled($res->id);
                     $wpdb->delete($DOPBSP->tables->reservations, ['id' => $res->id]);
@@ -373,6 +373,6 @@ class Dopbsp implements PluginInterface
                 return $calendar->id;
             }
         }
-        throw new RuntimeException('No calendar');
+        throw new \RuntimeException('No calendar');
     }
 }

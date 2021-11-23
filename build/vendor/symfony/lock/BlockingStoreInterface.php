@@ -14,12 +14,12 @@ use LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException;
 /**
  * @author Hamza Amrouche <hamza.simperfit@gmail.com>
  */
-interface BlockingStoreInterface extends PersistingStoreInterface
+interface BlockingStoreInterface extends \LockmeDep\Symfony\Component\Lock\PersistingStoreInterface
 {
     /**
      * Waits until a key becomes free, then stores the resource.
      *
      * @throws LockConflictedException
      */
-    public function waitAndSave(Key $key);
+    public function waitAndSave(\LockmeDep\Symfony\Component\Lock\Key $key);
 }

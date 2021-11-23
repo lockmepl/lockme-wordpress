@@ -8,7 +8,7 @@ namespace LockmeDep\GuzzleHttp\Promise;
  * Thenning off of this promise will invoke the onFulfilled callback
  * immediately and ignore other callbacks.
  */
-class FulfilledPromise implements PromiseInterface
+class FulfilledPromise implements \LockmeDep\GuzzleHttp\Promise\PromiseInterface
 {
     private $value;
     public function __construct($value)
@@ -24,11 +24,11 @@ class FulfilledPromise implements PromiseInterface
         if (!$onFulfilled) {
             return $this;
         }
-        $queue = Utils::queue();
-        $p = new Promise([$queue, 'run']);
+        $queue = \LockmeDep\GuzzleHttp\Promise\Utils::queue();
+        $p = new \LockmeDep\GuzzleHttp\Promise\Promise([$queue, 'run']);
         $value = $this->value;
         $queue->add(static function () use($p, $value, $onFulfilled) {
-            if (Is::pending($p)) {
+            if (\LockmeDep\GuzzleHttp\Promise\Is::pending($p)) {
                 try {
                     $p->resolve($onFulfilled($value));
                 } catch (\Throwable $e) {

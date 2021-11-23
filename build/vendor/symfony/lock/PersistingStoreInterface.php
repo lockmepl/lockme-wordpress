@@ -24,19 +24,19 @@ interface PersistingStoreInterface
      * @throws LockAcquiringException
      * @throws LockConflictedException
      */
-    public function save(Key $key);
+    public function save(\LockmeDep\Symfony\Component\Lock\Key $key);
     /**
      * Removes a resource from the storage.
      *
      * @throws LockReleasingException
      */
-    public function delete(Key $key);
+    public function delete(\LockmeDep\Symfony\Component\Lock\Key $key);
     /**
      * Returns whether or not the resource exists in the storage.
      *
      * @return bool
      */
-    public function exists(Key $key);
+    public function exists(\LockmeDep\Symfony\Component\Lock\Key $key);
     /**
      * Extends the TTL of a resource.
      *
@@ -44,5 +44,5 @@ interface PersistingStoreInterface
      *
      * @throws LockConflictedException
      */
-    public function putOffExpiration(Key $key, float $ttl);
+    public function putOffExpiration(\LockmeDep\Symfony\Component\Lock\Key $key, float $ttl);
 }

@@ -9,7 +9,7 @@ use LockmeDep\Psr\Http\Message\RequestInterface;
  *
  * Note that no response is present for a ConnectException
  */
-class ConnectException extends TransferException implements NetworkExceptionInterface
+class ConnectException extends \LockmeDep\GuzzleHttp\Exception\TransferException implements \LockmeDep\Psr\Http\Client\NetworkExceptionInterface
 {
     /**
      * @var RequestInterface
@@ -19,7 +19,7 @@ class ConnectException extends TransferException implements NetworkExceptionInte
      * @var array
      */
     private $handlerContext;
-    public function __construct(string $message, RequestInterface $request, \Throwable $previous = null, array $handlerContext = [])
+    public function __construct(string $message, \LockmeDep\Psr\Http\Message\RequestInterface $request, \Throwable $previous = null, array $handlerContext = [])
     {
         parent::__construct($message, 0, $previous);
         $this->request = $request;
@@ -28,7 +28,7 @@ class ConnectException extends TransferException implements NetworkExceptionInte
     /**
      * Get the request that caused the exception
      */
-    public function getRequest() : RequestInterface
+    public function getRequest() : \LockmeDep\Psr\Http\Message\RequestInterface
     {
         return $this->request;
     }

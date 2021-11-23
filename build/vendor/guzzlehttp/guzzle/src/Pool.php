@@ -20,7 +20,7 @@ use LockmeDep\Psr\Http\Message\RequestInterface;
  *
  * @final
  */
-class Pool implements PromisorInterface
+class Pool implements \LockmeDep\GuzzleHttp\Promise\PromisorInterface
 {
     /**
      * @var EachPromise
@@ -36,7 +36,7 @@ class Pool implements PromisorInterface
      *                                  - fulfilled: (callable) Function to invoke when a request completes.
      *                                  - rejected: (callable) Function to invoke when a request is rejected.
      */
-    public function __construct(ClientInterface $client, $requests, array $config = [])
+    public function __construct(\LockmeDep\GuzzleHttp\ClientInterface $client, $requests, array $config = [])
     {
         if (!isset($config['concurrency'])) {
             $config['concurrency'] = 25;
@@ -47,10 +47,10 @@ class Pool implements PromisorInterface
         } else {
             $opts = [];
         }
-        $iterable = P\Create::iterFor($requests);
+        $iterable = \LockmeDep\GuzzleHttp\Promise\Create::iterFor($requests);
         $requests = static function () use($iterable, $client, $opts) {
             foreach ($iterable as $key => $rfn) {
-                if ($rfn instanceof RequestInterface) {
+                if ($rfn instanceof \LockmeDep\Psr\Http\Message\RequestInterface) {
                     (yield $key => $client->sendAsync($rfn, $opts));
                 } elseif (\is_callable($rfn)) {
                     (yield $key => $rfn($opts));
@@ -59,12 +59,12 @@ class Pool implements PromisorInterface
                 }
             }
         };
-        $this->each = new EachPromise($requests(), $config);
+        $this->each = new \LockmeDep\GuzzleHttp\Promise\EachPromise($requests(), $config);
     }
     /**
      * Get promise
      */
-    public function promise() : PromiseInterface
+    public function promise() : \LockmeDep\GuzzleHttp\Promise\PromiseInterface
     {
         return $this->each->promise();
     }
@@ -86,7 +86,7 @@ class Pool implements PromisorInterface
      *
      * @throws \InvalidArgumentException if the event format is incorrect.
      */
-    public static function batch(ClientInterface $client, $requests, array $options = []) : array
+    public static function batch(\LockmeDep\GuzzleHttp\ClientInterface $client, $requests, array $options = []) : array
     {
         $res = [];
         self::cmpCallback($options, 'fulfilled', $res);

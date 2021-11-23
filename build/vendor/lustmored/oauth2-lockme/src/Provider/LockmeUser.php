@@ -7,7 +7,7 @@ use League\OAuth2\Client\Tool\ArrayAccessorTrait;
 /**
  * Lockme user
  */
-class LockmeUser implements ResourceOwnerInterface
+class LockmeUser implements \League\OAuth2\Client\Provider\ResourceOwnerInterface
 {
     use ArrayAccessorTrait;
     /**

@@ -5,7 +5,7 @@ namespace LockmeDep\GuzzleHttp\Cookie;
 /**
  * Persists cookies in the client session
  */
-class SessionCookieJar extends CookieJar
+class SessionCookieJar extends \LockmeDep\GuzzleHttp\Cookie\CookieJar
 {
     /**
      * @var string session key
@@ -45,7 +45,7 @@ class SessionCookieJar extends CookieJar
         $json = [];
         /** @var SetCookie $cookie */
         foreach ($this as $cookie) {
-            if (CookieJar::shouldPersist($cookie, $this->storeSessionCookies)) {
+            if (\LockmeDep\GuzzleHttp\Cookie\CookieJar::shouldPersist($cookie, $this->storeSessionCookies)) {
                 $json[] = $cookie->toArray();
             }
         }
@@ -62,7 +62,7 @@ class SessionCookieJar extends CookieJar
         $data = \json_decode($_SESSION[$this->sessionKey], \true);
         if (\is_array($data)) {
             foreach ($data as $cookie) {
-                $this->setCookie(new SetCookie($cookie));
+                $this->setCookie(new \LockmeDep\GuzzleHttp\Cookie\SetCookie($cookie));
             }
         } elseif (\strlen($data)) {
             throw new \RuntimeException("Invalid cookie data");

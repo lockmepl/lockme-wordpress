@@ -46,7 +46,7 @@ if (!\is_callable('random_bytes')) {
     {
         try {
             /** @var int $bytes */
-            $bytes = RandomCompat_intval($bytes);
+            $bytes = \LockmeDep\RandomCompat_intval($bytes);
         } catch (\TypeError $ex) {
             throw new \TypeError('random_bytes(): $bytes must be an integer');
         }
@@ -69,7 +69,7 @@ if (!\is_callable('random_bytes')) {
             $buf = \LockmeDep\Sodium\randombytes_buf($bytes);
         }
         if (\is_string($buf)) {
-            if (RandomCompat_strlen($buf) === $bytes) {
+            if (\LockmeDep\RandomCompat_strlen($buf) === $bytes) {
                 return $buf;
             }
         }

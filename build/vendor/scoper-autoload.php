@@ -6,14 +6,14 @@ $loader = require_once __DIR__.'/autoload.php';
 
 // Aliases for the whitelisted classes. For more information see:
 // https://github.com/humbug/php-scoper/blob/master/README.md#class-whitelisting
+if (!class_exists('ComposerAutoloaderInitd4cbf4ed8610848fdd2afdd92decc223', false) && !interface_exists('ComposerAutoloaderInitd4cbf4ed8610848fdd2afdd92decc223', false) && !trait_exists('ComposerAutoloaderInitd4cbf4ed8610848fdd2afdd92decc223', false)) {
+    spl_autoload_call('LockmeDep\ComposerAutoloaderInitd4cbf4ed8610848fdd2afdd92decc223');
+}
 if (!class_exists('Error', false) && !interface_exists('Error', false) && !trait_exists('Error', false)) {
     spl_autoload_call('LockmeDep\Error');
 }
 if (!class_exists('TypeError', false) && !interface_exists('TypeError', false) && !trait_exists('TypeError', false)) {
     spl_autoload_call('LockmeDep\TypeError');
-}
-if (!class_exists('ComposerAutoloaderInitd4cbf4ed8610848fdd2afdd92decc223', false) && !interface_exists('ComposerAutoloaderInitd4cbf4ed8610848fdd2afdd92decc223', false) && !trait_exists('ComposerAutoloaderInitd4cbf4ed8610848fdd2afdd92decc223', false)) {
-    spl_autoload_call('LockmeDep\ComposerAutoloaderInitd4cbf4ed8610848fdd2afdd92decc223');
 }
 if (!class_exists('UnhandledMatchError', false) && !interface_exists('UnhandledMatchError', false) && !trait_exists('UnhandledMatchError', false)) {
     spl_autoload_call('LockmeDep\UnhandledMatchError');
@@ -40,6 +40,11 @@ if (!function_exists('booked_apply_custom_timeslots_filter')) {
         return \LockmeDep\booked_apply_custom_timeslots_filter(...func_get_args());
     }
 }
+if (!function_exists('composerRequired4cbf4ed8610848fdd2afdd92decc223')) {
+    function composerRequired4cbf4ed8610848fdd2afdd92decc223() {
+        return \LockmeDep\composerRequired4cbf4ed8610848fdd2afdd92decc223(...func_get_args());
+    }
+}
 if (!function_exists('RandomCompat_strlen')) {
     function RandomCompat_strlen() {
         return \LockmeDep\RandomCompat_strlen(...func_get_args());
@@ -53,11 +58,6 @@ if (!function_exists('RandomCompat_substr')) {
 if (!function_exists('RandomCompat_intval')) {
     function RandomCompat_intval() {
         return \LockmeDep\RandomCompat_intval(...func_get_args());
-    }
-}
-if (!function_exists('composerRequired4cbf4ed8610848fdd2afdd92decc223')) {
-    function composerRequired4cbf4ed8610848fdd2afdd92decc223() {
-        return \LockmeDep\composerRequired4cbf4ed8610848fdd2afdd92decc223(...func_get_args());
     }
 }
 if (!function_exists('trigger_deprecation')) {

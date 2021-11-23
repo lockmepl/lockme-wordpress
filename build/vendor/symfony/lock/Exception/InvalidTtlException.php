@@ -13,6 +13,6 @@ namespace LockmeDep\Symfony\Component\Lock\Exception;
 /**
  * @author Amrouche Hamza <hamza.simperfit@gmail.com>
  */
-class InvalidTtlException extends InvalidArgumentException implements ExceptionInterface
+class InvalidTtlException extends \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException implements \LockmeDep\Symfony\Component\Lock\Exception\ExceptionInterface
 {
 }

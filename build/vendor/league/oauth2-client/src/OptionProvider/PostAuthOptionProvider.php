@@ -28,7 +28,7 @@ class PostAuthOptionProvider implements \League\OAuth2\Client\OptionProvider\Opt
     public function getAccessTokenOptions($method, array $params)
     {
         $options = ['headers' => ['content-type' => 'application/x-www-form-urlencoded']];
-        if ($method === AbstractProvider::METHOD_POST) {
+        if ($method === \League\OAuth2\Client\Provider\AbstractProvider::METHOD_POST) {
             $options['body'] = $this->getAccessTokenBody($params);
         }
         return $options;

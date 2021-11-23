@@ -24,7 +24,7 @@ use LockmeDep\Symfony\Component\Lock\Strategy\StrategyInterface;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-class CombinedStore implements SharedLockStoreInterface, LoggerAwareInterface
+class CombinedStore implements \LockmeDep\Symfony\Component\Lock\SharedLockStoreInterface, \LockmeDep\Psr\Log\LoggerAwareInterface
 {
     use ExpiringStoreTrait;
     use LoggerAwareTrait;
@@ -39,21 +39,21 @@ class CombinedStore implements SharedLockStoreInterface, LoggerAwareInterface
      *
      * @throws InvalidArgumentException
      */
-    public function __construct(array $stores, StrategyInterface $strategy)
+    public function __construct(array $stores, \LockmeDep\Symfony\Component\Lock\Strategy\StrategyInterface $strategy)
     {
         foreach ($stores as $store) {
-            if (!$store instanceof PersistingStoreInterface) {
-                throw new InvalidArgumentException(\sprintf('The store must implement "%s". Got "%s".', PersistingStoreInterface::class, \get_debug_type($store)));
+            if (!$store instanceof \LockmeDep\Symfony\Component\Lock\PersistingStoreInterface) {
+                throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('The store must implement "%s". Got "%s".', \LockmeDep\Symfony\Component\Lock\PersistingStoreInterface::class, \get_debug_type($store)));
             }
         }
         $this->stores = $stores;
         $this->strategy = $strategy;
-        $this->logger = new NullLogger();
+        $this->logger = new \LockmeDep\Psr\Log\NullLogger();
     }
     /**
      * {@inheritdoc}
      */
-    public function save(Key $key)
+    public function save(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         $successCount = 0;
         $failureCount = 0;
@@ -77,16 +77,16 @@ class CombinedStore implements SharedLockStoreInterface, LoggerAwareInterface
         $this->logger->info('Failed to store the "{resource}" lock. Quorum has not been met.', ['resource' => $key, 'success' => $successCount, 'failure' => $failureCount]);
         // clean up potential locks
         $this->delete($key);
-        throw new LockConflictedException();
+        throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
     }
-    public function saveRead(Key $key)
+    public function saveRead(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         $successCount = 0;
         $failureCount = 0;
         $storesCount = \count($this->stores);
         foreach ($this->stores as $store) {
             try {
-                if ($store instanceof SharedLockStoreInterface) {
+                if ($store instanceof \LockmeDep\Symfony\Component\Lock\SharedLockStoreInterface) {
                     $store->saveRead($key);
                 } else {
                     $store->save($key);
@@ -107,12 +107,12 @@ class CombinedStore implements SharedLockStoreInterface, LoggerAwareInterface
         $this->logger->info('Failed to store the "{resource}" lock. Quorum has not been met.', ['resource' => $key, 'success' => $successCount, 'failure' => $failureCount]);
         // clean up potential locks
         $this->delete($key);
-        throw new LockConflictedException();
+        throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
     }
     /**
      * {@inheritdoc}
      */
-    public function putOffExpiration(Key $key, float $ttl)
+    public function putOffExpiration(\LockmeDep\Symfony\Component\Lock\Key $key, float $ttl)
     {
         $successCount = 0;
         $failureCount = 0;
@@ -142,12 +142,12 @@ class CombinedStore implements SharedLockStoreInterface, LoggerAwareInterface
         $this->logger->notice('Failed to define the expiration for the "{resource}" lock. Quorum has not been met.', ['resource' => $key, 'success' => $successCount, 'failure' => $failureCount]);
         // clean up potential locks
         $this->delete($key);
-        throw new LockConflictedException();
+        throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
     }
     /**
      * {@inheritdoc}
      */
-    public function delete(Key $key)
+    public function delete(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         foreach ($this->stores as $store) {
             try {
@@ -160,7 +160,7 @@ class CombinedStore implements SharedLockStoreInterface, LoggerAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function exists(Key $key)
+    public function exists(\LockmeDep\Symfony\Component\Lock\Key $key)
     {
         $successCount = 0;
         $failureCount = 0;

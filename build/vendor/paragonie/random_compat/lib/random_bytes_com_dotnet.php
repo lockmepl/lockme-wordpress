@@ -44,7 +44,7 @@ if (!\is_callable('random_bytes')) {
     {
         try {
             /** @var int $bytes */
-            $bytes = RandomCompat_intval($bytes);
+            $bytes = \LockmeDep\RandomCompat_intval($bytes);
         } catch (\TypeError $ex) {
             throw new \TypeError('random_bytes(): $bytes must be an integer');
         }
@@ -65,11 +65,11 @@ if (!\is_callable('random_bytes')) {
          */
         do {
             $buf .= \base64_decode((string) $util->GetRandom($bytes, 0));
-            if (RandomCompat_strlen($buf) >= $bytes) {
+            if (\LockmeDep\RandomCompat_strlen($buf) >= $bytes) {
                 /**
                  * Return our random entropy buffer here:
                  */
-                return (string) RandomCompat_substr($buf, 0, $bytes);
+                return (string) \LockmeDep\RandomCompat_substr($buf, 0, $bytes);
             }
             ++$execCount;
         } while ($execCount < $bytes);

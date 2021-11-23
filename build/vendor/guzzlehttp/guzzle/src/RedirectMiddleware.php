@@ -35,7 +35,7 @@ class RedirectMiddleware
     {
         $this->nextHandler = $nextHandler;
     }
-    public function __invoke(RequestInterface $request, array $options) : PromiseInterface
+    public function __invoke(\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options) : \LockmeDep\GuzzleHttp\Promise\PromiseInterface
     {
         $fn = $this->nextHandler;
         if (empty($options['allow_redirects'])) {
@@ -52,14 +52,14 @@ class RedirectMiddleware
         if (empty($options['allow_redirects']['max'])) {
             return $fn($request, $options);
         }
-        return $fn($request, $options)->then(function (ResponseInterface $response) use($request, $options) {
+        return $fn($request, $options)->then(function (\LockmeDep\Psr\Http\Message\ResponseInterface $response) use($request, $options) {
             return $this->checkRedirect($request, $options, $response);
         });
     }
     /**
      * @return ResponseInterface|PromiseInterface
      */
-    public function checkRedirect(RequestInterface $request, array $options, ResponseInterface $response)
+    public function checkRedirect(\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options, \LockmeDep\Psr\Http\Message\ResponseInterface $response)
     {
         if (\strpos((string) $response->getStatusCode(), '3') !== 0 || !$response->hasHeader('Location')) {
             return $response;
@@ -79,9 +79,9 @@ class RedirectMiddleware
     /**
      * Enable tracking on promise.
      */
-    private function withTracking(PromiseInterface $promise, string $uri, int $statusCode) : PromiseInterface
+    private function withTracking(\LockmeDep\GuzzleHttp\Promise\PromiseInterface $promise, string $uri, int $statusCode) : \LockmeDep\GuzzleHttp\Promise\PromiseInterface
     {
-        return $promise->then(static function (ResponseInterface $response) use($uri, $statusCode) {
+        return $promise->then(static function (\LockmeDep\Psr\Http\Message\ResponseInterface $response) use($uri, $statusCode) {
             // Note that we are pushing to the front of the list as this
             // would be an earlier response than what is currently present
             // in the history header.
@@ -97,16 +97,16 @@ class RedirectMiddleware
      *
      * @throws TooManyRedirectsException Too many redirects.
      */
-    private function guardMax(RequestInterface $request, ResponseInterface $response, array &$options) : void
+    private function guardMax(\LockmeDep\Psr\Http\Message\RequestInterface $request, \LockmeDep\Psr\Http\Message\ResponseInterface $response, array &$options) : void
     {
         $current = $options['__redirect_count'] ?? 0;
         $options['__redirect_count'] = $current + 1;
         $max = $options['allow_redirects']['max'];
         if ($options['__redirect_count'] > $max) {
-            throw new TooManyRedirectsException("Will not follow more than {$max} redirects", $request, $response);
+            throw new \LockmeDep\GuzzleHttp\Exception\TooManyRedirectsException("Will not follow more than {$max} redirects", $request, $response);
         }
     }
-    public function modifyRequest(RequestInterface $request, array $options, ResponseInterface $response) : RequestInterface
+    public function modifyRequest(\LockmeDep\Psr\Http\Message\RequestInterface $request, array $options, \LockmeDep\Psr\Http\Message\ResponseInterface $response) : \LockmeDep\Psr\Http\Message\RequestInterface
     {
         // Request modifications to apply.
         $modify = [];
@@ -124,10 +124,10 @@ class RedirectMiddleware
         $uri = $this->redirectUri($request, $response, $protocols);
         if (isset($options['idn_conversion']) && $options['idn_conversion'] !== \false) {
             $idnOptions = $options['idn_conversion'] === \true ? \IDNA_DEFAULT : $options['idn_conversion'];
-            $uri = Utils::idnUriConvert($uri, $idnOptions);
+            $uri = \LockmeDep\GuzzleHttp\Utils::idnUriConvert($uri, $idnOptions);
         }
         $modify['uri'] = $uri;
-        Psr7\Message::rewindBody($request);
+        \LockmeDep\GuzzleHttp\Psr7\Message::rewindBody($request);
         // Add the Referer header if it is told to do so and only
         // add the header if we are not redirecting from https to http.
         if ($options['allow_redirects']['referer'] && $modify['uri']->getScheme() === $request->getUri()->getScheme()) {
@@ -140,17 +140,17 @@ class RedirectMiddleware
         if ($request->getUri()->getHost() !== $modify['uri']->getHost()) {
             $modify['remove_headers'][] = 'Authorization';
         }
-        return Psr7\Utils::modifyRequest($request, $modify);
+        return \LockmeDep\GuzzleHttp\Psr7\Utils::modifyRequest($request, $modify);
     }
     /**
      * Set the appropriate URL on the request based on the location header
      */
-    private function redirectUri(RequestInterface $request, ResponseInterface $response, array $protocols) : UriInterface
+    private function redirectUri(\LockmeDep\Psr\Http\Message\RequestInterface $request, \LockmeDep\Psr\Http\Message\ResponseInterface $response, array $protocols) : \LockmeDep\Psr\Http\Message\UriInterface
     {
-        $location = Psr7\UriResolver::resolve($request->getUri(), new Psr7\Uri($response->getHeaderLine('Location')));
+        $location = \LockmeDep\GuzzleHttp\Psr7\UriResolver::resolve($request->getUri(), new \LockmeDep\GuzzleHttp\Psr7\Uri($response->getHeaderLine('Location')));
         // Ensure that the redirect URI is allowed based on the protocols.
         if (!\in_array($location->getScheme(), $protocols)) {
-            throw new BadResponseException(\sprintf('Redirect URI, %s, does not use one of the allowed redirect protocols: %s', $location, \implode(', ', $protocols)), $request, $response);
+            throw new \LockmeDep\GuzzleHttp\Exception\BadResponseException(\sprintf('Redirect URI, %s, does not use one of the allowed redirect protocols: %s', $location, \implode(', ', $protocols)), $request, $response);
         }
         return $location;
     }

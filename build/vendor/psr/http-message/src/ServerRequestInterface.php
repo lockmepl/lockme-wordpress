@@ -40,7 +40,7 @@ namespace LockmeDep\Psr\Http\Message;
  * be implemented such that they retain the internal state of the current
  * message and return an instance that contains the changed state.
  */
-interface ServerRequestInterface extends RequestInterface
+interface ServerRequestInterface extends \LockmeDep\Psr\Http\Message\RequestInterface
 {
     /**
      * Retrieve server parameters.

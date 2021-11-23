@@ -15,7 +15,7 @@ namespace LockmeDep\Symfony\Component\Lock\Strategy;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-class UnanimousStrategy implements StrategyInterface
+class UnanimousStrategy implements \LockmeDep\Symfony\Component\Lock\Strategy\StrategyInterface
 {
     /**
      * {@inheritdoc}

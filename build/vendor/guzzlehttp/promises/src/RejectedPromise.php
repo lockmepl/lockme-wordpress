@@ -8,7 +8,7 @@ namespace LockmeDep\GuzzleHttp\Promise;
  * Thenning off of this promise will invoke the onRejected callback
  * immediately and ignore other callbacks.
  */
-class RejectedPromise implements PromiseInterface
+class RejectedPromise implements \LockmeDep\GuzzleHttp\Promise\PromiseInterface
 {
     private $reason;
     public function __construct($reason)
@@ -24,11 +24,11 @@ class RejectedPromise implements PromiseInterface
         if (!$onRejected) {
             return $this;
         }
-        $queue = Utils::queue();
+        $queue = \LockmeDep\GuzzleHttp\Promise\Utils::queue();
         $reason = $this->reason;
-        $p = new Promise([$queue, 'run']);
+        $p = new \LockmeDep\GuzzleHttp\Promise\Promise([$queue, 'run']);
         $queue->add(static function () use($p, $reason, $onRejected) {
-            if (Is::pending($p)) {
+            if (\LockmeDep\GuzzleHttp\Promise\Is::pending($p)) {
                 try {
                     // Return a resolved promise if onRejected does not throw.
                     $p->resolve($onRejected($reason));
@@ -50,7 +50,7 @@ class RejectedPromise implements PromiseInterface
     public function wait($unwrap = \true, $defaultDelivery = null)
     {
         if ($unwrap) {
-            throw Create::exceptionFor($this->reason);
+            throw \LockmeDep\GuzzleHttp\Promise\Create::exceptionFor($this->reason);
         }
         return null;
     }

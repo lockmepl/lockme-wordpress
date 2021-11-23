@@ -9,11 +9,11 @@ use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
 use LockmeDep\WC_Booking;
 use LockmeDep\WP_Query;
-class Woo implements PluginInterface
+class Woo implements \LockmeDep\LockmeIntegration\PluginInterface
 {
     private $options;
     private $plugin;
-    public function __construct(Plugin $plugin)
+    public function __construct(\LockmeDep\LockmeIntegration\Plugin $plugin)
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_woo');
@@ -40,7 +40,7 @@ class Woo implements PluginInterface
     public function ExportToLockMe() : void
     {
         $args = ['post_type' => 'wc_booking', 'meta_key' => '_booking_start', 'meta_value' => \date('YmdHis'), 'meta_compare' => '>=', 'posts_per_page' => -1, 'post_status' => 'any'];
-        $loop = new WP_Query($args);
+        $loop = new \LockmeDep\WP_Query($args);
         while ($loop->have_posts()) {
             $loop->the_post();
             $post = $loop->post;
@@ -72,7 +72,7 @@ class Woo implements PluginInterface
             if ($api) {
                 try {
                     $rooms = $api->RoomList();
-                } catch (IdentityProviderException $e) {
+                } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
                 }
             }
             $args = ['post_type' => 'product'];
@@ -122,7 +122,7 @@ class Woo implements PluginInterface
         if ($post->post_type !== 'wc_booking') {
             return \false;
         }
-        $booking = new WC_Booking($postid);
+        $booking = new \LockmeDep\WC_Booking($postid);
         if (!$booking->populated) {
             return \false;
         }
@@ -137,7 +137,7 @@ class Woo implements PluginInterface
         $lockme_data = null;
         try {
             $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$postid}");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
         try {
             if (!$lockme_data) {
@@ -147,7 +147,7 @@ class Woo implements PluginInterface
                 //Update
                 $api->EditReservation((int) $appdata['roomid'], "ext/{$postid}", $appdata);
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
         return \true;
     }
@@ -161,7 +161,7 @@ class Woo implements PluginInterface
         if ($post->post_type !== 'wc_booking') {
             return \false;
         }
-        $booking = new WC_Booking($postid);
+        $booking = new \LockmeDep\WC_Booking($postid);
         if (!$booking->populated) {
             return \false;
         }
@@ -175,7 +175,7 @@ class Woo implements PluginInterface
         $api = $this->plugin->GetApi();
         try {
             $api->DeleteReservation((int) $appdata['roomid'], "ext/{$booking->get_id()}");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
         }
         return null;
     }
@@ -199,10 +199,10 @@ class Woo implements PluginInterface
                         $api = $this->plugin->GetApi();
                         $api->EditReservation($roomid, $lockme_id, ['extid' => $booking->get_id()]);
                         return \true;
-                    } catch (Exception $e) {
+                    } catch (\Exception $e) {
                     }
                 } else {
-                    throw new RuntimeException('Saving error');
+                    throw new \RuntimeException('Saving error');
                 }
                 break;
             case 'edit':
@@ -211,7 +211,7 @@ class Woo implements PluginInterface
                     if ($post->post_type !== 'wc_booking') {
                         return \false;
                     }
-                    $booking = new WC_Booking($data['extid']);
+                    $booking = new \LockmeDep\WC_Booking($data['extid']);
                     if (!$booking->populated) {
                         return \false;
                     }

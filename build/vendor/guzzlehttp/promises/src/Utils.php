@@ -21,13 +21,13 @@ final class Utils
      *
      * @return TaskQueueInterface
      */
-    public static function queue(TaskQueueInterface $assign = null)
+    public static function queue(\LockmeDep\GuzzleHttp\Promise\TaskQueueInterface $assign = null)
     {
         static $queue;
         if ($assign) {
             $queue = $assign;
         } elseif (!$queue) {
-            $queue = new TaskQueue();
+            $queue = new \LockmeDep\GuzzleHttp\Promise\TaskQueue();
         }
         return $queue;
     }
@@ -42,7 +42,7 @@ final class Utils
     public static function task(callable $task)
     {
         $queue = self::queue();
-        $promise = new Promise([$queue, 'run']);
+        $promise = new \LockmeDep\GuzzleHttp\Promise\Promise([$queue, 'run']);
         $queue->add(function () use($task, $promise) {
             try {
                 $promise->resolve($task());
@@ -68,16 +68,16 @@ final class Utils
      *
      * @return array
      */
-    public static function inspect(PromiseInterface $promise)
+    public static function inspect(\LockmeDep\GuzzleHttp\Promise\PromiseInterface $promise)
     {
         try {
-            return ['state' => PromiseInterface::FULFILLED, 'value' => $promise->wait()];
-        } catch (RejectionException $e) {
-            return ['state' => PromiseInterface::REJECTED, 'reason' => $e->getReason()];
+            return ['state' => \LockmeDep\GuzzleHttp\Promise\PromiseInterface::FULFILLED, 'value' => $promise->wait()];
+        } catch (\LockmeDep\GuzzleHttp\Promise\RejectionException $e) {
+            return ['state' => \LockmeDep\GuzzleHttp\Promise\PromiseInterface::REJECTED, 'reason' => $e->getReason()];
         } catch (\Throwable $e) {
-            return ['state' => PromiseInterface::REJECTED, 'reason' => $e];
+            return ['state' => \LockmeDep\GuzzleHttp\Promise\PromiseInterface::REJECTED, 'reason' => $e];
         } catch (\Exception $e) {
-            return ['state' => PromiseInterface::REJECTED, 'reason' => $e];
+            return ['state' => \LockmeDep\GuzzleHttp\Promise\PromiseInterface::REJECTED, 'reason' => $e];
         }
     }
     /**
@@ -138,9 +138,9 @@ final class Utils
     public static function all($promises, $recursive = \false)
     {
         $results = [];
-        $promise = Each::of($promises, function ($value, $idx) use(&$results) {
+        $promise = \LockmeDep\GuzzleHttp\Promise\Each::of($promises, function ($value, $idx) use(&$results) {
             $results[$idx] = $value;
-        }, function ($reason, $idx, Promise $aggregate) {
+        }, function ($reason, $idx, \LockmeDep\GuzzleHttp\Promise\Promise $aggregate) {
             $aggregate->reject($reason);
         })->then(function () use(&$results) {
             \ksort($results);
@@ -149,7 +149,7 @@ final class Utils
         if (\true === $recursive) {
             $promise = $promise->then(function ($results) use($recursive, &$promises) {
                 foreach ($promises as $promise) {
-                    if (Is::pending($promise)) {
+                    if (\LockmeDep\GuzzleHttp\Promise\Is::pending($promise)) {
                         return self::all($promises, $recursive);
                     }
                 }
@@ -178,8 +178,8 @@ final class Utils
     {
         $results = [];
         $rejections = [];
-        return Each::of($promises, function ($value, $idx, PromiseInterface $p) use(&$results, $count) {
-            if (Is::settled($p)) {
+        return \LockmeDep\GuzzleHttp\Promise\Each::of($promises, function ($value, $idx, \LockmeDep\GuzzleHttp\Promise\PromiseInterface $p) use(&$results, $count) {
+            if (\LockmeDep\GuzzleHttp\Promise\Is::settled($p)) {
                 return;
             }
             $results[$idx] = $value;
@@ -190,7 +190,7 @@ final class Utils
             $rejections[] = $reason;
         })->then(function () use(&$results, &$rejections, $count) {
             if (\count($results) !== $count) {
-                throw new AggregateException('Not enough promises to fulfill count', $rejections);
+                throw new \LockmeDep\GuzzleHttp\Promise\AggregateException('Not enough promises to fulfill count', $rejections);
             }
             \ksort($results);
             return \array_values($results);
@@ -225,10 +225,10 @@ final class Utils
     public static function settle($promises)
     {
         $results = [];
-        return Each::of($promises, function ($value, $idx) use(&$results) {
-            $results[$idx] = ['state' => PromiseInterface::FULFILLED, 'value' => $value];
+        return \LockmeDep\GuzzleHttp\Promise\Each::of($promises, function ($value, $idx) use(&$results) {
+            $results[$idx] = ['state' => \LockmeDep\GuzzleHttp\Promise\PromiseInterface::FULFILLED, 'value' => $value];
         }, function ($reason, $idx) use(&$results) {
-            $results[$idx] = ['state' => PromiseInterface::REJECTED, 'reason' => $reason];
+            $results[$idx] = ['state' => \LockmeDep\GuzzleHttp\Promise\PromiseInterface::REJECTED, 'reason' => $reason];
         })->then(function () use(&$results) {
             \ksort($results);
             return $results;

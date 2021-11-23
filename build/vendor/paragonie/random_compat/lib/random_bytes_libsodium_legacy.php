@@ -46,7 +46,7 @@ if (!\is_callable('random_bytes')) {
     {
         try {
             /** @var int $bytes */
-            $bytes = RandomCompat_intval($bytes);
+            $bytes = \LockmeDep\RandomCompat_intval($bytes);
         } catch (\TypeError $ex) {
             throw new \TypeError('random_bytes(): $bytes must be an integer');
         }
@@ -64,13 +64,13 @@ if (!\is_callable('random_bytes')) {
         if ($bytes > 2147483647) {
             for ($i = 0; $i < $bytes; $i += 1073741824) {
                 $n = $bytes - $i > 1073741824 ? 1073741824 : $bytes - $i;
-                $buf .= Sodium::randombytes_buf((int) $n);
+                $buf .= \LockmeDep\Sodium::randombytes_buf((int) $n);
             }
         } else {
-            $buf .= Sodium::randombytes_buf((int) $bytes);
+            $buf .= \LockmeDep\Sodium::randombytes_buf((int) $bytes);
         }
         if (\is_string($buf)) {
-            if (RandomCompat_strlen($buf) === $bytes) {
+            if (\LockmeDep\RandomCompat_strlen($buf) === $bytes) {
                 return $buf;
             }
         }

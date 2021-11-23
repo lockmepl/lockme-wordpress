@@ -20,6 +20,6 @@ use InvalidArgumentException;
  *
  * @see League\OAuth2\Client\Grant\AbstractGrant
  */
-class InvalidGrantException extends InvalidArgumentException
+class InvalidGrantException extends \InvalidArgumentException
 {
 }

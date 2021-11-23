@@ -35,7 +35,7 @@ class RequestFactory
      */
     public function getRequest($method, $uri, array $headers = [], $body = null, $version = '1.1')
     {
-        return new Request($method, $uri, $headers, $body, $version);
+        return new \LockmeDep\GuzzleHttp\Psr7\Request($method, $uri, $headers, $body, $version);
     }
     /**
      * Parses simplified options.
