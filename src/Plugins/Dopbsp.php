@@ -465,6 +465,16 @@ class Dopbsp implements PluginInterface
                 'value' => $data['price']
             ]
         ];
+        if (isset($data['invoice']) && !empty($data['invoice'])) {
+            $form[] = [
+                'id' => '8',
+                'is_email' => 'false',
+                'add_to_day_hour_info' => 'false',
+                'add_to_day_hour_body' => 'false',
+                'translation' => 'Faktura',
+                'value' => $data['invoice']
+            ];
+        }
 
         switch ($message['action']) {
             case 'add':
