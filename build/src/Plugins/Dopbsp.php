@@ -296,6 +296,9 @@ class Dopbsp implements PluginInterface
         $hour = \date('H:i', \strtotime($data['hour']));
         $calendar_id = $this->GetCalendar($roomid);
         $form = [['id' => '1', 'is_email' => 'false', 'add_to_day_hour_info' => 'false', 'add_to_day_hour_body' => 'false', 'translation' => 'Imię', 'value' => $data['name']], ['id' => '2', 'is_email' => 'false', 'add_to_day_hour_info' => 'false', 'add_to_day_hour_body' => 'false', 'translation' => 'Nazwisko', 'value' => $data['surname']], ['id' => '3', 'is_email' => 'false', 'add_to_day_hour_info' => 'false', 'add_to_day_hour_body' => 'false', 'translation' => 'Email', 'value' => $data['email']], ['id' => '4', 'is_email' => 'false', 'add_to_day_hour_info' => 'false', 'add_to_day_hour_body' => 'false', 'translation' => 'Telefon', 'value' => $data['phone']], ['id' => '5', 'is_email' => 'false', 'add_to_day_hour_info' => 'false', 'add_to_day_hour_body' => 'false', 'translation' => 'Dodatkowe uwagi', 'value' => $data['comment']], ['id' => '6', 'is_email' => 'false', 'add_to_day_hour_info' => 'false', 'add_to_day_hour_body' => 'false', 'translation' => 'Źródło', 'value' => \in_array($data['source'], ['panel', 'web', 'widget']) ? 'LockMe' : ''], ['id' => '7', 'is_email' => 'false', 'add_to_day_hour_info' => 'false', 'add_to_day_hour_body' => 'false', 'translation' => 'Cena', 'value' => $data['price']]];
+        if (isset($data['invoice']) && !empty($data['invoice'])) {
+            $form[] = ['id' => '8', 'is_email' => 'false', 'add_to_day_hour_info' => 'false', 'add_to_day_hour_body' => 'false', 'translation' => 'Faktura', 'value' => $data['invoice']];
+        }
         switch ($message['action']) {
             case 'add':
                 $day_data = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $DOPBSP->tables->days . ' WHERE calendar_id=%d AND day="%s"', $calendar_id, $data['date']));

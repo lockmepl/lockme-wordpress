@@ -18,7 +18,7 @@ trait LoggerAwareTrait
      *
      * @param LoggerInterface $logger
      */
-    public function setLogger(LoggerInterface $logger)
+    public function setLogger(\LockmeDep\Psr\Log\LoggerInterface $logger)
     {
         $this->logger = $logger;
     }

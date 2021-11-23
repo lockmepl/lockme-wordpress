@@ -3,6 +3,9 @@
     "description": "LockMe wordpress integration plugin",
     "type": "wordpress-plugin",
     "config": {
+        "platform": {
+            "php": "7.2.5"
+        },
         "sort-packages": true
     },
     "require": {
