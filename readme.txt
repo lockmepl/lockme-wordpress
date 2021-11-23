@@ -5,7 +5,7 @@ Tags: lustmored
 Requires PHP: 7.2
 Requires at least: 4.8
 Tested up to: 5.5.1
-Stable tag: 2.1.5
+Stable tag: 2.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,10 @@ Show answer - no. Long answer - please contact us at kontakt@lockme.pl and we'll
 1. Main settings page for connection with Lockme API
 
 == Changelog ==
+
+= 2.2 =
+
+* Add information about invoice data (only Booking System PRO for now)
 
 = 2.1 =
 
