@@ -14,12 +14,12 @@ use LockmeDep\wpdevart_bc_ModelCalendars;
 use LockmeDep\wpdevart_bc_ModelExtras;
 use LockmeDep\wpdevart_bc_ModelForms;
 use LockmeDep\wpdevart_bc_ModelThemes;
-class WPDevArt implements \LockmeDep\LockmeIntegration\PluginInterface
+class WPDevArt implements PluginInterface
 {
     private $options;
     private $resdata;
     private $plugin;
-    public function __construct(\LockmeDep\LockmeIntegration\Plugin $plugin)
+    public function __construct(Plugin $plugin)
     {
         global $wpdb;
         $this->plugin = $plugin;
@@ -66,7 +66,7 @@ class WPDevArt implements \LockmeDep\LockmeIntegration\PluginInterface
         $lockme_data = [];
         try {
             $lockme_data = $api->Reservation((int) $resdata['roomid'], "ext/{$id}");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
         try {
             if (!$lockme_data) {
@@ -76,7 +76,7 @@ class WPDevArt implements \LockmeDep\LockmeIntegration\PluginInterface
                 //Update
                 $api->EditReservation((int) $resdata['roomid'], "ext/{$id}", $resdata);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
     }
     private function AppData($res) : array
@@ -102,7 +102,7 @@ class WPDevArt implements \LockmeDep\LockmeIntegration\PluginInterface
             if ($api) {
                 try {
                     $rooms = $api->RoomList();
-                } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+                } catch (IdentityProviderException $e) {
                 }
             }
             $query = 'SELECT * FROM ' . $wpdb->prefix . 'wpdevart_calendars ';
@@ -177,7 +177,7 @@ class WPDevArt implements \LockmeDep\LockmeIntegration\PluginInterface
         $api = $this->plugin->GetApi();
         try {
             $api->DeleteReservation((int) $resdata['roomid'], "ext/{$id}");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
     }
     public function GetMessage(array $message) : bool
@@ -193,7 +193,7 @@ class WPDevArt implements \LockmeDep\LockmeIntegration\PluginInterface
         $hour = \date('H:i', \strtotime($data['hour']));
         $calendar_id = $this->GetCalendar($roomid);
         if (!$calendar_id) {
-            throw new \RuntimeException('No calendar');
+            throw new RuntimeException('No calendar');
         }
         //        $cf_meta_value = '';
         //        foreach ([
@@ -209,14 +209,14 @@ class WPDevArt implements \LockmeDep\LockmeIntegration\PluginInterface
             case 'add':
                 $result = $wpdb->insert($wpdb->prefix . 'wpdevart_reservations', ['calendar_id' => $calendar_id, 'single_day' => $date, 'start_hour' => $hour, 'count_item' => 1, 'price' => $data['price'], 'total_price' => $data['price'], 'form' => [], 'email' => $data['email'], 'status' => 'approved', 'date_created' => \date('Y-m-d H:i'), 'is_new' => 0]);
                 if ($result === \false) {
-                    throw new \RuntimeException('Error saving to database - ' . $wpdb->last_error);
+                    throw new RuntimeException('Error saving to database - ' . $wpdb->last_error);
                 }
                 $id = $wpdb->insert_id;
                 $res = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $wpdb->prefix . 'wpdevart_reservations WHERE `id`=%d', $id), ARRAY_A);
-                $theme_model = new \LockmeDep\wpdevart_bc_ModelThemes();
-                $calendar_model = new \LockmeDep\wpdevart_bc_ModelCalendars();
-                $form_model = new \LockmeDep\wpdevart_bc_ModelForms();
-                $extra_model = new \LockmeDep\wpdevart_bc_ModelExtras();
+                $theme_model = new wpdevart_bc_ModelThemes();
+                $calendar_model = new wpdevart_bc_ModelCalendars();
+                $form_model = new wpdevart_bc_ModelForms();
+                $extra_model = new wpdevart_bc_ModelExtras();
                 $ids = $calendar_model->get_ids($calendar_id);
                 $theme_option = $theme_model->get_setting_rows($ids['theme_id']);
                 $calendar_data = $calendar_model->get_db_days_data($calendar_id);
@@ -229,8 +229,8 @@ class WPDevArt implements \LockmeDep\LockmeIntegration\PluginInterface
                 } else {
                     $theme_option = [];
                 }
-                $wpdevart_booking = new \LockmeDep\wpdevart_bc_BookingCalendar($date, $res, $calendar_id, $theme_option, $calendar_data, $form_option, $extra_field, [], \false, [], $calendar_title);
-                $reflector = new \ReflectionObject($wpdevart_booking);
+                $wpdevart_booking = new wpdevart_bc_BookingCalendar($date, $res, $calendar_id, $theme_option, $calendar_data, $form_option, $extra_field, [], \false, [], $calendar_title);
+                $reflector = new ReflectionObject($wpdevart_booking);
                 $method = $reflector->getMethod('change_date_avail_count');
                 $method->setAccessible(\true);
                 $method->invoke($wpdevart_booking, $id, \true, 'insert', []);
@@ -238,7 +238,7 @@ class WPDevArt implements \LockmeDep\LockmeIntegration\PluginInterface
                     $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, ['extid' => $id]);
                     return \true;
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                 }
                 break;
             case 'edit':
@@ -246,10 +246,10 @@ class WPDevArt implements \LockmeDep\LockmeIntegration\PluginInterface
                     $row_id = $data['extid'];
                     $old_reserv = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $wpdb->prefix . 'wpdevart_reservations WHERE `id`=%d', $row_id), ARRAY_A);
                     $wpdb->update($wpdb->prefix . 'wpdevart_reservations', ['calendar_id' => $calendar_id, 'single_day' => $date, 'start_hour' => $hour, 'count_item' => 1, 'price' => $data['price'], 'total_price' => $data['price'], 'form' => [], 'email' => $data['email'], 'status' => 'approved', 'date_created' => \date('Y-m-d H:i'), 'is_new' => 0], ['id' => $row_id]);
-                    $theme_model = new \LockmeDep\wpdevart_bc_ModelThemes();
-                    $calendar_model = new \LockmeDep\wpdevart_bc_ModelCalendars();
-                    $form_model = new \LockmeDep\wpdevart_bc_ModelForms();
-                    $extra_model = new \LockmeDep\wpdevart_bc_ModelExtras();
+                    $theme_model = new wpdevart_bc_ModelThemes();
+                    $calendar_model = new wpdevart_bc_ModelCalendars();
+                    $form_model = new wpdevart_bc_ModelForms();
+                    $extra_model = new wpdevart_bc_ModelExtras();
                     $ids = $calendar_model->get_ids($calendar_id);
                     $theme_option = $theme_model->get_setting_rows($ids['theme_id']);
                     $calendar_data = $calendar_model->get_db_days_data($calendar_id);
@@ -262,8 +262,8 @@ class WPDevArt implements \LockmeDep\LockmeIntegration\PluginInterface
                     } else {
                         $theme_option = [];
                     }
-                    $wpdevart_booking = new \LockmeDep\wpdevart_bc_BookingCalendar($date, $old_reserv, $calendar_id, $theme_option, $calendar_data, $form_option, $extra_field, [], \false, [], $calendar_title);
-                    $reflector = new \ReflectionObject($wpdevart_booking);
+                    $wpdevart_booking = new wpdevart_bc_BookingCalendar($date, $old_reserv, $calendar_id, $theme_option, $calendar_data, $form_option, $extra_field, [], \false, [], $calendar_title);
+                    $reflector = new ReflectionObject($wpdevart_booking);
                     $method = $reflector->getMethod('change_date_avail_count');
                     $method->setAccessible(\true);
                     $method->invoke($wpdevart_booking, $row_id, \true, 'update', $old_reserv);
@@ -277,8 +277,8 @@ class WPDevArt implements \LockmeDep\LockmeIntegration\PluginInterface
                     $wpdb->query($wpdb->prepare('DELETE FROM ' . $wpdb->prefix . 'wpdevart_reservations WHERE id="%d"', $row_id));
                     /** @noinspection PhpIncludeInspection */
                     require_once WPDEVART_PLUGIN_DIR . 'admin/controllers/Reservations.php';
-                    $wpdevart_booking = new \LockmeDep\wpdevart_bc_ControllerReservations();
-                    $reflector = new \ReflectionObject($wpdevart_booking);
+                    $wpdevart_booking = new wpdevart_bc_ControllerReservations();
+                    $reflector = new ReflectionObject($wpdevart_booking);
                     $method = $reflector->getMethod('change_date_avail_count');
                     $method->setAccessible(\true);
                     $method->invoke($wpdevart_booking, $row_id, \false, $old_reserv);

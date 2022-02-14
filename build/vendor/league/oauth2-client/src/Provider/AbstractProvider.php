@@ -102,20 +102,20 @@ abstract class AbstractProvider
         // options, skipping any blacklisted properties defined in the provider
         $this->fillProperties($options);
         if (empty($collaborators['grantFactory'])) {
-            $collaborators['grantFactory'] = new \League\OAuth2\Client\Grant\GrantFactory();
+            $collaborators['grantFactory'] = new GrantFactory();
         }
         $this->setGrantFactory($collaborators['grantFactory']);
         if (empty($collaborators['requestFactory'])) {
-            $collaborators['requestFactory'] = new \League\OAuth2\Client\Tool\RequestFactory();
+            $collaborators['requestFactory'] = new RequestFactory();
         }
         $this->setRequestFactory($collaborators['requestFactory']);
         if (empty($collaborators['httpClient'])) {
             $client_options = $this->getAllowedClientOptions($options);
-            $collaborators['httpClient'] = new \LockmeDep\GuzzleHttp\Client(\array_intersect_key($options, \array_flip($client_options)));
+            $collaborators['httpClient'] = new HttpClient(\array_intersect_key($options, \array_flip($client_options)));
         }
         $this->setHttpClient($collaborators['httpClient']);
         if (empty($collaborators['optionProvider'])) {
-            $collaborators['optionProvider'] = new \League\OAuth2\Client\OptionProvider\PostAuthOptionProvider();
+            $collaborators['optionProvider'] = new PostAuthOptionProvider();
         }
         $this->setOptionProvider($collaborators['optionProvider']);
     }
@@ -142,7 +142,7 @@ abstract class AbstractProvider
      * @param  GrantFactory $factory
      * @return self
      */
-    public function setGrantFactory(\League\OAuth2\Client\Grant\GrantFactory $factory)
+    public function setGrantFactory(GrantFactory $factory)
     {
         $this->grantFactory = $factory;
         return $this;
@@ -162,7 +162,7 @@ abstract class AbstractProvider
      * @param  RequestFactory $factory
      * @return self
      */
-    public function setRequestFactory(\League\OAuth2\Client\Tool\RequestFactory $factory)
+    public function setRequestFactory(RequestFactory $factory)
     {
         $this->requestFactory = $factory;
         return $this;
@@ -182,7 +182,7 @@ abstract class AbstractProvider
      * @param  HttpClientInterface $client
      * @return self
      */
-    public function setHttpClient(\LockmeDep\GuzzleHttp\ClientInterface $client)
+    public function setHttpClient(HttpClientInterface $client)
     {
         $this->httpClient = $client;
         return $this;
@@ -202,7 +202,7 @@ abstract class AbstractProvider
      * @param  OptionProviderInterface $provider
      * @return self
      */
-    public function setOptionProvider(\League\OAuth2\Client\OptionProvider\OptionProviderInterface $provider)
+    public function setOptionProvider(OptionProviderInterface $provider)
     {
         $this->optionProvider = $provider;
         return $this;
@@ -250,7 +250,7 @@ abstract class AbstractProvider
      * @param AccessToken $token
      * @return string
      */
-    public abstract function getResourceOwnerDetailsUrl(\League\OAuth2\Client\Token\AccessToken $token);
+    public abstract function getResourceOwnerDetailsUrl(AccessToken $token);
     /**
      * Returns a new random string to use as the state parameter in an
      * authorization flow.
@@ -456,7 +456,7 @@ abstract class AbstractProvider
         $request = $this->getAccessTokenRequest($params);
         $response = $this->getParsedResponse($request);
         if (\false === \is_array($response)) {
-            throw new \UnexpectedValueException('Invalid response received from Authorization Server. Expected JSON.');
+            throw new UnexpectedValueException('Invalid response received from Authorization Server. Expected JSON.');
         }
         $prepared = $this->prepareAccessTokenResponse($response);
         $token = $this->createAccessToken($prepared, $grant);
@@ -512,7 +512,7 @@ abstract class AbstractProvider
      * @param  RequestInterface $request
      * @return ResponseInterface
      */
-    public function getResponse(\LockmeDep\Psr\Http\Message\RequestInterface $request)
+    public function getResponse(RequestInterface $request)
     {
         return $this->getHttpClient()->send($request);
     }
@@ -523,11 +523,11 @@ abstract class AbstractProvider
      * @throws IdentityProviderException
      * @return mixed
      */
-    public function getParsedResponse(\LockmeDep\Psr\Http\Message\RequestInterface $request)
+    public function getParsedResponse(RequestInterface $request)
     {
         try {
             $response = $this->getResponse($request);
-        } catch (\LockmeDep\GuzzleHttp\Exception\BadResponseException $e) {
+        } catch (BadResponseException $e) {
             $response = $e->getResponse();
         }
         $parsed = $this->parseResponse($response);
@@ -545,7 +545,7 @@ abstract class AbstractProvider
     {
         $content = \json_decode($content, \true);
         if (\json_last_error() !== \JSON_ERROR_NONE) {
-            throw new \UnexpectedValueException(\sprintf("Failed to parse JSON response: %s", \json_last_error_msg()));
+            throw new UnexpectedValueException(\sprintf("Failed to parse JSON response: %s", \json_last_error_msg()));
         }
         return $content;
     }
@@ -555,7 +555,7 @@ abstract class AbstractProvider
      * @param  ResponseInterface $response
      * @return string Semi-colon separated join of content-type headers.
      */
-    protected function getContentType(\LockmeDep\Psr\Http\Message\ResponseInterface $response)
+    protected function getContentType(ResponseInterface $response)
     {
         return \join(';', (array) $response->getHeader('content-type'));
     }
@@ -566,7 +566,7 @@ abstract class AbstractProvider
      * @param  ResponseInterface $response
      * @return array
      */
-    protected function parseResponse(\LockmeDep\Psr\Http\Message\ResponseInterface $response)
+    protected function parseResponse(ResponseInterface $response)
     {
         $content = (string) $response->getBody();
         $type = $this->getContentType($response);
@@ -579,12 +579,12 @@ abstract class AbstractProvider
         // exception if the JSON could not be parsed when it was expected to.
         try {
             return $this->parseJson($content);
-        } catch (\UnexpectedValueException $e) {
+        } catch (UnexpectedValueException $e) {
             if (\strpos($type, 'json') !== \false) {
                 throw $e;
             }
             if ($response->getStatusCode() == 500) {
-                throw new \UnexpectedValueException('An OAuth server error was encountered that did not contain a JSON body', 0, $e);
+                throw new UnexpectedValueException('An OAuth server error was encountered that did not contain a JSON body', 0, $e);
             }
             return $content;
         }
@@ -597,7 +597,7 @@ abstract class AbstractProvider
      * @param  array|string $data Parsed response data
      * @return void
      */
-    protected abstract function checkResponse(\LockmeDep\Psr\Http\Message\ResponseInterface $response, $data);
+    protected abstract function checkResponse(ResponseInterface $response, $data);
     /**
      * Prepares an parsed access token response for a grant.
      *
@@ -624,9 +624,9 @@ abstract class AbstractProvider
      * @param  AbstractGrant $grant
      * @return AccessTokenInterface
      */
-    protected function createAccessToken(array $response, \League\OAuth2\Client\Grant\AbstractGrant $grant)
+    protected function createAccessToken(array $response, AbstractGrant $grant)
     {
-        return new \League\OAuth2\Client\Token\AccessToken($response);
+        return new AccessToken($response);
     }
     /**
      * Generates a resource owner object from a successful resource owner
@@ -636,14 +636,14 @@ abstract class AbstractProvider
      * @param  AccessToken $token
      * @return ResourceOwnerInterface
      */
-    protected abstract function createResourceOwner(array $response, \League\OAuth2\Client\Token\AccessToken $token);
+    protected abstract function createResourceOwner(array $response, AccessToken $token);
     /**
      * Requests and returns the resource owner of given access token.
      *
      * @param  AccessToken $token
      * @return ResourceOwnerInterface
      */
-    public function getResourceOwner(\League\OAuth2\Client\Token\AccessToken $token)
+    public function getResourceOwner(AccessToken $token)
     {
         $response = $this->fetchResourceOwnerDetails($token);
         return $this->createResourceOwner($response, $token);
@@ -654,13 +654,13 @@ abstract class AbstractProvider
      * @param  AccessToken $token
      * @return mixed
      */
-    protected function fetchResourceOwnerDetails(\League\OAuth2\Client\Token\AccessToken $token)
+    protected function fetchResourceOwnerDetails(AccessToken $token)
     {
         $url = $this->getResourceOwnerDetailsUrl($token);
         $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $token);
         $response = $this->getParsedResponse($request);
         if (\false === \is_array($response)) {
-            throw new \UnexpectedValueException('Invalid response received from Authorization Server. Expected JSON.');
+            throw new UnexpectedValueException('Invalid response received from Authorization Server. Expected JSON.');
         }
         return $response;
     }

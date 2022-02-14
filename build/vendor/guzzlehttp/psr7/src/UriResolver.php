@@ -48,7 +48,7 @@ final class UriResolver
      *
      * @link http://tools.ietf.org/html/rfc3986#section-5.2
      */
-    public static function resolve(\LockmeDep\Psr\Http\Message\UriInterface $base, \LockmeDep\Psr\Http\Message\UriInterface $rel) : \LockmeDep\Psr\Http\Message\UriInterface
+    public static function resolve(UriInterface $base, UriInterface $rel) : UriInterface
     {
         if ((string) $rel === '') {
             // we can simply return the same base URI instance for this same-document reference
@@ -85,7 +85,7 @@ final class UriResolver
                 $targetQuery = $rel->getQuery();
             }
         }
-        return new \LockmeDep\GuzzleHttp\Psr7\Uri(\LockmeDep\GuzzleHttp\Psr7\Uri::composeComponents($base->getScheme(), $targetAuthority, $targetPath, $targetQuery, $rel->getFragment()));
+        return new Uri(Uri::composeComponents($base->getScheme(), $targetAuthority, $targetPath, $targetQuery, $rel->getFragment()));
     }
     /**
      * Returns the target URI as a relative reference from the base URI.
@@ -108,12 +108,12 @@ final class UriResolver
      *
      *    echo UriResolver::relativize($base, new Uri('/a/b/c'));  // prints 'c' as well
      */
-    public static function relativize(\LockmeDep\Psr\Http\Message\UriInterface $base, \LockmeDep\Psr\Http\Message\UriInterface $target) : \LockmeDep\Psr\Http\Message\UriInterface
+    public static function relativize(UriInterface $base, UriInterface $target) : UriInterface
     {
         if ($target->getScheme() !== '' && ($base->getScheme() !== $target->getScheme() || $target->getAuthority() === '' && $base->getAuthority() !== '')) {
             return $target;
         }
-        if (\LockmeDep\GuzzleHttp\Psr7\Uri::isRelativePathReference($target)) {
+        if (Uri::isRelativePathReference($target)) {
             // As the target is already highly relative we return it as-is. It would be possible to resolve
             // the target with `$target = self::resolve($base, $target);` and then try make it more relative
             // by removing a duplicate query. But let's not do that automatically.
@@ -143,7 +143,7 @@ final class UriResolver
         }
         return $emptyPathUri;
     }
-    private static function getRelativePath(\LockmeDep\Psr\Http\Message\UriInterface $base, \LockmeDep\Psr\Http\Message\UriInterface $target) : string
+    private static function getRelativePath(UriInterface $base, UriInterface $target) : string
     {
         $sourceSegments = \explode('/', $base->getPath());
         $targetSegments = \explode('/', $target->getPath());

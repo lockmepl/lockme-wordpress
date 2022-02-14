@@ -20,7 +20,7 @@ use LockmeDep\Symfony\Component\Lock\PersistingStoreInterface;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-class MemcachedStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreInterface
+class MemcachedStore implements PersistingStoreInterface
 {
     use ExpiringStoreTrait;
     private $memcached;
@@ -37,10 +37,10 @@ class MemcachedStore implements \LockmeDep\Symfony\Component\Lock\PersistingStor
     public function __construct(\Memcached $memcached, int $initialTtl = 300)
     {
         if (!static::isSupported()) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException('Memcached extension is required.');
+            throw new InvalidArgumentException('Memcached extension is required.');
         }
         if ($initialTtl < 1) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('"%s()" expects a strictly positive TTL. Got %d.', __METHOD__, $initialTtl));
+            throw new InvalidArgumentException(\sprintf('"%s()" expects a strictly positive TTL. Got %d.', __METHOD__, $initialTtl));
         }
         $this->memcached = $memcached;
         $this->initialTtl = $initialTtl;
@@ -48,7 +48,7 @@ class MemcachedStore implements \LockmeDep\Symfony\Component\Lock\PersistingStor
     /**
      * {@inheritdoc}
      */
-    public function save(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function save(Key $key)
     {
         $token = $this->getUniqueToken($key);
         $key->reduceLifetime($this->initialTtl);
@@ -61,10 +61,10 @@ class MemcachedStore implements \LockmeDep\Symfony\Component\Lock\PersistingStor
     /**
      * {@inheritdoc}
      */
-    public function putOffExpiration(\LockmeDep\Symfony\Component\Lock\Key $key, float $ttl)
+    public function putOffExpiration(Key $key, float $ttl)
     {
         if ($ttl < 1) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidTtlException(\sprintf('"%s()" expects a TTL greater or equals to 1 second. Got %s.', __METHOD__, $ttl));
+            throw new InvalidTtlException(\sprintf('"%s()" expects a TTL greater or equals to 1 second. Got %s.', __METHOD__, $ttl));
         }
         // Interface defines a float value but Store required an integer.
         $ttl = (int) \ceil($ttl);
@@ -77,21 +77,21 @@ class MemcachedStore implements \LockmeDep\Symfony\Component\Lock\PersistingStor
                 return;
             }
             // no luck, with concurrency, someone else acquire the lock
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+            throw new LockConflictedException();
         }
         // Someone else steal the lock
         if ($value !== $token) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+            throw new LockConflictedException();
         }
         if (!$this->memcached->cas($cas, (string) $key, $token, $ttl)) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException();
+            throw new LockConflictedException();
         }
         $this->checkNotExpired($key);
     }
     /**
      * {@inheritdoc}
      */
-    public function delete(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function delete(Key $key)
     {
         $token = $this->getUniqueToken($key);
         [$value, $cas] = $this->getValueAndCas($key);
@@ -110,11 +110,11 @@ class MemcachedStore implements \LockmeDep\Symfony\Component\Lock\PersistingStor
     /**
      * {@inheritdoc}
      */
-    public function exists(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function exists(Key $key)
     {
         return $this->memcached->get((string) $key) === $this->getUniqueToken($key);
     }
-    private function getUniqueToken(\LockmeDep\Symfony\Component\Lock\Key $key) : string
+    private function getUniqueToken(Key $key) : string
     {
         if (!$key->hasState(__CLASS__)) {
             $token = \base64_encode(\random_bytes(32));
@@ -122,7 +122,7 @@ class MemcachedStore implements \LockmeDep\Symfony\Component\Lock\PersistingStor
         }
         return $key->getState(__CLASS__);
     }
-    private function getValueAndCas(\LockmeDep\Symfony\Component\Lock\Key $key) : array
+    private function getValueAndCas(Key $key) : array
     {
         if (null === $this->useExtendedReturn) {
             $this->useExtendedReturn = \version_compare(\phpversion('memcached'), '2.9.9', '>');

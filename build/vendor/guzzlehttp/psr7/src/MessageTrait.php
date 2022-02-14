@@ -22,7 +22,7 @@ trait MessageTrait
     {
         return $this->protocol;
     }
-    public function withProtocolVersion($version) : \LockmeDep\Psr\Http\Message\MessageInterface
+    public function withProtocolVersion($version) : MessageInterface
     {
         if ($this->protocol === $version) {
             return $this;
@@ -52,7 +52,7 @@ trait MessageTrait
     {
         return \implode(', ', $this->getHeader($header));
     }
-    public function withHeader($header, $value) : \LockmeDep\Psr\Http\Message\MessageInterface
+    public function withHeader($header, $value) : MessageInterface
     {
         $this->assertHeader($header);
         $value = $this->normalizeHeaderValue($value);
@@ -65,7 +65,7 @@ trait MessageTrait
         $new->headers[$header] = $value;
         return $new;
     }
-    public function withAddedHeader($header, $value) : \LockmeDep\Psr\Http\Message\MessageInterface
+    public function withAddedHeader($header, $value) : MessageInterface
     {
         $this->assertHeader($header);
         $value = $this->normalizeHeaderValue($value);
@@ -80,7 +80,7 @@ trait MessageTrait
         }
         return $new;
     }
-    public function withoutHeader($header) : \LockmeDep\Psr\Http\Message\MessageInterface
+    public function withoutHeader($header) : MessageInterface
     {
         $normalized = \strtolower($header);
         if (!isset($this->headerNames[$normalized])) {
@@ -91,14 +91,14 @@ trait MessageTrait
         unset($new->headers[$header], $new->headerNames[$normalized]);
         return $new;
     }
-    public function getBody() : \LockmeDep\Psr\Http\Message\StreamInterface
+    public function getBody() : StreamInterface
     {
         if (!$this->stream) {
-            $this->stream = \LockmeDep\GuzzleHttp\Psr7\Utils::streamFor('');
+            $this->stream = Utils::streamFor('');
         }
         return $this->stream;
     }
-    public function withBody(\LockmeDep\Psr\Http\Message\StreamInterface $body) : \LockmeDep\Psr\Http\Message\MessageInterface
+    public function withBody(StreamInterface $body) : MessageInterface
     {
         if ($body === $this->stream) {
             return $this;

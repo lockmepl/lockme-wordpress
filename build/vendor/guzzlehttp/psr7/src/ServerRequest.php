@@ -22,7 +22,7 @@ use LockmeDep\Psr\Http\Message\UriInterface;
  * implemented such that they retain the internal state of the current
  * message and return a new instance that contains the changed state.
  */
-class ServerRequest extends \LockmeDep\GuzzleHttp\Psr7\Request implements \LockmeDep\Psr\Http\Message\ServerRequestInterface
+class ServerRequest extends Request implements ServerRequestInterface
 {
     /**
      * @var array
@@ -72,7 +72,7 @@ class ServerRequest extends \LockmeDep\GuzzleHttp\Psr7\Request implements \Lockm
     {
         $normalized = [];
         foreach ($files as $key => $value) {
-            if ($value instanceof \LockmeDep\Psr\Http\Message\UploadedFileInterface) {
+            if ($value instanceof UploadedFileInterface) {
                 $normalized[$key] = $value;
             } elseif (\is_array($value) && isset($value['tmp_name'])) {
                 $normalized[$key] = self::createUploadedFileFromSpec($value);
@@ -80,7 +80,7 @@ class ServerRequest extends \LockmeDep\GuzzleHttp\Psr7\Request implements \Lockm
                 $normalized[$key] = self::normalizeFiles($value);
                 continue;
             } else {
-                throw new \InvalidArgumentException('Invalid value in files specification');
+                throw new InvalidArgumentException('Invalid value in files specification');
             }
         }
         return $normalized;
@@ -100,7 +100,7 @@ class ServerRequest extends \LockmeDep\GuzzleHttp\Psr7\Request implements \Lockm
         if (\is_array($value['tmp_name'])) {
             return self::normalizeNestedFileSpec($value);
         }
-        return new \LockmeDep\GuzzleHttp\Psr7\UploadedFile($value['tmp_name'], (int) $value['size'], (int) $value['error'], $value['name'], $value['type']);
+        return new UploadedFile($value['tmp_name'], (int) $value['size'], (int) $value['error'], $value['name'], $value['type']);
     }
     /**
      * Normalize an array of file specifications.
@@ -127,14 +127,14 @@ class ServerRequest extends \LockmeDep\GuzzleHttp\Psr7\Request implements \Lockm
      * $_FILES
      * $_SERVER
      */
-    public static function fromGlobals() : \LockmeDep\Psr\Http\Message\ServerRequestInterface
+    public static function fromGlobals() : ServerRequestInterface
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $headers = \getallheaders();
         $uri = self::getUriFromGlobals();
-        $body = new \LockmeDep\GuzzleHttp\Psr7\CachingStream(new \LockmeDep\GuzzleHttp\Psr7\LazyOpenStream('php://input', 'r+'));
+        $body = new CachingStream(new LazyOpenStream('php://input', 'r+'));
         $protocol = isset($_SERVER['SERVER_PROTOCOL']) ? \str_replace('HTTP/', '', $_SERVER['SERVER_PROTOCOL']) : '1.1';
-        $serverRequest = new \LockmeDep\GuzzleHttp\Psr7\ServerRequest($method, $uri, $headers, $body, $protocol, $_SERVER);
+        $serverRequest = new ServerRequest($method, $uri, $headers, $body, $protocol, $_SERVER);
         return $serverRequest->withCookieParams($_COOKIE)->withQueryParams($_GET)->withParsedBody($_POST)->withUploadedFiles(self::normalizeFiles($_FILES));
     }
     private static function extractHostAndPortFromAuthority(string $authority) : array
@@ -151,9 +151,9 @@ class ServerRequest extends \LockmeDep\GuzzleHttp\Psr7\Request implements \Lockm
     /**
      * Get a Uri populated with values from $_SERVER.
      */
-    public static function getUriFromGlobals() : \LockmeDep\Psr\Http\Message\UriInterface
+    public static function getUriFromGlobals() : UriInterface
     {
-        $uri = new \LockmeDep\GuzzleHttp\Psr7\Uri('');
+        $uri = new Uri('');
         $uri = $uri->withScheme(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http');
         $hasPort = \false;
         if (isset($_SERVER['HTTP_HOST'])) {
@@ -195,7 +195,7 @@ class ServerRequest extends \LockmeDep\GuzzleHttp\Psr7\Request implements \Lockm
     {
         return $this->uploadedFiles;
     }
-    public function withUploadedFiles(array $uploadedFiles) : \LockmeDep\Psr\Http\Message\ServerRequestInterface
+    public function withUploadedFiles(array $uploadedFiles) : ServerRequestInterface
     {
         $new = clone $this;
         $new->uploadedFiles = $uploadedFiles;
@@ -205,7 +205,7 @@ class ServerRequest extends \LockmeDep\GuzzleHttp\Psr7\Request implements \Lockm
     {
         return $this->cookieParams;
     }
-    public function withCookieParams(array $cookies) : \LockmeDep\Psr\Http\Message\ServerRequestInterface
+    public function withCookieParams(array $cookies) : ServerRequestInterface
     {
         $new = clone $this;
         $new->cookieParams = $cookies;
@@ -215,7 +215,7 @@ class ServerRequest extends \LockmeDep\GuzzleHttp\Psr7\Request implements \Lockm
     {
         return $this->queryParams;
     }
-    public function withQueryParams(array $query) : \LockmeDep\Psr\Http\Message\ServerRequestInterface
+    public function withQueryParams(array $query) : ServerRequestInterface
     {
         $new = clone $this;
         $new->queryParams = $query;
@@ -230,7 +230,7 @@ class ServerRequest extends \LockmeDep\GuzzleHttp\Psr7\Request implements \Lockm
     {
         return $this->parsedBody;
     }
-    public function withParsedBody($data) : \LockmeDep\Psr\Http\Message\ServerRequestInterface
+    public function withParsedBody($data) : ServerRequestInterface
     {
         $new = clone $this;
         $new->parsedBody = $data;
@@ -252,13 +252,13 @@ class ServerRequest extends \LockmeDep\GuzzleHttp\Psr7\Request implements \Lockm
         }
         return $this->attributes[$attribute];
     }
-    public function withAttribute($attribute, $value) : \LockmeDep\Psr\Http\Message\ServerRequestInterface
+    public function withAttribute($attribute, $value) : ServerRequestInterface
     {
         $new = clone $this;
         $new->attributes[$attribute] = $value;
         return $new;
     }
-    public function withoutAttribute($attribute) : \LockmeDep\Psr\Http\Message\ServerRequestInterface
+    public function withoutAttribute($attribute) : ServerRequestInterface
     {
         if (\false === \array_key_exists($attribute, $this->attributes)) {
             return $this;

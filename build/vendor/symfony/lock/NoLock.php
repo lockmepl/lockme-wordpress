@@ -18,7 +18,7 @@ namespace LockmeDep\Symfony\Component\Lock;
  *
  * @author Wouter de Jong <wouter@wouterj.nl>
  */
-final class NoLock implements \LockmeDep\Symfony\Component\Lock\LockInterface
+final class NoLock implements LockInterface
 {
     public function acquire(bool $blocking = \false) : bool
     {

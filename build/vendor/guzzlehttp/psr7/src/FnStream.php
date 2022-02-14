@@ -10,7 +10,7 @@ use LockmeDep\Psr\Http\Message\StreamInterface;
  * Allows for easy testing and extension of a provided stream without needing
  * to create a concrete class for a simple extension point.
  */
-final class FnStream implements \LockmeDep\Psr\Http\Message\StreamInterface
+final class FnStream implements StreamInterface
 {
     private const SLOTS = ['__toString', 'close', 'detach', 'rewind', 'getSize', 'tell', 'eof', 'isSeekable', 'seek', 'isWritable', 'write', 'isReadable', 'read', 'getContents', 'getMetadata'];
     /** @var array<string, callable> */
@@ -62,7 +62,7 @@ final class FnStream implements \LockmeDep\Psr\Http\Message\StreamInterface
      *
      * @return FnStream
      */
-    public static function decorate(\LockmeDep\Psr\Http\Message\StreamInterface $stream, array $methods)
+    public static function decorate(StreamInterface $stream, array $methods)
     {
         // If any of the required methods were not provided, then simply
         // proxy to the decorated stream.

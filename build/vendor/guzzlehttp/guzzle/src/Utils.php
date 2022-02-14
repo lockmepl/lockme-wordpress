@@ -79,14 +79,14 @@ final class Utils
     {
         $handler = null;
         if (\function_exists('curl_multi_exec') && \function_exists('curl_exec')) {
-            $handler = \LockmeDep\GuzzleHttp\Handler\Proxy::wrapSync(new \LockmeDep\GuzzleHttp\Handler\CurlMultiHandler(), new \LockmeDep\GuzzleHttp\Handler\CurlHandler());
+            $handler = Proxy::wrapSync(new CurlMultiHandler(), new CurlHandler());
         } elseif (\function_exists('curl_exec')) {
-            $handler = new \LockmeDep\GuzzleHttp\Handler\CurlHandler();
+            $handler = new CurlHandler();
         } elseif (\function_exists('curl_multi_exec')) {
-            $handler = new \LockmeDep\GuzzleHttp\Handler\CurlMultiHandler();
+            $handler = new CurlMultiHandler();
         }
         if (\ini_get('allow_url_fopen')) {
-            $handler = $handler ? \LockmeDep\GuzzleHttp\Handler\Proxy::wrapStreaming($handler, new \LockmeDep\GuzzleHttp\Handler\StreamHandler()) : new \LockmeDep\GuzzleHttp\Handler\StreamHandler();
+            $handler = $handler ? Proxy::wrapStreaming($handler, new StreamHandler()) : new StreamHandler();
         } elseif (!$handler) {
             throw new \RuntimeException('GuzzleHttp requires cURL, the allow_url_fopen ini setting, or a custom HTTP handler.');
         }
@@ -97,7 +97,7 @@ final class Utils
      */
     public static function defaultUserAgent() : string
     {
-        return \sprintf('GuzzleHttp/%d', \LockmeDep\GuzzleHttp\ClientInterface::MAJOR_VERSION);
+        return \sprintf('GuzzleHttp/%d', ClientInterface::MAJOR_VERSION);
     }
     /**
      * Returns the default cacert bundle for the current system.
@@ -198,7 +198,7 @@ EOT
     public static function isHostInNoProxy(string $host, array $noProxyArray) : bool
     {
         if (\strlen($host) === 0) {
-            throw new \LockmeDep\GuzzleHttp\Exception\InvalidArgumentException('Empty host provided');
+            throw new InvalidArgumentException('Empty host provided');
         }
         // Strip port if present.
         [$host] = \explode(':', $host, 2);
@@ -243,7 +243,7 @@ EOT
     {
         $data = \json_decode($json, $assoc, $depth, $options);
         if (\JSON_ERROR_NONE !== \json_last_error()) {
-            throw new \LockmeDep\GuzzleHttp\Exception\InvalidArgumentException('json_decode error: ' . \json_last_error_msg());
+            throw new InvalidArgumentException('json_decode error: ' . \json_last_error_msg());
         }
         return $data;
     }
@@ -262,7 +262,7 @@ EOT
     {
         $json = \json_encode($value, $options, $depth);
         if (\JSON_ERROR_NONE !== \json_last_error()) {
-            throw new \LockmeDep\GuzzleHttp\Exception\InvalidArgumentException('json_encode error: ' . \json_last_error_msg());
+            throw new InvalidArgumentException('json_encode error: ' . \json_last_error_msg());
         }
         /** @var string */
         return $json;
@@ -284,7 +284,7 @@ EOT
      *
      * @internal
      */
-    public static function idnUriConvert(\LockmeDep\Psr\Http\Message\UriInterface $uri, int $options = 0) : \LockmeDep\Psr\Http\Message\UriInterface
+    public static function idnUriConvert(UriInterface $uri, int $options = 0) : UriInterface
     {
         if ($uri->getHost()) {
             $asciiHost = self::idnToAsci($uri->getHost(), $options, $info);
@@ -303,7 +303,7 @@ EOT
                 if ($errors) {
                     $errorMessage .= ' (errors: ' . \implode(', ', $errors) . ')';
                 }
-                throw new \LockmeDep\GuzzleHttp\Exception\InvalidArgumentException($errorMessage);
+                throw new InvalidArgumentException($errorMessage);
             }
             if ($uri->getHost() !== $asciiHost) {
                 // Replace URI only if the ASCII version is different

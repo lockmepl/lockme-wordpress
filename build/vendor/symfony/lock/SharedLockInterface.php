@@ -17,16 +17,16 @@ use LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-interface SharedLockInterface extends \LockmeDep\Symfony\Component\Lock\LockInterface
+interface SharedLockInterface extends LockInterface
 {
     /**
      * Acquires the lock for reading. If the lock is acquired by someone else in write mode, the parameter `blocking`
      * determines whether or not the call should block until the release of the lock.
      *
-     * @return bool whether or not the lock had been acquired
+     * @return bool
      *
      * @throws LockConflictedException If the lock is acquired by someone else in blocking mode
-     * @throws LockAcquiringException  If the lock can not be acquired
+     * @throws LockAcquiringException  If the lock cannot be acquired
      */
     public function acquireRead(bool $blocking = \false);
 }

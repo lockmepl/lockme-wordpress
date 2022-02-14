@@ -23,7 +23,7 @@ use LockmeDep\Symfony\Component\Lock\Exception\LockReleasingException;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-final class Lock implements \LockmeDep\Symfony\Component\Lock\SharedLockInterface, \LockmeDep\Psr\Log\LoggerAwareInterface
+final class Lock implements SharedLockInterface, LoggerAwareInterface
 {
     use LoggerAwareTrait;
     private $store;
@@ -35,18 +35,15 @@ final class Lock implements \LockmeDep\Symfony\Component\Lock\SharedLockInterfac
      * @param float|null $ttl         Maximum expected lock duration in seconds
      * @param bool       $autoRelease Whether to automatically release the lock or not when the lock instance is destroyed
      */
-    public function __construct(\LockmeDep\Symfony\Component\Lock\Key $key, \LockmeDep\Symfony\Component\Lock\PersistingStoreInterface $store, float $ttl = null, bool $autoRelease = \true)
+    public function __construct(Key $key, PersistingStoreInterface $store, float $ttl = null, bool $autoRelease = \true)
     {
         $this->store = $store;
         $this->key = $key;
         $this->ttl = $ttl;
         $this->autoRelease = $autoRelease;
-        $this->logger = new \LockmeDep\Psr\Log\NullLogger();
+        $this->logger = new NullLogger();
     }
-    /**
-     * @return array
-     */
-    public function __sleep()
+    public function __sleep() : array
     {
         throw new \BadMethodCallException('Cannot serialize ' . __CLASS__);
     }
@@ -72,12 +69,12 @@ final class Lock implements \LockmeDep\Symfony\Component\Lock\SharedLockInterfac
         $this->key->resetLifetime();
         try {
             if ($blocking) {
-                if (!$this->store instanceof \LockmeDep\Symfony\Component\Lock\BlockingStoreInterface) {
+                if (!$this->store instanceof BlockingStoreInterface) {
                     while (\true) {
                         try {
                             $this->store->save($this->key);
                             break;
-                        } catch (\LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException $e) {
+                        } catch (LockConflictedException $e) {
                             \usleep((100 + \random_int(-10, 10)) * 1000);
                         }
                     }
@@ -98,10 +95,10 @@ final class Lock implements \LockmeDep\Symfony\Component\Lock\SharedLockInterfac
                 } catch (\Exception $e) {
                     // swallow exception to not hide the original issue
                 }
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\LockExpiredException(\sprintf('Failed to store the "%s" lock.', $this->key));
+                throw new LockExpiredException(\sprintf('Failed to store the "%s" lock.', $this->key));
             }
             return \true;
-        } catch (\LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException $e) {
+        } catch (LockConflictedException $e) {
             $this->dirty = \false;
             $this->logger->info('Failed to acquire the "{resource}" lock. Someone else already acquired the lock.', ['resource' => $this->key]);
             if ($blocking) {
@@ -110,7 +107,7 @@ final class Lock implements \LockmeDep\Symfony\Component\Lock\SharedLockInterfac
             return \false;
         } catch (\Exception $e) {
             $this->logger->notice('Failed to acquire the "{resource}" lock.', ['resource' => $this->key, 'exception' => $e]);
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockAcquiringException(\sprintf('Failed to acquire the "%s" lock.', $this->key), 0, $e);
+            throw new LockAcquiringException(\sprintf('Failed to acquire the "%s" lock.', $this->key), 0, $e);
         }
     }
     /**
@@ -120,17 +117,17 @@ final class Lock implements \LockmeDep\Symfony\Component\Lock\SharedLockInterfac
     {
         $this->key->resetLifetime();
         try {
-            if (!$this->store instanceof \LockmeDep\Symfony\Component\Lock\SharedLockStoreInterface) {
+            if (!$this->store instanceof SharedLockStoreInterface) {
                 $this->logger->debug('Store does not support ReadLocks, fallback to WriteLock.', ['resource' => $this->key]);
                 return $this->acquire($blocking);
             }
             if ($blocking) {
-                if (!$this->store instanceof \LockmeDep\Symfony\Component\Lock\BlockingSharedLockStoreInterface) {
+                if (!$this->store instanceof BlockingSharedLockStoreInterface) {
                     while (\true) {
                         try {
                             $this->store->saveRead($this->key);
                             break;
-                        } catch (\LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException $e) {
+                        } catch (LockConflictedException $e) {
                             \usleep((100 + \random_int(-10, 10)) * 1000);
                         }
                     }
@@ -151,10 +148,10 @@ final class Lock implements \LockmeDep\Symfony\Component\Lock\SharedLockInterfac
                 } catch (\Exception $e) {
                     // swallow exception to not hide the original issue
                 }
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\LockExpiredException(\sprintf('Failed to store the "%s" lock.', $this->key));
+                throw new LockExpiredException(\sprintf('Failed to store the "%s" lock.', $this->key));
             }
             return \true;
-        } catch (\LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException $e) {
+        } catch (LockConflictedException $e) {
             $this->dirty = \false;
             $this->logger->info('Failed to acquire the "{resource}" lock. Someone else already acquired the lock.', ['resource' => $this->key]);
             if ($blocking) {
@@ -163,7 +160,7 @@ final class Lock implements \LockmeDep\Symfony\Component\Lock\SharedLockInterfac
             return \false;
         } catch (\Exception $e) {
             $this->logger->notice('Failed to acquire the "{resource}" lock.', ['resource' => $this->key, 'exception' => $e]);
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockAcquiringException(\sprintf('Failed to acquire the "%s" lock.', $this->key), 0, $e);
+            throw new LockAcquiringException(\sprintf('Failed to acquire the "%s" lock.', $this->key), 0, $e);
         }
     }
     /**
@@ -175,7 +172,7 @@ final class Lock implements \LockmeDep\Symfony\Component\Lock\SharedLockInterfac
             $ttl = $this->ttl;
         }
         if (!$ttl) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException('You have to define an expiration duration.');
+            throw new InvalidArgumentException('You have to define an expiration duration.');
         }
         try {
             $this->key->resetLifetime();
@@ -187,16 +184,16 @@ final class Lock implements \LockmeDep\Symfony\Component\Lock\SharedLockInterfac
                 } catch (\Exception $e) {
                     // swallow exception to not hide the original issue
                 }
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\LockExpiredException(\sprintf('Failed to put off the expiration of the "%s" lock within the specified time.', $this->key));
+                throw new LockExpiredException(\sprintf('Failed to put off the expiration of the "%s" lock within the specified time.', $this->key));
             }
             $this->logger->debug('Expiration defined for "{resource}" lock for "{ttl}" seconds.', ['resource' => $this->key, 'ttl' => $ttl]);
-        } catch (\LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException $e) {
+        } catch (LockConflictedException $e) {
             $this->dirty = \false;
             $this->logger->notice('Failed to define an expiration for the "{resource}" lock, someone else acquired the lock.', ['resource' => $this->key]);
             throw $e;
         } catch (\Exception $e) {
             $this->logger->notice('Failed to define an expiration for the "{resource}" lock.', ['resource' => $this->key, 'exception' => $e]);
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockAcquiringException(\sprintf('Failed to define an expiration for the "%s" lock.', $this->key), 0, $e);
+            throw new LockAcquiringException(\sprintf('Failed to define an expiration for the "%s" lock.', $this->key), 0, $e);
         }
     }
     /**
@@ -215,15 +212,15 @@ final class Lock implements \LockmeDep\Symfony\Component\Lock\SharedLockInterfac
             try {
                 $this->store->delete($this->key);
                 $this->dirty = \false;
-            } catch (\LockmeDep\Symfony\Component\Lock\Exception\LockReleasingException $e) {
+            } catch (LockReleasingException $e) {
                 throw $e;
             } catch (\Exception $e) {
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\LockReleasingException(\sprintf('Failed to release the "%s" lock.', $this->key), 0, $e);
+                throw new LockReleasingException(\sprintf('Failed to release the "%s" lock.', $this->key), 0, $e);
             }
             if ($this->store->exists($this->key)) {
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\LockReleasingException(\sprintf('Failed to release the "%s" lock, the resource is still locked.', $this->key));
+                throw new LockReleasingException(\sprintf('Failed to release the "%s" lock, the resource is still locked.', $this->key));
             }
-        } catch (\LockmeDep\Symfony\Component\Lock\Exception\LockReleasingException $e) {
+        } catch (LockReleasingException $e) {
             $this->logger->notice('Failed to release the "{resource}" lock.', ['resource' => $this->key]);
             throw $e;
         }

@@ -43,7 +43,7 @@ use LockmeDep\Symfony\Component\Lock\PersistingStoreInterface;
  *
  * @author Joe Bennett <joe@assimtech.com>
  */
-class MongoDbStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreInterface
+class MongoDbStore implements PersistingStoreInterface
 {
     use ExpiringStoreTrait;
     private $collection;
@@ -88,28 +88,28 @@ class MongoDbStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreI
     {
         $this->options = \array_merge(['gcProbablity' => 0.001, 'database' => null, 'collection' => null, 'uriOptions' => [], 'driverOptions' => []], $options);
         $this->initialTtl = $initialTtl;
-        if ($mongo instanceof \LockmeDep\MongoDB\Collection) {
+        if ($mongo instanceof Collection) {
             $this->collection = $mongo;
-        } elseif ($mongo instanceof \LockmeDep\MongoDB\Client) {
+        } elseif ($mongo instanceof Client) {
             $this->client = $mongo;
         } elseif (\is_string($mongo)) {
             $this->uri = $this->skimUri($mongo);
         } else {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('"%s()" requires "%s" or "%s" or URI as first argument, "%s" given.', __METHOD__, \LockmeDep\MongoDB\Collection::class, \LockmeDep\MongoDB\Client::class, \get_debug_type($mongo)));
+            throw new InvalidArgumentException(\sprintf('"%s()" requires "%s" or "%s" or URI as first argument, "%s" given.', __METHOD__, Collection::class, Client::class, \get_debug_type($mongo)));
         }
-        if (!$mongo instanceof \LockmeDep\MongoDB\Collection) {
+        if (!$mongo instanceof Collection) {
             if (null === $this->options['database']) {
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('"%s()" requires the "database" in the URI path or option.', __METHOD__));
+                throw new InvalidArgumentException(\sprintf('"%s()" requires the "database" in the URI path or option.', __METHOD__));
             }
             if (null === $this->options['collection']) {
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('"%s()" requires the "collection" in the URI querystring or option.', __METHOD__));
+                throw new InvalidArgumentException(\sprintf('"%s()" requires the "collection" in the URI querystring or option.', __METHOD__));
             }
         }
         if ($this->options['gcProbablity'] < 0.0 || $this->options['gcProbablity'] > 1.0) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('"%s()" gcProbablity must be a float from 0.0 to 1.0, "%f" given.', __METHOD__, $this->options['gcProbablity']));
+            throw new InvalidArgumentException(\sprintf('"%s()" gcProbablity must be a float from 0.0 to 1.0, "%f" given.', __METHOD__, $this->options['gcProbablity']));
         }
         if ($this->initialTtl <= 0) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidTtlException(\sprintf('"%s()" expects a strictly positive TTL, got "%d".', __METHOD__, $this->initialTtl));
+            throw new InvalidTtlException(\sprintf('"%s()" expects a strictly positive TTL, got "%d".', __METHOD__, $this->initialTtl));
         }
     }
     /**
@@ -122,7 +122,7 @@ class MongoDbStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreI
     private function skimUri(string $uri) : string
     {
         if (\false === ($parsedUrl = \parse_url($uri))) {
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException(\sprintf('The given MongoDB Connection URI "%s" is invalid.', $uri));
+            throw new InvalidArgumentException(\sprintf('The given MongoDB Connection URI "%s" is invalid.', $uri));
         }
         $pathDb = \ltrim($parsedUrl['path'] ?? '', '/') ?: null;
         if (null !== $pathDb) {
@@ -182,16 +182,16 @@ class MongoDbStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreI
      *
      * @throws LockExpiredException when save is called on an expired lock
      */
-    public function save(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function save(Key $key)
     {
         $key->reduceLifetime($this->initialTtl);
         try {
             $this->upsert($key, $this->initialTtl);
-        } catch (\MongoDB\Driver\Exception\WriteException $e) {
+        } catch (WriteException $e) {
             if ($this->isDuplicateKeyException($e)) {
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException('Lock was acquired by someone else.', 0, $e);
+                throw new LockConflictedException('Lock was acquired by someone else.', 0, $e);
             }
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockAcquiringException('Failed to acquire lock.', 0, $e);
+            throw new LockAcquiringException('Failed to acquire lock.', 0, $e);
         }
         if ($this->options['gcProbablity'] > 0.0 && (1.0 === $this->options['gcProbablity'] || \random_int(0, \PHP_INT_MAX) / \PHP_INT_MAX <= $this->options['gcProbablity'])) {
             $this->createTtlIndex();
@@ -204,23 +204,23 @@ class MongoDbStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreI
      * @throws LockStorageException
      * @throws LockExpiredException
      */
-    public function putOffExpiration(\LockmeDep\Symfony\Component\Lock\Key $key, float $ttl)
+    public function putOffExpiration(Key $key, float $ttl)
     {
         $key->reduceLifetime($ttl);
         try {
             $this->upsert($key, $ttl);
-        } catch (\MongoDB\Driver\Exception\WriteException $e) {
+        } catch (WriteException $e) {
             if ($this->isDuplicateKeyException($e)) {
-                throw new \LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException('Failed to put off the expiration of the lock.', 0, $e);
+                throw new LockConflictedException('Failed to put off the expiration of the lock.', 0, $e);
             }
-            throw new \LockmeDep\Symfony\Component\Lock\Exception\LockStorageException($e->getMessage(), 0, $e);
+            throw new LockStorageException($e->getMessage(), 0, $e);
         }
         $this->checkNotExpired($key);
     }
     /**
      * {@inheritdoc}
      */
-    public function delete(\LockmeDep\Symfony\Component\Lock\Key $key)
+    public function delete(Key $key)
     {
         $this->getCollection()->deleteOne([
             // filter
@@ -231,21 +231,21 @@ class MongoDbStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreI
     /**
      * {@inheritdoc}
      */
-    public function exists(\LockmeDep\Symfony\Component\Lock\Key $key) : bool
+    public function exists(Key $key) : bool
     {
         return null !== $this->getCollection()->findOne([
             // filter
             '_id' => (string) $key,
             'token' => $this->getUniqueToken($key),
             'expires_at' => ['$gt' => $this->createMongoDateTime(\microtime(\true))],
-        ], ['readPreference' => new \MongoDB\Driver\ReadPreference(\defined(\MongoDB\Driver\ReadPreference::PRIMARY) ? \MongoDB\Driver\ReadPreference::PRIMARY : \MongoDB\Driver\ReadPreference::RP_PRIMARY)]);
+        ], ['readPreference' => new ReadPreference(\defined(ReadPreference::PRIMARY) ? ReadPreference::PRIMARY : ReadPreference::RP_PRIMARY)]);
     }
     /**
      * Update or Insert a Key.
      *
      * @param float $ttl Expiry in seconds from now
      */
-    private function upsert(\LockmeDep\Symfony\Component\Lock\Key $key, float $ttl)
+    private function upsert(Key $key, float $ttl)
     {
         $now = \microtime(\true);
         $token = $this->getUniqueToken($key);
@@ -261,7 +261,7 @@ class MongoDbStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreI
             'upsert' => \true,
         ]);
     }
-    private function isDuplicateKeyException(\MongoDB\Driver\Exception\WriteException $e) : bool
+    private function isDuplicateKeyException(WriteException $e) : bool
     {
         $code = $e->getCode();
         $writeErrors = $e->getWriteResult()->getWriteErrors();
@@ -271,13 +271,13 @@ class MongoDbStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreI
         // Mongo error E11000 - DuplicateKey
         return 11000 === $code;
     }
-    private function getCollection() : \LockmeDep\MongoDB\Collection
+    private function getCollection() : Collection
     {
         if (null !== $this->collection) {
             return $this->collection;
         }
         if (null === $this->client) {
-            $this->client = new \LockmeDep\MongoDB\Client($this->uri, $this->options['uriOptions'], $this->options['driverOptions']);
+            $this->client = new Client($this->uri, $this->options['uriOptions'], $this->options['driverOptions']);
         }
         $this->collection = $this->client->selectCollection($this->options['database'], $this->options['collection']);
         return $this->collection;
@@ -285,18 +285,16 @@ class MongoDbStore implements \LockmeDep\Symfony\Component\Lock\PersistingStoreI
     /**
      * @param float $seconds Seconds since 1970-01-01T00:00:00.000Z supporting millisecond precision. Defaults to now.
      */
-    private function createMongoDateTime(float $seconds) : \MongoDB\BSON\UTCDateTime
+    private function createMongoDateTime(float $seconds) : UTCDateTime
     {
-        return new \MongoDB\BSON\UTCDateTime($seconds * 1000);
+        return new UTCDateTime($seconds * 1000);
     }
     /**
      * Retrieves an unique token for the given key namespaced to this store.
      *
      * @param Key lock state container
-     *
-     * @return string token
      */
-    private function getUniqueToken(\LockmeDep\Symfony\Component\Lock\Key $key) : string
+    private function getUniqueToken(Key $key) : string
     {
         if (!$key->hasState(__CLASS__)) {
             $token = \base64_encode(\random_bytes(32));

@@ -8,7 +8,7 @@ use LockmeDep\Psr\Http\Message\StreamInterface;
  * Stream decorator that can cache previously read bytes from a sequentially
  * read stream.
  */
-final class CachingStream implements \LockmeDep\Psr\Http\Message\StreamInterface
+final class CachingStream implements StreamInterface
 {
     use StreamDecoratorTrait;
     /** @var StreamInterface Stream being wrapped */
@@ -21,10 +21,10 @@ final class CachingStream implements \LockmeDep\Psr\Http\Message\StreamInterface
      * @param StreamInterface $stream Stream to cache. The cursor is assumed to be at the beginning of the stream.
      * @param StreamInterface $target Optionally specify where data is cached
      */
-    public function __construct(\LockmeDep\Psr\Http\Message\StreamInterface $stream, \LockmeDep\Psr\Http\Message\StreamInterface $target = null)
+    public function __construct(StreamInterface $stream, StreamInterface $target = null)
     {
         $this->remoteStream = $stream;
-        $this->stream = $target ?: new \LockmeDep\GuzzleHttp\Psr7\Stream(\LockmeDep\GuzzleHttp\Psr7\Utils::tryFopen('php://temp', 'r+'));
+        $this->stream = $target ?: new Stream(Utils::tryFopen('php://temp', 'r+'));
     }
     public function getSize() : ?int
     {
@@ -114,8 +114,8 @@ final class CachingStream implements \LockmeDep\Psr\Http\Message\StreamInterface
     }
     private function cacheEntireStream() : int
     {
-        $target = new \LockmeDep\GuzzleHttp\Psr7\FnStream(['write' => 'strlen']);
-        \LockmeDep\GuzzleHttp\Psr7\Utils::copyToStream($this, $target);
+        $target = new FnStream(['write' => 'strlen']);
+        Utils::copyToStream($this, $target);
         return $this->tell();
     }
 }

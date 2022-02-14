@@ -7,7 +7,7 @@ use LockmeDep\Psr\Http\Message\StreamInterface;
 /**
  * PHP stream implementation.
  */
-class Stream implements \LockmeDep\Psr\Http\Message\StreamInterface
+class Stream implements StreamInterface
 {
     /**
      * @see http://php.net/manual/function.fopen.php

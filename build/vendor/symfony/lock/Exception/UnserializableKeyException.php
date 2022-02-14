@@ -17,6 +17,6 @@ namespace LockmeDep\Symfony\Component\Lock\Exception;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-class UnserializableKeyException extends \RuntimeException implements \LockmeDep\Symfony\Component\Lock\Exception\ExceptionInterface
+class UnserializableKeyException extends \RuntimeException implements ExceptionInterface
 {
 }

@@ -8,11 +8,11 @@ use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
 use LockmeDep\WP_Query;
-class Booked implements \LockmeDep\LockmeIntegration\PluginInterface
+class Booked implements PluginInterface
 {
     private $options;
     private $plugin;
-    public function __construct(\LockmeDep\LockmeIntegration\Plugin $plugin)
+    public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_booked');
@@ -59,7 +59,7 @@ class Booked implements \LockmeDep\LockmeIntegration\PluginInterface
         $lockme_data = [];
         try {
             $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
         try {
             if (!$lockme_data) {
@@ -69,14 +69,14 @@ class Booked implements \LockmeDep\LockmeIntegration\PluginInterface
                 //Update
                 $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
         return null;
     }
     public function ExportToLockMe() : void
     {
         $args = ['post_type' => 'booked_appointments', 'orderby' => 'meta_value', 'meta_key' => '_appointment_timestamp', 'meta_query' => [['key' => '_appointment_timestamp', 'value' => \strtotime('today'), 'compare' => '>=']], 'posts_per_page' => -1];
-        $loop = new \LockmeDep\WP_Query($args);
+        $loop = new WP_Query($args);
         while ($loop->have_posts()) {
             $loop->the_post();
             $post = $loop->post;
@@ -120,7 +120,7 @@ class Booked implements \LockmeDep\LockmeIntegration\PluginInterface
         $api = $this->plugin->GetApi();
         try {
             $api->DeleteReservation((int) $appdata['roomid'], "ext/{$id}");
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
     }
     public function GetMessage(array $message) : bool
@@ -136,7 +136,7 @@ class Booked implements \LockmeDep\LockmeIntegration\PluginInterface
         $calendar_id = $this->GetCalendar($roomid);
         $hour = $this->GetSlot($calendar_id, $date, $data['hour']);
         if (!$hour) {
-            throw new \RuntimeException('No time slot');
+            throw new RuntimeException('No time slot');
         }
         $time_format = get_option('time_format');
         $date_format = get_option('date_format');
@@ -155,10 +155,10 @@ class Booked implements \LockmeDep\LockmeIntegration\PluginInterface
                 ]);
                 $row_id = wp_insert_post($post, \true);
                 if (!$row_id) {
-                    throw new \RuntimeException('Error saving to database: ' . $wpdb->last_error);
+                    throw new RuntimeException('Error saving to database: ' . $wpdb->last_error);
                 }
                 if (is_wp_error($row_id)) {
-                    throw new \RuntimeException($row_id->get_error_message());
+                    throw new RuntimeException($row_id->get_error_message());
                 }
                 update_post_meta($row_id, '_appointment_guest_name', $data['name'] . ' ' . $data['surname']);
                 update_post_meta($row_id, '_appointment_guest_email', $data['email']);
@@ -173,7 +173,7 @@ class Booked implements \LockmeDep\LockmeIntegration\PluginInterface
                     $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, ['extid' => $row_id]);
                     return \true;
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                 }
                 break;
             case 'edit':
@@ -287,7 +287,7 @@ class Booked implements \LockmeDep\LockmeIntegration\PluginInterface
             if ($api) {
                 try {
                     $rooms = $api->RoomList();
-                } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+                } catch (IdentityProviderException $e) {
                 }
             }
             add_settings_field('calendar_default', 'Pokój dla domyślnego kalendarza', function () use($rooms) {

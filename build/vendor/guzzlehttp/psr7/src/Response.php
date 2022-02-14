@@ -8,7 +8,7 @@ use LockmeDep\Psr\Http\Message\StreamInterface;
 /**
  * PSR-7 response implementation.
  */
-class Response implements \LockmeDep\Psr\Http\Message\ResponseInterface
+class Response implements ResponseInterface
 {
     use MessageTrait;
     /** Map of standard HTTP status code/reason phrases */
@@ -29,7 +29,7 @@ class Response implements \LockmeDep\Psr\Http\Message\ResponseInterface
         $this->assertStatusCodeRange($status);
         $this->statusCode = $status;
         if ($body !== '' && $body !== null) {
-            $this->stream = \LockmeDep\GuzzleHttp\Psr7\Utils::streamFor($body);
+            $this->stream = Utils::streamFor($body);
         }
         $this->setHeaders($headers);
         if ($reason == '' && isset(self::PHRASES[$this->statusCode])) {
@@ -47,7 +47,7 @@ class Response implements \LockmeDep\Psr\Http\Message\ResponseInterface
     {
         return $this->reasonPhrase;
     }
-    public function withStatus($code, $reasonPhrase = '') : \LockmeDep\Psr\Http\Message\ResponseInterface
+    public function withStatus($code, $reasonPhrase = '') : ResponseInterface
     {
         $this->assertStatusCodeIsInteger($code);
         $code = (int) $code;

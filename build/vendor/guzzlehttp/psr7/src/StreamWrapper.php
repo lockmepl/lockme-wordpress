@@ -26,7 +26,7 @@ final class StreamWrapper
      *
      * @throws \InvalidArgumentException if stream is not readable or writable
      */
-    public static function getResource(\LockmeDep\Psr\Http\Message\StreamInterface $stream)
+    public static function getResource(StreamInterface $stream)
     {
         self::register();
         if ($stream->isReadable()) {
@@ -43,7 +43,7 @@ final class StreamWrapper
      *
      * @return resource
      */
-    public static function createStreamContext(\LockmeDep\Psr\Http\Message\StreamInterface $stream)
+    public static function createStreamContext(StreamInterface $stream)
     {
         return \stream_context_create(['guzzle' => ['stream' => $stream]]);
     }

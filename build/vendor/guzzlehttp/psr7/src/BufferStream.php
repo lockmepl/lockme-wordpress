@@ -12,7 +12,7 @@ use LockmeDep\Psr\Http\Message\StreamInterface;
  * what the configured high water mark of the stream is, or the maximum
  * preferred size of the buffer.
  */
-final class BufferStream implements \LockmeDep\Psr\Http\Message\StreamInterface
+final class BufferStream implements StreamInterface
 {
     /** @var int */
     private $hwm;

@@ -19,14 +19,14 @@ use LockmeDep\Psr\Log\NullLogger;
  * @author Jérémy Derussé <jeremy@derusse.com>
  * @author Hamza Amrouche <hamza.simperfit@gmail.com>
  */
-class LockFactory implements \LockmeDep\Psr\Log\LoggerAwareInterface
+class LockFactory implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
     private $store;
-    public function __construct(\LockmeDep\Symfony\Component\Lock\PersistingStoreInterface $store)
+    public function __construct(PersistingStoreInterface $store)
     {
         $this->store = $store;
-        $this->logger = new \LockmeDep\Psr\Log\NullLogger();
+        $this->logger = new NullLogger();
     }
     /**
      * Creates a lock for the given resource.
@@ -35,9 +35,9 @@ class LockFactory implements \LockmeDep\Psr\Log\LoggerAwareInterface
      * @param float|null $ttl         Maximum expected lock duration in seconds
      * @param bool       $autoRelease Whether to automatically release the lock or not when the lock instance is destroyed
      */
-    public function createLock(string $resource, ?float $ttl = 300.0, bool $autoRelease = \true) : \LockmeDep\Symfony\Component\Lock\LockInterface
+    public function createLock(string $resource, ?float $ttl = 300.0, bool $autoRelease = \true) : LockInterface
     {
-        return $this->createLockFromKey(new \LockmeDep\Symfony\Component\Lock\Key($resource), $ttl, $autoRelease);
+        return $this->createLockFromKey(new Key($resource), $ttl, $autoRelease);
     }
     /**
      * Creates a lock from the given key.
@@ -46,9 +46,9 @@ class LockFactory implements \LockmeDep\Psr\Log\LoggerAwareInterface
      * @param float|null $ttl         Maximum expected lock duration in seconds
      * @param bool       $autoRelease Whether to automatically release the lock or not when the lock instance is destroyed
      */
-    public function createLockFromKey(\LockmeDep\Symfony\Component\Lock\Key $key, ?float $ttl = 300.0, bool $autoRelease = \true) : \LockmeDep\Symfony\Component\Lock\LockInterface
+    public function createLockFromKey(Key $key, ?float $ttl = 300.0, bool $autoRelease = \true) : LockInterface
     {
-        $lock = new \LockmeDep\Symfony\Component\Lock\Lock($key, $this->store, $ttl, $autoRelease);
+        $lock = new Lock($key, $this->store, $ttl, $autoRelease);
         $lock->setLogger($this->logger);
         return $lock;
     }

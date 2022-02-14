@@ -306,6 +306,7 @@ class Booked implements PluginInterface
 
         $day_name = date('D', $date);
         $formatted_date = date_i18n('Ymd', $date);
+
         if (function_exists('booked_apply_custom_timeslots_details_filter')) {
             $booked_defaults = booked_apply_custom_timeslots_details_filter($booked_defaults, $calendar_id);
         } elseif (function_exists('booked_apply_custom_timeslots_filter')) {
@@ -329,6 +330,7 @@ class Booked implements PluginInterface
                 return $h;
             }
         }
+
         return null;
     }
 

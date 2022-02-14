@@ -2,7 +2,7 @@
 
 namespace LockmeDep;
 
-#[Attribute(\Attribute::TARGET_CLASS)]
+#[\Attribute(\Attribute::TARGET_CLASS)]
 final class Attribute
 {
     public const TARGET_CLASS = 1;
@@ -20,4 +20,3 @@ final class Attribute
         $this->flags = $flags;
     }
 }
-\class_alias('LockmeDep\\Attribute', 'Attribute', \false);

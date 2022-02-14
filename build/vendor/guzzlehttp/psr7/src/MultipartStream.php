@@ -8,7 +8,7 @@ use LockmeDep\Psr\Http\Message\StreamInterface;
  * Stream that when read returns bytes for a streaming multipart or
  * multipart/form-data stream.
  */
-final class MultipartStream implements \LockmeDep\Psr\Http\Message\StreamInterface
+final class MultipartStream implements StreamInterface
 {
     use StreamDecoratorTrait;
     /** @var string */
@@ -54,24 +54,24 @@ final class MultipartStream implements \LockmeDep\Psr\Http\Message\StreamInterfa
     /**
      * Create the aggregate stream that will be used to upload the POST data
      */
-    protected function createStream(array $elements = []) : \LockmeDep\Psr\Http\Message\StreamInterface
+    protected function createStream(array $elements = []) : StreamInterface
     {
-        $stream = new \LockmeDep\GuzzleHttp\Psr7\AppendStream();
+        $stream = new AppendStream();
         foreach ($elements as $element) {
             $this->addElement($stream, $element);
         }
         // Add the trailing boundary with CRLF
-        $stream->addStream(\LockmeDep\GuzzleHttp\Psr7\Utils::streamFor("--{$this->boundary}--\r\n"));
+        $stream->addStream(Utils::streamFor("--{$this->boundary}--\r\n"));
         return $stream;
     }
-    private function addElement(\LockmeDep\GuzzleHttp\Psr7\AppendStream $stream, array $element) : void
+    private function addElement(AppendStream $stream, array $element) : void
     {
         foreach (['contents', 'name'] as $key) {
             if (!\array_key_exists($key, $element)) {
                 throw new \InvalidArgumentException("A '{$key}' key is required");
             }
         }
-        $element['contents'] = \LockmeDep\GuzzleHttp\Psr7\Utils::streamFor($element['contents']);
+        $element['contents'] = Utils::streamFor($element['contents']);
         if (empty($element['filename'])) {
             $uri = $element['contents']->getMetadata('uri');
             if (\substr($uri, 0, 6) !== 'php://') {
@@ -79,11 +79,11 @@ final class MultipartStream implements \LockmeDep\Psr\Http\Message\StreamInterfa
             }
         }
         [$body, $headers] = $this->createElement($element['name'], $element['contents'], $element['filename'] ?? null, $element['headers'] ?? []);
-        $stream->addStream(\LockmeDep\GuzzleHttp\Psr7\Utils::streamFor($this->getHeaders($headers)));
+        $stream->addStream(Utils::streamFor($this->getHeaders($headers)));
         $stream->addStream($body);
-        $stream->addStream(\LockmeDep\GuzzleHttp\Psr7\Utils::streamFor("\r\n"));
+        $stream->addStream(Utils::streamFor("\r\n"));
     }
-    private function createElement(string $name, \LockmeDep\Psr\Http\Message\StreamInterface $stream, ?string $filename, array $headers) : array
+    private function createElement(string $name, StreamInterface $stream, ?string $filename, array $headers) : array
     {
         // Set a default content-disposition header if one was no provided
         $disposition = $this->getHeader($headers, 'content-disposition');
@@ -100,7 +100,7 @@ final class MultipartStream implements \LockmeDep\Psr\Http\Message\StreamInterfa
         // Set a default Content-Type if one was not supplied
         $type = $this->getHeader($headers, 'content-type');
         if (!$type && ($filename === '0' || $filename)) {
-            if ($type = \LockmeDep\GuzzleHttp\Psr7\MimeType::fromFilename($filename)) {
+            if ($type = MimeType::fromFilename($filename)) {
                 $headers['Content-Type'] = $type;
             }
         }
