@@ -135,6 +135,7 @@ return array(
     'LockmeDep\\Lockme\\OAuth2\\Client\\Provider\\Lockme' => $vendorDir . '/lustmored/oauth2-lockme/src/Provider/Lockme.php',
     'LockmeDep\\Lockme\\OAuth2\\Client\\Provider\\LockmeUser' => $vendorDir . '/lustmored/oauth2-lockme/src/Provider/LockmeUser.php',
     'LockmeDep\\Lockme\\SDK\\Lockme' => $vendorDir . '/lustmored/lockme-sdk/src/Lockme.php',
+    'LockmeDep\\PhpToken' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
     'LockmeDep\\Psr\\Http\\Client\\ClientExceptionInterface' => $vendorDir . '/psr/http-client/src/ClientExceptionInterface.php',
     'LockmeDep\\Psr\\Http\\Client\\ClientInterface' => $vendorDir . '/psr/http-client/src/ClientInterface.php',
     'LockmeDep\\Psr\\Http\\Client\\NetworkExceptionInterface' => $vendorDir . '/psr/http-client/src/NetworkExceptionInterface.php',
@@ -204,6 +205,7 @@ return array(
     'LockmeDep\\Symfony\\Component\\Lock\\Strategy\\StrategyInterface' => $vendorDir . '/symfony/lock/Strategy/StrategyInterface.php',
     'LockmeDep\\Symfony\\Component\\Lock\\Strategy\\UnanimousStrategy' => $vendorDir . '/symfony/lock/Strategy/UnanimousStrategy.php',
     'LockmeDep\\Symfony\\Polyfill\\Php80\\Php80' => $vendorDir . '/symfony/polyfill-php80/Php80.php',
+    'LockmeDep\\Symfony\\Polyfill\\Php80\\PhpToken' => $vendorDir . '/symfony/polyfill-php80/PhpToken.php',
     'LockmeDep\\UnhandledMatchError' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
     'LockmeDep\\ValueError' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
 );
