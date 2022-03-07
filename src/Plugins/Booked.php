@@ -173,14 +173,29 @@ class Booked implements PluginInterface
         $time_format = get_option('time_format');
         $date_format = get_option('date_format');
 
+        $cf_data = [
+            'Żródło' => sprintf('LockMe (%s)', $data['source']),
+            'Telefon' => $data['phone'],
+            'Ilość osób' => $data['people'],
+            'Cena' => $data['price'],
+        ];
+        switch ($data['source']) {
+            case 'web':
+                $cf_data['Status'] = $data['status'] ? 'Opłacone' : 'Rezerwacja (max. 20 minut)';
+                break;
+            case 'panel':
+                $cf_data['Status'] = 'Rezerwacja z panelu Lockme - status sprawdź w panelu Lockme';
+                break;
+            case 'api':
+                $cf_data['Status'] = 'Rezerwacja z API';
+                break;
+            case 'widget':
+                $cf_data['Status'] = 'Rezerwacja z widgeta';
+                break;
+        }
+
         $cf_meta_value = '';
-        foreach ([
-                     'Żródło' => 'LockMe',
-                     'Telefon' => $data['phone'],
-                     'Ilość osób' => $data['people'],
-                     'Cena' => $data['price'],
-                     'Status' => $data['status'] ? 'Opłacone' : 'Rezerwacja (max. 20 minut)'
-                 ] as $label => $value) {
+        foreach ($cf_data as $label => $value) {
             $cf_meta_value .= '<p class="cf-meta-value"><strong>'.$label.'</strong><br>'.$value.'</p>';
         }
 
