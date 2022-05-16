@@ -56,11 +56,11 @@ class SemaphoreStore implements BlockingStoreInterface
             return;
         }
         $keyId = \unpack('i', \md5($key, \true))[1];
-        $resource = \sem_get($keyId);
-        $acquired = @\sem_acquire($resource, !$blocking);
+        $resource = @\sem_get($keyId);
+        $acquired = $resource && @\sem_acquire($resource, !$blocking);
         while ($blocking && !$acquired) {
-            $resource = \sem_get($keyId);
-            $acquired = @\sem_acquire($resource);
+            $resource = @\sem_get($keyId);
+            $acquired = $resource && @\sem_acquire($resource);
         }
         if (!$acquired) {
             throw new LockConflictedException();
