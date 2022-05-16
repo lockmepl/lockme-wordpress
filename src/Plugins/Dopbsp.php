@@ -454,7 +454,7 @@ class Dopbsp implements PluginInterface
                 'add_to_day_hour_info' => 'false',
                 'add_to_day_hour_body' => 'false',
                 'translation' => 'Źródło',
-                'value' => in_array($data['source'], ['panel', 'web', 'widget']) ? 'LockMe' : ''
+                'value' => in_array($data['source'], ['panel', 'web', 'widget']) ? 'LockMe ('.$data['source'].')' : ''
             ],
             [
                 'id' => '7',
