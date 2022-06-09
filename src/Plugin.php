@@ -42,6 +42,8 @@ class Plugin
      */
     private $available_plugins = [];
 
+    private $api = null;
+
     public function __construct()
     {
         if (!session_id()) {
@@ -140,6 +142,10 @@ class Plugin
 
     public function GetApi(): ?Lockme
     {
+        if (null !== $this->api) {
+            return $this->api;
+        }
+
         if ($this->options['client_id'] && $this->options['client_secret']) {
             $lm = new Lockme([
                 'clientId' => $this->options['client_id'],
@@ -153,9 +159,9 @@ class Plugin
                     function ($token) { update_option('lockme_oauth2_token', $token); }
                 );
             } catch (Exception $e) {
-                return $lm;
+                return $this->api = $lm;
             }
-            return $lm;
+            return $this->api = $lm;
         }
         return null;
     }
