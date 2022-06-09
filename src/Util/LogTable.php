@@ -31,6 +31,11 @@ class LogTable extends WP_List_Table
         }
     }
 
+    protected function get_table_classes(): array
+    {
+        return array( 'widefat', 'striped' );
+    }
+
     public function no_items(): void
     {
         echo 'The logs are empty. And this is a good thing!';
