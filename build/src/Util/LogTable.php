@@ -4,6 +4,7 @@ declare (strict_types=1);
 namespace LockmeDep\LockmeIntegration\Util;
 
 use LockmeDep\LockmeIntegration\Libs\WP_List_Table;
+use LockmeDep\WP_Query;
 class LogTable extends WP_List_Table
 {
     public function get_columns() : array
@@ -35,7 +36,7 @@ class LogTable extends WP_List_Table
         $order = isset($_GET['order']) ? esc_sql($_GET['order']) : 'DESC';
         $items = 10;
         $page = ($this->get_pagenum() - 1) * $items;
-        $query = "SELECT\n            *\n        FROM {$wpdb_table}\n        ORDER BY {$orderby} {$order}\n        LIMIT {$page},{$items}";
+        $query = $wpdb->prepare("SELECT\n            *\n        FROM {$wpdb_table}\n        ORDER BY {$orderby} {$order}\n        LIMIT {$page},{$items}");
         // query output_type will be an associative array with ARRAY_A.
         $this->items = $wpdb->get_results($query, ARRAY_A);
         $total = $wpdb->get_var("SELECT count(*) FROM {$wpdb_table}");

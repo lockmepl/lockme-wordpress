@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace LockmeIntegration\Util;
 
 use LockmeIntegration\Libs\WP_List_Table;
+use WP_Query;
 
 class LogTable extends WP_List_Table
 {
@@ -49,11 +50,11 @@ class LogTable extends WP_List_Table
         $items = 10;
         $page = ($this->get_pagenum() - 1) * $items;
 
-        $query = "SELECT
+        $query = $wpdb->prepare("SELECT
             *
         FROM $wpdb_table
         ORDER BY $orderby $order
-        LIMIT $page,$items";
+        LIMIT $page,$items");
 
         // query output_type will be an associative array with ARRAY_A.
         $this->items = $wpdb->get_results( $query, ARRAY_A  );

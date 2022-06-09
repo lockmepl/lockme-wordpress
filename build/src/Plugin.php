@@ -178,13 +178,9 @@ class Plugin
             $logTable->prepare_items();
             echo '<div class="wrap">';
             echo '<h2>Lockme API error logs</h2>';
-            echo '<div id="nds-wp-list-table-demo">';
-            echo '<div id="nds-post-body">';
-            echo '<form id="nds-user-list-form" method="get">';
+            echo '<form method="get">';
             $logTable->display();
             echo '</form>';
-            echo '</div>';
-            echo '</div>';
             echo '</div>';
             return;
         }
