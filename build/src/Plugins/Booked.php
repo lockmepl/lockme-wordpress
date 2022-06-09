@@ -16,7 +16,7 @@ class Booked implements PluginInterface
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_booked');
-        if (\is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
+        if (\is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_action('booked_new_appointment_created', [$this, 'AddEditReservation'], 5);
             add_action('transition_post_status', [$this, 'AddEditReservation'], 10, 3);
             add_action('before_delete_post', [$this, 'Delete']);
@@ -126,7 +126,7 @@ class Booked implements PluginInterface
     public function GetMessage(array $message) : bool
     {
         global $wpdb;
-        if (!$this->options['use'] || !$this->CheckDependencies()) {
+        if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return \false;
         }
         $data = $message['data'];
@@ -294,9 +294,9 @@ class Booked implements PluginInterface
             echo '<p>Ustawienia integracji z wtyczką Booked</p>';
         }, 'lockme-booked');
         add_settings_field('booked_use', 'Włącz integrację', function () {
-            echo '<input name="lockme_booked[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'], \false) . ' />';
+            echo '<input name="lockme_booked[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'] ?? null, \false) . ' />';
         }, 'lockme-booked', 'lockme_booked_section', []);
-        if ($this->options['use'] && $this->plugin->tab === 'booked_plugin') {
+        if (($this->options['use'] ?? null) && $this->plugin->tab === 'booked_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {

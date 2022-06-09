@@ -17,7 +17,7 @@ class Cpabc implements PluginInterface {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_cpabc');
 
-        if(is_array($this->options) && $this->options['use']){
+        if(is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()){
             register_shutdown_function([$this, 'ShutDown']);
 
             add_action('init', function(){
@@ -60,13 +60,13 @@ class Cpabc implements PluginInterface {
             'cpabc_use',
             'Włącz integrację',
             static function() use($options){
-                echo '<input name="lockme_cpabc[use]" type="checkbox" value="1"  '.checked(1, $options['use'], false).' />';
+                echo '<input name="lockme_cpabc[use]" type="checkbox" value="1"  '.checked(1, $options['use'] ?? null, false).' />';
             },
             'lockme-cpabc',
             'lockme_cpabc_section',
             array());
 
-        if($options['use'] && $this->plugin->tab === 'cpabc_plugin'){
+        if(($this->options['use'] ?? null) && $this->plugin->tab === 'cpabc_plugin'){
             $api = $this->plugin->GetApi();
             $rooms = [];
             if($api){
@@ -287,7 +287,7 @@ class Cpabc implements PluginInterface {
     public function GetMessage(array $message): bool
     {
         global $wpdb;
-        if(!$this->options['use'] || !$this->CheckDependencies()){
+        if(!($this->options['use'] ?? null) || !$this->CheckDependencies()){
             return false;
         }
 

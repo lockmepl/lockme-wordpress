@@ -20,7 +20,7 @@ class Woo implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option('lockme_woo');
 
-        if (is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
+        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_action('woocommerce_new_booking', [$this, 'AddEditReservation'], 5, 1);
             foreach (['unpaid', 'pending-confirmation', 'confirmed', 'paid', 'complete', 'in-cart'] as $action) {
                 add_action('woocommerce_booking_'.$action, [$this, 'AddEditReservation'], 5, 1);
@@ -88,7 +88,7 @@ class Woo implements PluginInterface
             'woo_use',
             'Włącz integrację',
             function () {
-                echo '<input name="lockme_woo[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'],
+                echo '<input name="lockme_woo[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'] ?? null,
                         false).' />';
             },
             'lockme-woo',
@@ -96,7 +96,7 @@ class Woo implements PluginInterface
             []
         );
 
-        if ($this->options['use'] && $this->plugin->tab === 'woo_plugin') {
+        if (($this->options['use'] ?? null) && $this->plugin->tab === 'woo_plugin') {
             add_settings_field(
                 'slot_length',
                 'Dłogośc slota (w min)',
@@ -252,7 +252,7 @@ class Woo implements PluginInterface
 
     public function GetMessage(array $message): bool
     {
-        if (!$this->options['use'] || !$this->CheckDependencies()) {
+        if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return false;
         }
 

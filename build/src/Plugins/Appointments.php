@@ -15,7 +15,7 @@ class Appointments implements PluginInterface
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_app');
-        if (\is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
+        if (\is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_action('wpmudev_appointments_insert_appointment', [$this, 'AddReservation'], 10, 1);
             add_action('app-appointment-inline_edit-after_save', [$this, 'AddEditReservation'], 10, 2);
             add_action('app-appointments-appointment_cancelled', [$this, 'RemoveReservation'], 10, 1);
@@ -47,9 +47,9 @@ class Appointments implements PluginInterface
             echo '<p>Ustawienia integracji z wtyczką Appointments</p>';
         }, 'lockme-app');
         add_settings_field('app_use', 'Włącz integrację', function () {
-            echo '<input name="lockme_app[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'], \false) . ' />';
+            echo '<input name="lockme_app[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'] ?? null, \false) . ' />';
         }, 'lockme-app', 'lockme_app_section', []);
-        if ($this->options['use'] && $this->plugin->tab === 'appointments_plugin') {
+        if (($this->options['use'] ?? null) && $this->plugin->tab === 'appointments_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
@@ -113,7 +113,7 @@ class Appointments implements PluginInterface
     public function GetMessage(array $message) : bool
     {
         global $appointments, $wpdb;
-        if (!$this->options['use'] || !$this->CheckDependencies()) {
+        if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return \false;
         }
         $data = $message['data'];

@@ -26,7 +26,7 @@ class WPBooking implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option('lockme_wpb');
 
-        if (is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
+        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             $wpb_path = __DIR__.'/../../../../wp-booking-calendar/';
             /** @noinspection PhpIncludeInspection */
             include_once $wpb_path.'/admin/class/list.class.php';
@@ -165,7 +165,7 @@ class WPBooking implements PluginInterface
             'wpb_use',
             'Włącz integrację',
             function () {
-                echo '<input name="lockme_wpb[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'],
+                echo '<input name="lockme_wpb[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'] ?? null,
                         false).' />';
             },
             'lockme-wpb',
@@ -173,7 +173,7 @@ class WPBooking implements PluginInterface
             []
         );
 
-        if ($this->options['use'] && $this->plugin->tab === 'wp_booking_plugin') {
+        if (($this->options['use'] ?? null) && $this->plugin->tab === 'wp_booking_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
@@ -280,7 +280,7 @@ class WPBooking implements PluginInterface
     public function GetMessage(array $message): bool
     {
         global $wpdb, $blog_id;
-        if (!$this->options['use'] || !$this->CheckDependencies()) {
+        if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return false;
         }
 

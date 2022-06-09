@@ -17,7 +17,7 @@ class Woo implements PluginInterface
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_woo');
-        if (\is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
+        if (\is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_action('woocommerce_new_booking', [$this, 'AddEditReservation'], 5, 1);
             foreach (['unpaid', 'pending-confirmation', 'confirmed', 'paid', 'complete', 'in-cart'] as $action) {
                 add_action('woocommerce_booking_' . $action, [$this, 'AddEditReservation'], 5, 1);
@@ -61,9 +61,9 @@ class Woo implements PluginInterface
             echo '<p>Ustawienia integracji z wtyczką Woocommerce Bookings</p>';
         }, 'lockme-woo');
         add_settings_field('woo_use', 'Włącz integrację', function () {
-            echo '<input name="lockme_woo[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'], \false) . ' />';
+            echo '<input name="lockme_woo[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'] ?? null, \false) . ' />';
         }, 'lockme-woo', 'lockme_woo_section', []);
-        if ($this->options['use'] && $this->plugin->tab === 'woo_plugin') {
+        if (($this->options['use'] ?? null) && $this->plugin->tab === 'woo_plugin') {
             add_settings_field('slot_length', 'Dłogośc slota (w min)', function () {
                 echo '<input name="lockme_woo[slot_length]" type="text" value="' . $this->options['slot_length'] . '" />';
             }, 'lockme-woo', 'lockme_woo_section', []);
@@ -181,7 +181,7 @@ class Woo implements PluginInterface
     }
     public function GetMessage(array $message) : bool
     {
-        if (!$this->options['use'] || !$this->CheckDependencies()) {
+        if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return \false;
         }
         $data = $message['data'];

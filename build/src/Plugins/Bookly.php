@@ -24,7 +24,7 @@ class Bookly implements PluginInterface
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_bookly');
-        if (\is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
+        if (\is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_filter('wp_die_ajax_handler', [$this, 'Ajax'], 15, 1);
             add_action('init', function () {
                 if (is_admin() && wp_doing_ajax()) {
@@ -184,7 +184,7 @@ class Bookly implements PluginInterface
     }
     public function GetMessage(array $message) : bool
     {
-        if (!$this->options['use'] || !$this->CheckDependencies()) {
+        if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return \false;
         }
         $data = $message['data'];
@@ -299,9 +299,9 @@ class Bookly implements PluginInterface
             echo '<p>Ustawienia integracji z wtyczką bookly</p>';
         }, 'lockme-bookly');
         add_settings_field('bookly_use', 'Włącz integrację', function () {
-            echo '<input name="lockme_bookly[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'], \false) . ' />';
+            echo '<input name="lockme_bookly[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'] ?? null, \false) . ' />';
         }, 'lockme-bookly', 'lockme_bookly_section', []);
-        if ($this->options['use'] && $this->plugin->tab === 'bookly_plugin') {
+        if (($this->options['use'] ?? null) && $this->plugin->tab === 'bookly_plugin') {
             add_settings_field('one_person', 'Traktuj grupy jako jedną osobę', function () {
                 echo '<input name="lockme_bookly[one_person]" type="checkbox" value="1"  ' . checked(1, $this->options['one_person'], \false) . ' />';
             }, 'lockme-bookly', 'lockme_bookly_section', []);

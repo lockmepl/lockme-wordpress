@@ -18,7 +18,7 @@ class Dopbsp implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option('lockme_dopbsp');
 
-        if (is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
+        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_action('dopbsp_action_book_after', [$this, 'AddReservation'], 5);
             add_action('woocommerce_payment_complete', [$this, 'AddWooReservation'], 20, 1);
             add_action('woocommerce_thankyou', [$this, 'AddWooReservation'], 20, 1);
@@ -32,7 +32,7 @@ class Dopbsp implements PluginInterface
                     exit;
                 }
 
-                if ($_GET['dopbsp_fix']) {
+                if ($_GET['dopbsp_fix'] ?? null) {
                     $this->FixSettings();
                     $_SESSION['dopbsp_fix'] = 1;
                     wp_redirect('?page=lockme_integration&tab=dopbsp_plugin');
@@ -253,14 +253,14 @@ class Dopbsp implements PluginInterface
             'dopbsp_use',
             'Włącz integrację',
             function () {
-                echo '<input name="lockme_dopbsp[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'],
+                echo '<input name="lockme_dopbsp[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'] ?? null,
                         false).' />';
             },
             'lockme-dopbsp',
             'lockme_dopbsp_section',
             []);
 
-        if ($this->options['use'] && $this->plugin->tab === 'dopbsp_plugin') {
+        if (($this->options['use'] ?? null) && $this->plugin->tab === 'dopbsp_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
@@ -396,7 +396,7 @@ class Dopbsp implements PluginInterface
     public function GetMessage(array $message): bool
     {
         global $DOPBSP, $wpdb;
-        if (!$this->options['use'] || !$this->CheckDependencies()) {
+        if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return false;
         }
 

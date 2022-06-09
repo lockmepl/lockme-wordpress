@@ -22,7 +22,7 @@ class Easyapp implements PluginInterface
         global $wpdb;
         $this->plugin = $plugin;
         $this->options = get_option('lockme_easyapp');
-        if (\is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
+        if (\is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             $this->models = new EADBModels($wpdb, new EATableColumns(), []);
             if (isset($_GET['action'], $_GET['id']) && $_GET['action'] === 'ea_appointment' && $_GET['id']) {
                 $this->resdata = $this->AppData($_GET['id']);
@@ -69,9 +69,9 @@ class Easyapp implements PluginInterface
             echo '<p>Ustawienia integracji z wtyczką Easy Appointments</p>';
         }, 'lockme-easyapp');
         add_settings_field('easyapp_use', 'Włącz integrację', function () {
-            echo '<input name="lockme_easyapp[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'], \false) . ' />';
+            echo '<input name="lockme_easyapp[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'] ?? null, \false) . ' />';
         }, 'lockme-easyapp', 'lockme_easyapp_section', []);
-        if ($this->options['use'] && $this->plugin->tab === 'easyapp_plugin') {
+        if (($this->options['use'] ?? null) && $this->plugin->tab === 'easyapp_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
@@ -167,7 +167,7 @@ class Easyapp implements PluginInterface
     }
     public function GetMessage(array $message) : bool
     {
-        if (!$this->options['use'] || !$this->CheckDependencies()) {
+        if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return \false;
         }
         $data = $message['data'];

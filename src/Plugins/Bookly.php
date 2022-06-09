@@ -27,7 +27,7 @@ class Bookly implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option('lockme_bookly');
 
-        if (is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
+        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_filter('wp_die_ajax_handler', [$this, 'Ajax'], 15, 1);
 
             add_action('init', function () {
@@ -236,7 +236,7 @@ class Bookly implements PluginInterface
 
     public function GetMessage(array $message): bool
     {
-        if (!$this->options['use'] || !$this->CheckDependencies()) {
+        if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return false;
         }
 
@@ -392,7 +392,7 @@ class Bookly implements PluginInterface
             'bookly_use',
             'Włącz integrację',
             function () {
-                echo '<input name="lockme_bookly[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'],
+                echo '<input name="lockme_bookly[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'] ?? null,
                         false).' />';
             },
             'lockme-bookly',
@@ -400,7 +400,7 @@ class Bookly implements PluginInterface
             []
         );
 
-        if ($this->options['use'] && $this->plugin->tab === 'bookly_plugin') {
+        if (($this->options['use'] ?? null) && $this->plugin->tab === 'bookly_plugin') {
             add_settings_field(
                 'one_person',
                 'Traktuj grupy jako jedną osobę',

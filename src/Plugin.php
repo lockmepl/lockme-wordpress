@@ -213,7 +213,7 @@ class Plugin
             'rodo_mode',
             'RODO mode (anonymize data)',
             function () {
-                echo '<input type="checkbox" name="lockme_settings[rodo_mode]" value="1"  '.checked(1, $this->options['rodo_mode'], false).' /> <small>Jeśli włączysz tę funkcję to w ramach wymiany danych przez API pomiędzy Twoją stroną a Lockme będzie wysyłana jedynie informacja o dacie i godzinie wizyty. Wszystkie dane osobowe klienta zostaną tylko na Twojej stronie. <strong>Uwaga!</strong> jeśli taką rezerwację wyedytujesz z poziomu panelu lockme to istnieje ryzyko, że skasuje to dane w Twoim systemie rezerwacyjnym. Pamiętaj aby takimi rezerwacjami zarządzać tylko przez swój system.</small>';
+                echo '<input type="checkbox" name="lockme_settings[rodo_mode]" value="1"  '.checked(1, $this->options['rodo_mode'] ?? false, false).' /> <small>Jeśli włączysz tę funkcję to w ramach wymiany danych przez API pomiędzy Twoją stroną a Lockme będzie wysyłana jedynie informacja o dacie i godzinie wizyty. Wszystkie dane osobowe klienta zostaną tylko na Twojej stronie. <strong>Uwaga!</strong> jeśli taką rezerwację wyedytujesz z poziomu panelu lockme to istnieje ryzyko, że skasuje to dane w Twoim systemie rezerwacyjnym. Pamiętaj aby takimi rezerwacjami zarządzać tylko przez swój system.</small>';
             },
             'lockme-admin',
             'lockme_settings_section',

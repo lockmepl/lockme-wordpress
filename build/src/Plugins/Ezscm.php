@@ -19,7 +19,7 @@ class Ezscm implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option('lockme_ezscm');
         $this->tables = array('entries' => "{$wpdb->prefix}ezscm_entries", 'schedules' => "{$wpdb->prefix}ezscm_schedules", 'settings' => "{$wpdb->prefix}ezscm_settings", 'settings_schedule' => "{$wpdb->prefix}ezscm_settings_schedule");
-        if (\is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
+        if (\is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             if ($_POST['action'] === 'ezscm_frontend' || $_POST['action'] === 'ezscm_backend') {
                 \parse_str($_REQUEST['data'], $data);
                 $action = $data['action'];
@@ -55,9 +55,9 @@ class Ezscm implements PluginInterface
         }, 'lockme-ezscm');
         $options = $this->options;
         add_settings_field('ezscm_use', 'Włącz integrację', static function () use($options) {
-            echo '<input name="lockme_ezscm[use]" type="checkbox" value="1"  ' . checked(1, $options['use'], \false) . ' />';
+            echo '<input name="lockme_ezscm[use]" type="checkbox" value="1"  ' . checked(1, $options['use'] ?? null, \false) . ' />';
         }, 'lockme-ezscm', 'lockme_ezscm_section', array());
-        if ($options['use'] && $this->plugin->tab === 'ezscm_plugin') {
+        if (($this->options['use'] ?? null) && $this->plugin->tab === 'ezscm_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
@@ -206,7 +206,7 @@ class Ezscm implements PluginInterface
     public function GetMessage(array $message) : bool
     {
         global $wpdb;
-        if (!$this->options['use'] || !$this->CheckDependencies()) {
+        if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return \false;
         }
         $data = $message['data'];

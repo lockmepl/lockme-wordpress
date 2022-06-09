@@ -3,7 +3,6 @@
 declare (strict_types=1);
 namespace LockmeDep\LockmeIntegration\Libs;
 
-use JsonException;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\Lockme\OAuth2\Client\Provider\Lockme;
 class WrappedProvider extends Lockme

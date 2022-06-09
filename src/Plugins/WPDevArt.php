@@ -28,7 +28,7 @@ class WPDevArt implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option('lockme_wpdevart');
 
-        if (is_array($this->options) && $this->options['use'] && $this->CheckDependencies()) {
+        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             if ($_GET['page'] === 'wpdevart-reservations' && $_POST['task'] && $_POST['id'] && is_admin()) {
                 $this->resdata = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$wpdb->prefix.'wpdevart_reservations WHERE `id`=%d',
                     $_POST['id']), ARRAY_A);
@@ -130,14 +130,14 @@ class WPDevArt implements PluginInterface
             'wpdevart_use',
             'Włącz integrację',
             function () {
-                echo '<input name="lockme_wpdevart[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'],
+                echo '<input name="lockme_wpdevart[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'] ?? null,
                         false).' />';
             },
             'lockme-wpdevart',
             'lockme_wpdevart_section',
             []);
 
-        if ($this->options['use'] && $this->plugin->tab === 'wpdevart_plugin') {
+        if (($this->options['use'] ?? null) && $this->plugin->tab === 'wpdevart_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
@@ -251,7 +251,7 @@ class WPDevArt implements PluginInterface
     public function GetMessage(array $message): bool
     {
         global $wpdb;
-        if (!$this->options['use'] || !$this->CheckDependencies()) {
+        if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return false;
         }
 
