@@ -59,4 +59,6 @@ namespace {
     aliasDeps();
 
     $lockme = new LockmeDep\LockmeIntegration\Plugin();
+    register_activation_hook(__FILE__, [$lockme, 'createDatabase']);
+    add_action('plugins_loaded', [$lockme, 'createDatabase']);
 }

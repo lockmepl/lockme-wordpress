@@ -18,6 +18,7 @@ use LockmeDep\LockmeIntegration\Plugins\WPDevArt;
 include_once ABSPATH . 'wp-admin/includes/plugin.php';
 class Plugin
 {
+    private const DB_VER = '1.0';
     public $options;
     public $tab;
     private $url_key;
@@ -221,5 +222,16 @@ class Plugin
             }, \ARRAY_FILTER_USE_KEY);
         }
         return $data;
+    }
+    public function createDatabase() : void
+    {
+        global $wpdb;
+        if (get_option('lockme_db_ver') !== self::DB_VER) {
+            $table = $wpdb->prefix . 'lockme_log';
+            $charset_collate = $wpdb->get_charset_collate();
+            $sql = "CREATE TABLE {$table} (\n              id int(11) NOT NULL AUTO_INCREMENT,\n              time timestamp DEFAULT current_timestamp NOT NULL,\n              method varchar(10) NOT NULL,\n              uri varchar(255) NOT NULL,\n              params mediumtext NOT NULL,\n              response mediumtext NOT NULL,\n              PRIMARY KEY  (id)\n            ) {$charset_collate}";
+            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+            update_option('lockme_db_ver', self::DB_VER);
+        }
     }
 }
