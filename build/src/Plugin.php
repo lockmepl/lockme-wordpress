@@ -5,6 +5,7 @@ namespace LockmeDep\LockmeIntegration;
 use Exception;
 use League\OAuth2\Client\Token\AccessToken;
 use LockmeDep\Lockme\SDK\Lockme;
+use LockmeDep\LockmeIntegration\Libs\WrappedProvider;
 use LockmeDep\LockmeIntegration\Plugins\Appointments;
 use LockmeDep\LockmeIntegration\Plugins\Booked;
 use LockmeDep\LockmeIntegration\Plugins\Bookly;
@@ -117,7 +118,7 @@ class Plugin
             return $this->api;
         }
         if ($this->options['client_id'] && $this->options['client_secret']) {
-            $lm = new Lockme(['clientId' => $this->options['client_id'], 'clientSecret' => $this->options['client_secret'], 'redirectUri' => get_admin_url() . 'options-general.php?page=lockme_integration&tab=api_options', 'api_domain' => $this->options['api_domain'] ?: 'https://api.lock.me']);
+            $lm = new Lockme(['provider' => new WrappedProvider(['clientId' => $this->options['client_id'], 'clientSecret' => $this->options['client_secret'], 'redirectUri' => get_admin_url() . 'options-general.php?page=lockme_integration&tab=api_options', 'api_domain' => $this->options['api_domain'] ?: 'https://api.lock.me'])]);
             try {
                 $lm->loadAccessToken(function () {
                     return get_option('lockme_oauth2_token');

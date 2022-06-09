@@ -50,11 +50,11 @@ class LogTable extends WP_List_Table
         $items = 10;
         $page = ($this->get_pagenum() - 1) * $items;
 
-        $query = $wpdb->prepare("SELECT
+        $query = "SELECT
             *
         FROM $wpdb_table
         ORDER BY $orderby $order
-        LIMIT $page,$items");
+        LIMIT $page,$items";
 
         // query output_type will be an associative array with ARRAY_A.
         $this->items = $wpdb->get_results( $query, ARRAY_A  );

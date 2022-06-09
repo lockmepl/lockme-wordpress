@@ -200,6 +200,7 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
         'LockmeDep\\GuzzleHttp\\TransferStats' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/TransferStats.php',
         'LockmeDep\\GuzzleHttp\\Utils' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Utils.php',
         'LockmeDep\\LockmeIntegration\\Libs\\WP_List_Table' => __DIR__ . '/../..' . '/src/Libs/WP_List_Table.php',
+        'LockmeDep\\LockmeIntegration\\Libs\\WrappedProvider' => __DIR__ . '/../..' . '/src/Libs/WrappedProvider.php',
         'LockmeDep\\LockmeIntegration\\Plugin' => __DIR__ . '/../..' . '/src/Plugin.php',
         'LockmeDep\\LockmeIntegration\\PluginInterface' => __DIR__ . '/../..' . '/src/PluginInterface.php',
         'LockmeDep\\LockmeIntegration\\Plugins\\Appointments' => __DIR__ . '/../..' . '/src/Plugins/Appointments.php',
