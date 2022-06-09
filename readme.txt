@@ -5,7 +5,7 @@ Tags: lustmored
 Requires PHP: 7.2
 Requires at least: 4.8
 Tested up to: 5.9.0
-Stable tag: 2.2.5
+Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,10 @@ Show answer - no. Long answer - please contact us at kontakt@lockme.pl and we'll
 1. Main settings page for connection with Lockme API
 
 == Changelog ==
+
+= 2.3 =
+
+* Add logging all API communication errors to the database
 
 = 2.2 =
 
