@@ -407,17 +407,17 @@
         },
         {
             "name": "lustmored\/lockme-sdk",
-            "version": "2.2.0",
-            "version_normalized": "2.2.0.0",
+            "version": "2.2.1",
+            "version_normalized": "2.2.1.0",
             "source": {
                 "type": "git",
                 "url": "https:\/\/github.com\/Lustmored\/lockme-sdk.git",
-                "reference": "22cb2f28b14e18068a2da8705b26973fe8b2981c"
+                "reference": "b495cb9a3c779bd77c2a58ea29d84373ce589013"
             },
             "dist": {
                 "type": "zip",
-                "url": "https:\/\/api.github.com\/repos\/Lustmored\/lockme-sdk\/zipball\/22cb2f28b14e18068a2da8705b26973fe8b2981c",
-                "reference": "22cb2f28b14e18068a2da8705b26973fe8b2981c",
+                "url": "https:\/\/api.github.com\/repos\/Lustmored\/lockme-sdk\/zipball\/b495cb9a3c779bd77c2a58ea29d84373ce589013",
+                "reference": "b495cb9a3c779bd77c2a58ea29d84373ce589013",
                 "shasum": ""
             },
             "require": {
@@ -426,7 +426,7 @@
                 "php": ">=7.2.0",
                 "symfony\/lock": "^5.4|^6.0"
             },
-            "time": "2022-01-10T10:45:35+00:00",
+            "time": "2022-06-08T10:32:21+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -447,7 +447,7 @@
             "description": "LockMe SDK",
             "support": {
                 "issues": "https:\/\/github.com\/Lustmored\/lockme-sdk\/issues",
-                "source": "https:\/\/github.com\/Lustmored\/lockme-sdk\/tree\/2.2.0"
+                "source": "https:\/\/github.com\/Lustmored\/lockme-sdk\/tree\/2.2.1"
             },
             "install-path": "..\/lustmored\/lockme-sdk"
         },
