@@ -14,6 +14,7 @@ use LockmeIntegration\Plugins\Ezscm;
 use LockmeIntegration\Plugins\Woo;
 use LockmeIntegration\Plugins\WPBooking;
 use LockmeIntegration\Plugins\WPDevArt;
+use LockmeIntegration\Util\LogTable;
 
 include_once ABSPATH.'wp-admin/includes/plugin.php';
 
@@ -263,7 +264,27 @@ class Plugin
         foreach ($this->available_plugins as $k=>$plugin) {
             echo '    <a href="?page=lockme_integration&tab='.$k.'_plugin" class="nav-tab '.($this->tab === $k.'_plugin'?'nav-tab-active':'').'">Wtyczka '.$plugin->getPluginName().'</a>';
         }
+        echo '    <a href="?page=lockme_integration&tab=api_logs" class="nav-tab '.($this->tab ===
+                                                                                       'api_logs'?'nav-tab-active':'').'">API error logs</a>';
         echo '</h2>';
+
+        if ($this->tab === 'api_logs') {
+            $logTable = new LogTable();
+            $logTable->prepare_items();
+
+            echo '<div class="wrap">';
+            echo '<h2>Lockme API error logs</h2>';
+            echo '<div id="nds-wp-list-table-demo">';
+            echo '<div id="nds-post-body">';
+            echo '<form id="nds-user-list-form" method="get">';
+            $logTable->display();
+            echo '</form>';
+            echo '</div>';
+            echo '</div>';
+            echo '</div>';
+
+            return;
+        }
 
         echo '<form method="post" action="options.php">';
 
