@@ -41,6 +41,7 @@ Other booking systems to be available after porting to API 2.0 and testing. Syst
 1. Upload the plugin files to the `/wp-content/plugins/plugin-name` directory, or install the plugin through the WordPress plugins screen directly.
 1. Activate the plugin through the 'Plugins' screen in WordPress
 1. Use the Settings->Lockme screen to fill your OAuth2 Client ID and Client Secret (to be found in Lockme Panel)
+1. Copy redirect URI from Wordpress Lockme configuration page to an app in Lockme Panel
 1. Log in to Lockme to establish connection, using "Click here" link on setting page
 1. Set up Callback URL in department configuration on Lockme
 1. Choose tab corresponding to your booking system and configure rooms
