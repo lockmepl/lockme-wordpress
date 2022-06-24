@@ -171,6 +171,7 @@ class Plugin
         }
         echo '<div class="wrap">';
         echo '<h2>Integracja LockMe</h2>';
+        echo '<p><strong>IMPORTANT!</strong> Please remember that this plugin purpose is to help you with synchronizing data between your site and Lockme. Author does not take any responsibility for correct data synchronization or any side effects of using it.</p>';
         echo '<h2 class="nav-tab-wrapper">';
         echo '    <a href="?page=lockme_integration&tab=api_options" class="nav-tab ' . ($this->tab === 'api_options' ? 'nav-tab-active' : '') . '">Ustawienia API</a>';
         foreach ($this->available_plugins as $k => $plugin) {
