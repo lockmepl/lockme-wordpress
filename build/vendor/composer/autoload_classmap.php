@@ -111,6 +111,7 @@ return array(
     'LockmeDep\\GuzzleHttp\\Psr7\\StreamWrapper' => $vendorDir . '/guzzlehttp/psr7/src/StreamWrapper.php',
     'LockmeDep\\GuzzleHttp\\Psr7\\UploadedFile' => $vendorDir . '/guzzlehttp/psr7/src/UploadedFile.php',
     'LockmeDep\\GuzzleHttp\\Psr7\\Uri' => $vendorDir . '/guzzlehttp/psr7/src/Uri.php',
+    'LockmeDep\\GuzzleHttp\\Psr7\\UriComparator' => $vendorDir . '/guzzlehttp/psr7/src/UriComparator.php',
     'LockmeDep\\GuzzleHttp\\Psr7\\UriNormalizer' => $vendorDir . '/guzzlehttp/psr7/src/UriNormalizer.php',
     'LockmeDep\\GuzzleHttp\\Psr7\\UriResolver' => $vendorDir . '/guzzlehttp/psr7/src/UriResolver.php',
     'LockmeDep\\GuzzleHttp\\Psr7\\Utils' => $vendorDir . '/guzzlehttp/psr7/src/Utils.php',
