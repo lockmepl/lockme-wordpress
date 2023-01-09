@@ -140,7 +140,7 @@ class Booked implements PluginInterface
         }
         $time_format = get_option('time_format');
         $date_format = get_option('date_format');
-        $cf_data = ['Żródło' => \sprintf('LockMe (%s)', $data['source']), 'Telefon' => $data['phone'], 'Ilość osób' => $data['people'], 'Cena' => $data['price']];
+        $cf_data = ['Żródło' => \sprintf('LockMe (%s)', $data['source']), 'Telefon' => $data['phone'], 'Ilość osób' => $data['people'], 'Cena' => $data['price'], 'Dodatkowe uwagi' => $data['comment']];
         switch ($data['source']) {
             case 'web':
                 $cf_data['Status'] = $data['status'] ? 'Opłacone' : 'Rezerwacja (max. 20 minut)';
@@ -154,6 +154,9 @@ class Booked implements PluginInterface
             case 'widget':
                 $cf_data['Status'] = 'Rezerwacja z widgeta';
                 break;
+        }
+        if (isset($data['invoice']) && !empty($data['invoice'])) {
+            $cf_data['Faktura'] = $data['invoice'];
         }
         $cf_meta_value = '';
         foreach ($cf_data as $label => $value) {
