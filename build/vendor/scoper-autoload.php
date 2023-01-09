@@ -22,11 +22,6 @@ if (!function_exists('booked_apply_custom_timeslots_filter')) {
         return \LockmeDep\booked_apply_custom_timeslots_filter(...func_get_args());
     }
 }
-if (!function_exists('composerRequired4cbf4ed8610848fdd2afdd92decc223')) {
-    function composerRequired4cbf4ed8610848fdd2afdd92decc223() {
-        return \LockmeDep\composerRequired4cbf4ed8610848fdd2afdd92decc223(...func_get_args());
-    }
-}
 if (!function_exists('RandomCompat_strlen')) {
     function RandomCompat_strlen() {
         return \LockmeDep\RandomCompat_strlen(...func_get_args());
