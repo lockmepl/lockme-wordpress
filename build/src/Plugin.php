@@ -3,6 +3,7 @@
 namespace LockmeDep\LockmeIntegration;
 
 use Exception;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use LockmeDep\Lockme\SDK\Lockme;
 use LockmeDep\LockmeIntegration\Libs\WrappedProvider;
@@ -207,6 +208,9 @@ class Plugin
                     }
                 } catch (Exception $e) {
                     echo '<p><strong>BŁĄD API: ' . $e->getMessage() . '.</p>';
+                    if ($e instanceof IdentityProviderException) {
+                        echo '<p>Response from Lockme:<br><textarea readonly>' . $e->getResponseBody() . '</textarea></p>';
+                    }
                 }
                 $authorizationUrl = $api->getAuthorizationUrl(['rooms_manage']);
                 echo '<p><a href="' . $authorizationUrl . '">Kliknij tutaj</a>, aby połączyć wtyczkę z Lockme.</p>';
