@@ -178,6 +178,7 @@ class Booked implements PluginInterface
             'Telefon' => $data['phone'],
             'Ilość osób' => $data['people'],
             'Cena' => $data['price'],
+            'Dodatkowe uwagi' => $data['comment'],
         ];
         switch ($data['source']) {
             case 'web':
@@ -192,6 +193,9 @@ class Booked implements PluginInterface
             case 'widget':
                 $cf_data['Status'] = 'Rezerwacja z widgeta';
                 break;
+        }
+        if (isset($data['invoice']) && !empty($data['invoice'])) {
+            $cf_data['Faktura'] = $data['invoice'];
         }
 
         $cf_meta_value = '';
