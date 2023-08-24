@@ -112,6 +112,10 @@ class Booked implements PluginInterface
         if (\defined('LOCKME_MESSAGING')) {
             return;
         }
+        $type = get_post_type($id);
+        if ($type && get_post_type($id) !== 'booked_appointments') {
+            return;
+        }
         $post = get_post($id);
         $appdata = $this->AppData($post);
         if (!$appdata['roomid']) {

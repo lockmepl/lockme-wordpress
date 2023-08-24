@@ -139,6 +139,12 @@ class Booked implements PluginInterface
             return;
         }
 
+        $type = get_post_type($id);
+
+        if ($type && (get_post_type($id) !== 'booked_appointments')) {
+            return;
+        }
+
         $post = get_post($id);
         $appdata = $this->AppData($post);
         if(!$appdata['roomid']) {
