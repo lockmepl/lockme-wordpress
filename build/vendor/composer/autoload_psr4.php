@@ -6,9 +6,8 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'LockmeDep\\Symfony\\Polyfill\\Php80\\' => array($vendorDir . '/symfony/polyfill-php80'),
     'LockmeDep\\Symfony\\Component\\Lock\\' => array($vendorDir . '/symfony/lock'),
-    'LockmeDep\\Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
+    'LockmeDep\\Psr\\Log\\' => array($vendorDir . '/psr/log/src'),
     'LockmeDep\\Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-factory/src', $vendorDir . '/psr/http-message/src'),
     'LockmeDep\\Psr\\Http\\Client\\' => array($vendorDir . '/psr/http-client/src'),
     'LockmeDep\\Lockme\\SDK\\' => array($vendorDir . '/lustmored/lockme-sdk/src'),

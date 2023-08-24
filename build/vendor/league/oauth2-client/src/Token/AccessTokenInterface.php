@@ -62,6 +62,6 @@ interface AccessTokenInterface extends JsonSerializable
      *
      * @return array
      */
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function jsonSerialize();
 }

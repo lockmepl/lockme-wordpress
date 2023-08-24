@@ -2,7 +2,7 @@
 Contributors: lustmored
 Donate link:
 Tags: lustmored
-Requires PHP: 7.2
+Requires PHP: 8.0
 Requires at least: 4.8
 Tested up to: 6.1.1
 Stable tag: 2.3.2

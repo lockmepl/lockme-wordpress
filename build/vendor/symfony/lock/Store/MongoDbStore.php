@@ -48,9 +48,9 @@ class MongoDbStore implements PersistingStoreInterface
     use ExpiringStoreTrait;
     private $collection;
     private $client;
-    private $uri;
-    private $options;
-    private $initialTtl;
+    private string $uri;
+    private array $options;
+    private float $initialTtl;
     /**
      * @param Collection|Client|string $mongo      An instance of a Collection or Client or URI @see https://docs.mongodb.com/manual/reference/connection-string/
      * @param array                    $options    See below
@@ -84,7 +84,7 @@ class MongoDbStore implements PersistingStoreInterface
      * readPreference is primary for all queries.
      * @see https://docs.mongodb.com/manual/applications/replication/
      */
-    public function __construct($mongo, array $options = [], float $initialTtl = 300.0)
+    public function __construct(Collection|Client|string $mongo, array $options = [], float $initialTtl = 300.0)
     {
         $this->options = \array_merge(['gcProbablity' => 0.001, 'database' => null, 'collection' => null, 'uriOptions' => [], 'driverOptions' => []], $options);
         $this->initialTtl = $initialTtl;
@@ -92,10 +92,8 @@ class MongoDbStore implements PersistingStoreInterface
             $this->collection = $mongo;
         } elseif ($mongo instanceof Client) {
             $this->client = $mongo;
-        } elseif (\is_string($mongo)) {
-            $this->uri = $this->skimUri($mongo);
         } else {
-            throw new InvalidArgumentException(\sprintf('"%s()" requires "%s" or "%s" or URI as first argument, "%s" given.', __METHOD__, Collection::class, Client::class, \get_debug_type($mongo)));
+            $this->uri = $this->skimUri($mongo);
         }
         if (!$mongo instanceof Collection) {
             if (null === $this->options['database']) {
@@ -273,12 +271,10 @@ class MongoDbStore implements PersistingStoreInterface
     }
     private function getCollection() : Collection
     {
-        if (null !== $this->collection) {
+        if (isset($this->collection)) {
             return $this->collection;
         }
-        if (null === $this->client) {
-            $this->client = new Client($this->uri, $this->options['uriOptions'], $this->options['driverOptions']);
-        }
+        $this->client ??= new Client($this->uri, $this->options['uriOptions'], $this->options['driverOptions']);
         $this->collection = $this->client->selectCollection($this->options['database'], $this->options['collection']);
         return $this->collection;
     }
@@ -292,7 +288,7 @@ class MongoDbStore implements PersistingStoreInterface
     /**
      * Retrieves an unique token for the given key namespaced to this store.
      *
-     * @param Key $key lock state container
+     * @param Key lock state container
      */
     private function getUniqueToken(Key $key) : string
     {

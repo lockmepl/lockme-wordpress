@@ -21,8 +21,8 @@ use LockmeDep\Symfony\Component\Lock\SharedLockStoreInterface;
  */
 class InMemoryStore implements SharedLockStoreInterface
 {
-    private $locks = [];
-    private $readLocks = [];
+    private array $locks = [];
+    private array $readLocks = [];
     public function save(Key $key)
     {
         $hashKey = (string) $key;
@@ -76,7 +76,7 @@ class InMemoryStore implements SharedLockStoreInterface
             unset($this->locks[$hashKey]);
         }
     }
-    public function exists(Key $key)
+    public function exists(Key $key) : bool
     {
         $hashKey = (string) $key;
         $token = $this->getUniqueToken($key);

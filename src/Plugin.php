@@ -48,10 +48,6 @@ class Plugin
 
     public function __construct()
     {
-        if (!session_id()) {
-            session_start();
-        }
-
         $this->options = get_option('lockme_settings');
 
         $this->url_key = get_option('lockme_url_key');
@@ -64,7 +60,7 @@ class Plugin
             update_option('lockme_url_key', $this->url_key);
         }
 
-        add_action('init', array(&$this, 'api_call'));
+        add_action('init', array(&$this, 'api_call'), PHP_INT_MAX);
 
         foreach ($this->plugins as $k=>$v) {
             /** @var PluginInterface $plugin */
@@ -84,6 +80,10 @@ class Plugin
 
     public function api_call(): void
     {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
         // Check for OAuth2 state
         $code = $_GET['code'] ?? null;
         $state = $_GET['state'] ?? null;

@@ -7,18 +7,16 @@ namespace Composer\Autoload;
 class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
 {
     public static $files = array (
-        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '5255c38a0faeba867671b61dfda6d864' => __DIR__ . '/..' . '/paragonie/random_compat/lib/random.php',
-        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
     );
 
     public static $prefixLengthsPsr4 = array (
         'L' => 
         array (
-            'LockmeDep\\Symfony\\Polyfill\\Php80\\' => 33,
             'LockmeDep\\Symfony\\Component\\Lock\\' => 33,
             'LockmeDep\\Psr\\Log\\' => 18,
             'LockmeDep\\Psr\\Http\\Message\\' => 27,
@@ -34,17 +32,13 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
     );
 
     public static $prefixDirsPsr4 = array (
-        'LockmeDep\\Symfony\\Polyfill\\Php80\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
-        ),
         'LockmeDep\\Symfony\\Component\\Lock\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/lock',
         ),
         'LockmeDep\\Psr\\Log\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+            0 => __DIR__ . '/..' . '/psr/log/src',
         ),
         'LockmeDep\\Psr\\Http\\Message\\' => 
         array (
@@ -113,7 +107,6 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
         'League\\OAuth2\\Client\\Tool\\QueryBuilderTrait' => __DIR__ . '/..' . '/league/oauth2-client/src/Tool/QueryBuilderTrait.php',
         'League\\OAuth2\\Client\\Tool\\RequestFactory' => __DIR__ . '/..' . '/league/oauth2-client/src/Tool/RequestFactory.php',
         'League\\OAuth2\\Client\\Tool\\RequiredParameterTrait' => __DIR__ . '/..' . '/league/oauth2-client/src/Tool/RequiredParameterTrait.php',
-        'LockmeDep\\Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'LockmeDep\\GuzzleHttp\\BodySummarizer' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/BodySummarizer.php',
         'LockmeDep\\GuzzleHttp\\BodySummarizerInterface' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/BodySummarizerInterface.php',
         'LockmeDep\\GuzzleHttp\\Client' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Client.php',
@@ -219,7 +212,6 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
         'LockmeDep\\Lockme\\OAuth2\\Client\\Provider\\Lockme' => __DIR__ . '/..' . '/lustmored/oauth2-lockme/src/Provider/Lockme.php',
         'LockmeDep\\Lockme\\OAuth2\\Client\\Provider\\LockmeUser' => __DIR__ . '/..' . '/lustmored/oauth2-lockme/src/Provider/LockmeUser.php',
         'LockmeDep\\Lockme\\SDK\\Lockme' => __DIR__ . '/..' . '/lustmored/lockme-sdk/src/Lockme.php',
-        'LockmeDep\\PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
         'LockmeDep\\Psr\\Http\\Client\\ClientExceptionInterface' => __DIR__ . '/..' . '/psr/http-client/src/ClientExceptionInterface.php',
         'LockmeDep\\Psr\\Http\\Client\\ClientInterface' => __DIR__ . '/..' . '/psr/http-client/src/ClientInterface.php',
         'LockmeDep\\Psr\\Http\\Client\\NetworkExceptionInterface' => __DIR__ . '/..' . '/psr/http-client/src/NetworkExceptionInterface.php',
@@ -237,18 +229,14 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
         'LockmeDep\\Psr\\Http\\Message\\UploadedFileInterface' => __DIR__ . '/..' . '/psr/http-message/src/UploadedFileInterface.php',
         'LockmeDep\\Psr\\Http\\Message\\UriFactoryInterface' => __DIR__ . '/..' . '/psr/http-factory/src/UriFactoryInterface.php',
         'LockmeDep\\Psr\\Http\\Message\\UriInterface' => __DIR__ . '/..' . '/psr/http-message/src/UriInterface.php',
-        'LockmeDep\\Psr\\Log\\AbstractLogger' => __DIR__ . '/..' . '/psr/log/Psr/Log/AbstractLogger.php',
-        'LockmeDep\\Psr\\Log\\InvalidArgumentException' => __DIR__ . '/..' . '/psr/log/Psr/Log/InvalidArgumentException.php',
-        'LockmeDep\\Psr\\Log\\LogLevel' => __DIR__ . '/..' . '/psr/log/Psr/Log/LogLevel.php',
-        'LockmeDep\\Psr\\Log\\LoggerAwareInterface' => __DIR__ . '/..' . '/psr/log/Psr/Log/LoggerAwareInterface.php',
-        'LockmeDep\\Psr\\Log\\LoggerAwareTrait' => __DIR__ . '/..' . '/psr/log/Psr/Log/LoggerAwareTrait.php',
-        'LockmeDep\\Psr\\Log\\LoggerInterface' => __DIR__ . '/..' . '/psr/log/Psr/Log/LoggerInterface.php',
-        'LockmeDep\\Psr\\Log\\LoggerTrait' => __DIR__ . '/..' . '/psr/log/Psr/Log/LoggerTrait.php',
-        'LockmeDep\\Psr\\Log\\NullLogger' => __DIR__ . '/..' . '/psr/log/Psr/Log/NullLogger.php',
-        'LockmeDep\\Psr\\Log\\Test\\DummyTest' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/DummyTest.php',
-        'LockmeDep\\Psr\\Log\\Test\\LoggerInterfaceTest' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/LoggerInterfaceTest.php',
-        'LockmeDep\\Psr\\Log\\Test\\TestLogger' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/TestLogger.php',
-        'LockmeDep\\Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
+        'LockmeDep\\Psr\\Log\\AbstractLogger' => __DIR__ . '/..' . '/psr/log/src/AbstractLogger.php',
+        'LockmeDep\\Psr\\Log\\InvalidArgumentException' => __DIR__ . '/..' . '/psr/log/src/InvalidArgumentException.php',
+        'LockmeDep\\Psr\\Log\\LogLevel' => __DIR__ . '/..' . '/psr/log/src/LogLevel.php',
+        'LockmeDep\\Psr\\Log\\LoggerAwareInterface' => __DIR__ . '/..' . '/psr/log/src/LoggerAwareInterface.php',
+        'LockmeDep\\Psr\\Log\\LoggerAwareTrait' => __DIR__ . '/..' . '/psr/log/src/LoggerAwareTrait.php',
+        'LockmeDep\\Psr\\Log\\LoggerInterface' => __DIR__ . '/..' . '/psr/log/src/LoggerInterface.php',
+        'LockmeDep\\Psr\\Log\\LoggerTrait' => __DIR__ . '/..' . '/psr/log/src/LoggerTrait.php',
+        'LockmeDep\\Psr\\Log\\NullLogger' => __DIR__ . '/..' . '/psr/log/src/NullLogger.php',
         'LockmeDep\\Symfony\\Component\\Lock\\BlockingSharedLockStoreInterface' => __DIR__ . '/..' . '/symfony/lock/BlockingSharedLockStoreInterface.php',
         'LockmeDep\\Symfony\\Component\\Lock\\BlockingStoreInterface' => __DIR__ . '/..' . '/symfony/lock/BlockingStoreInterface.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Exception\\ExceptionInterface' => __DIR__ . '/..' . '/symfony/lock/Exception/ExceptionInterface.php',
@@ -259,7 +247,6 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
         'LockmeDep\\Symfony\\Component\\Lock\\Exception\\LockExpiredException' => __DIR__ . '/..' . '/symfony/lock/Exception/LockExpiredException.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Exception\\LockReleasingException' => __DIR__ . '/..' . '/symfony/lock/Exception/LockReleasingException.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Exception\\LockStorageException' => __DIR__ . '/..' . '/symfony/lock/Exception/LockStorageException.php',
-        'LockmeDep\\Symfony\\Component\\Lock\\Exception\\NotSupportedException' => __DIR__ . '/..' . '/symfony/lock/Exception/NotSupportedException.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Exception\\UnserializableKeyException' => __DIR__ . '/..' . '/symfony/lock/Exception/UnserializableKeyException.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Key' => __DIR__ . '/..' . '/symfony/lock/Key.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Lock' => __DIR__ . '/..' . '/symfony/lock/Lock.php',
@@ -281,17 +268,12 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
         'LockmeDep\\Symfony\\Component\\Lock\\Store\\PdoStore' => __DIR__ . '/..' . '/symfony/lock/Store/PdoStore.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Store\\PostgreSqlStore' => __DIR__ . '/..' . '/symfony/lock/Store/PostgreSqlStore.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Store\\RedisStore' => __DIR__ . '/..' . '/symfony/lock/Store/RedisStore.php',
-        'LockmeDep\\Symfony\\Component\\Lock\\Store\\RetryTillSaveStore' => __DIR__ . '/..' . '/symfony/lock/Store/RetryTillSaveStore.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Store\\SemaphoreStore' => __DIR__ . '/..' . '/symfony/lock/Store/SemaphoreStore.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Store\\StoreFactory' => __DIR__ . '/..' . '/symfony/lock/Store/StoreFactory.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Store\\ZookeeperStore' => __DIR__ . '/..' . '/symfony/lock/Store/ZookeeperStore.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Strategy\\ConsensusStrategy' => __DIR__ . '/..' . '/symfony/lock/Strategy/ConsensusStrategy.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Strategy\\StrategyInterface' => __DIR__ . '/..' . '/symfony/lock/Strategy/StrategyInterface.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Strategy\\UnanimousStrategy' => __DIR__ . '/..' . '/symfony/lock/Strategy/UnanimousStrategy.php',
-        'LockmeDep\\Symfony\\Polyfill\\Php80\\Php80' => __DIR__ . '/..' . '/symfony/polyfill-php80/Php80.php',
-        'LockmeDep\\Symfony\\Polyfill\\Php80\\PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/PhpToken.php',
-        'LockmeDep\\UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
-        'LockmeDep\\ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
