@@ -155,7 +155,8 @@ class Plugin
                     'clientSecret' => $this->options['client_secret'],
                     'redirectUri' => get_admin_url().'options-general.php?page=lockme_integration&tab=api_options',
                     'api_domain' => $this->options['api_domain'] ?: 'https://api.lock.me'
-                ])
+                ]),
+                'tmp_dir' => get_temp_dir(),
             ]);
             try{
                 $lm->loadAccessToken(

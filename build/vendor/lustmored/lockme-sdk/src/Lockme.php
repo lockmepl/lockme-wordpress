@@ -9,8 +9,11 @@ use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 use League\OAuth2\Client\Token\AccessToken;
 use LockmeDep\Lockme\OAuth2\Client\Provider\Lockme as LockmeProvider;
 use RuntimeException;
+use LockmeDep\Symfony\Component\Lock\BlockingStoreInterface;
+use LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException;
 use LockmeDep\Symfony\Component\Lock\LockFactory;
 use LockmeDep\Symfony\Component\Lock\Store\FlockStore;
+use LockmeDep\Symfony\Component\Lock\Store\SemaphoreStore;
 use function is_callable;
 /**
  * Lockme SDK object
@@ -38,7 +41,16 @@ class Lockme
     public function __construct(array $options = [])
     {
         $this->provider = $options['provider'] ?? new LockmeProvider($options);
-        $this->lockFactory = new LockFactory(new FlockStore());
+        $this->lockFactory = new LockFactory($this->lockStore($options));
+    }
+    private function lockStore(array $options = []) : BlockingStoreInterface
+    {
+        try {
+            return new SemaphoreStore();
+        } catch (InvalidArgumentException $exception) {
+            // Semaphore is not supported
+        }
+        return new FlockStore($options['tmp_dir'] ?? \sys_get_temp_dir());
     }
     /**
      * Generate authorization URL

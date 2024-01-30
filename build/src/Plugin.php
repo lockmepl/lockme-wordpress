@@ -119,7 +119,7 @@ class Plugin
             return $this->api;
         }
         if ($this->options['client_id'] && $this->options['client_secret']) {
-            $lm = new Lockme(['provider' => new WrappedProvider(['clientId' => $this->options['client_id'], 'clientSecret' => $this->options['client_secret'], 'redirectUri' => get_admin_url() . 'options-general.php?page=lockme_integration&tab=api_options', 'api_domain' => $this->options['api_domain'] ?: 'https://api.lock.me'])]);
+            $lm = new Lockme(['provider' => new WrappedProvider(['clientId' => $this->options['client_id'], 'clientSecret' => $this->options['client_secret'], 'redirectUri' => get_admin_url() . 'options-general.php?page=lockme_integration&tab=api_options', 'api_domain' => $this->options['api_domain'] ?: 'https://api.lock.me']), 'tmp_dir' => get_temp_dir()]);
             try {
                 $lm->loadAccessToken(function () {
                     return get_option('lockme_oauth2_token');
