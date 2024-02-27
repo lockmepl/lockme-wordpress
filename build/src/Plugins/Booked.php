@@ -7,7 +7,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
-use LockmeDep\WP_Query;
+use WP_Query;
 class Booked implements PluginInterface
 {
     private $options;

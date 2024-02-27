@@ -8,12 +8,12 @@ use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use ReflectionObject;
 use RuntimeException;
-use LockmeDep\wpdevart_bc_BookingCalendar;
-use LockmeDep\wpdevart_bc_ControllerReservations;
-use LockmeDep\wpdevart_bc_ModelCalendars;
-use LockmeDep\wpdevart_bc_ModelExtras;
-use LockmeDep\wpdevart_bc_ModelForms;
-use LockmeDep\wpdevart_bc_ModelThemes;
+use wpdevart_bc_BookingCalendar;
+use wpdevart_bc_ControllerReservations;
+use wpdevart_bc_ModelCalendars;
+use wpdevart_bc_ModelExtras;
+use wpdevart_bc_ModelForms;
+use wpdevart_bc_ModelThemes;
 class WPDevArt implements PluginInterface
 {
     private $options;

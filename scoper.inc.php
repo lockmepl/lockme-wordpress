@@ -77,6 +77,23 @@ return [
     // For more see https://github.com/humbug/php-scoper#constants--constants--functions-from-the-global-namespace
     'expose-global-classes' => true,
 
+    'exclude-classes' => [
+        'WP_Query',
+        'EADBModels',
+        'EATableColumns',
+        'WC_Booking',
+        'wp_booking_calendar_lists',
+        'wp_booking_calendar_public_reservation',
+        'wp_booking_calendar_reservation',
+        'wp_booking_calendar_slot',
+        'wpdevart_bc_BookingCalendar',
+        'wpdevart_bc_ControllerReservations',
+        'wpdevart_bc_ModelCalendars',
+        'wpdevart_bc_ModelExtras',
+        'wpdevart_bc_ModelForms',
+        'wpdevart_bc_ModelThemes',
+    ],
+
     // If `true` then the user defined functions belonging to the global namespace will not be prefixed.
     //
     // For more see https://github.com/humbug/php-scoper#constants--constants--functions-from-the-global-namespace

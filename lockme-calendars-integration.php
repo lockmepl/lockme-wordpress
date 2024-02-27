@@ -30,34 +30,6 @@ namespace {
 
     require_once __DIR__.'/build/vendor/scoper-autoload.php';
 
-    function aliasDeps()
-    {
-        $global = [
-            'WP_Query',
-            'EADBModels',
-            'EATableColumns',
-            'WC_Booking',
-            'wp_booking_calendar_lists',
-            'wp_booking_calendar_public_reservation',
-            'wp_booking_calendar_reservation',
-            'wp_booking_calendar_slot',
-            'wpdevart_bc_BookingCalendar',
-            'wpdevart_bc_ControllerReservations',
-            'wpdevart_bc_ModelCalendars',
-            'wpdevart_bc_ModelExtras',
-            'wpdevart_bc_ModelForms',
-            'wpdevart_bc_ModelThemes',
-        ];
-        foreach ($global as $className) {
-            $alias = "LockmeDep\\{$className}";
-            if (class_exists($className) && !class_exists($alias)) {
-                class_alias($className, "LockmeDep\\{$className}");
-            }
-        }
-    }
-
-    aliasDeps();
-
     $lockme = new LockmeDep\LockmeIntegration\Plugin();
     register_activation_hook(__FILE__, [$lockme, 'createDatabase']);
     add_action('plugins_loaded', [$lockme, 'createDatabase']);

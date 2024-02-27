@@ -4,7 +4,7 @@ declare (strict_types=1);
 namespace LockmeDep\LockmeIntegration\Util;
 
 use LockmeDep\LockmeIntegration\Libs\WP_List_Table;
-use LockmeDep\WP_Query;
+use WP_Query;
 class LogTable extends WP_List_Table
 {
     public function get_columns() : array

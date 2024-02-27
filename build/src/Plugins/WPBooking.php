@@ -7,10 +7,10 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
-use LockmeDep\wp_booking_calendar_lists;
-use LockmeDep\wp_booking_calendar_public_reservation;
-use LockmeDep\wp_booking_calendar_reservation;
-use LockmeDep\wp_booking_calendar_slot;
+use wp_booking_calendar_lists;
+use wp_booking_calendar_public_reservation;
+use wp_booking_calendar_reservation;
+use wp_booking_calendar_slot;
 class WPBooking implements PluginInterface
 {
     private $options;
@@ -26,7 +26,6 @@ class WPBooking implements PluginInterface
             $wpb_path = __DIR__ . '/../../../../wp-booking-calendar/';
             /** @noinspection PhpIncludeInspection */
             include_once $wpb_path . '/admin/class/list.class.php';
-            aliasDeps();
             \register_shutdown_function([$this, 'ShutDown']);
             $script = \preg_replace("/^.*wp-booking-calendar\\//", '', $_SERVER['SCRIPT_FILENAME']);
             if ($script === 'admin/ajax/delReservationItem.php') {

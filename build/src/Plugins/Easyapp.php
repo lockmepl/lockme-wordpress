@@ -4,8 +4,8 @@ namespace LockmeDep\LockmeIntegration\Plugins;
 
 use DateInterval;
 use DateTime;
-use LockmeDep\EADBModels;
-use LockmeDep\EATableColumns;
+use EADBModels;
+use EATableColumns;
 use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;

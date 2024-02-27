@@ -7,8 +7,8 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
-use LockmeDep\WC_Booking;
-use LockmeDep\WP_Query;
+use WC_Booking;
+use WP_Query;
 class Woo implements PluginInterface
 {
     private $options;

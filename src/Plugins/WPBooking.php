@@ -31,8 +31,6 @@ class WPBooking implements PluginInterface
             /** @noinspection PhpIncludeInspection */
             include_once $wpb_path.'/admin/class/list.class.php';
 
-            aliasDeps();
-
             register_shutdown_function([$this, 'ShutDown']);
 
             $script = preg_replace("/^.*wp-booking-calendar\//", '', $_SERVER['SCRIPT_FILENAME']);
