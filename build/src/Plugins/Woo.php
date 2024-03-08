@@ -193,7 +193,7 @@ class Woo implements PluginInterface
         $calendar_id = $this->GetCalendar($roomid);
         switch ($message['action']) {
             case 'add':
-                $booking = create_wc_booking($calendar_id, ['product_id' => $calendar_id, 'start_date' => $start, 'end_date' => $start + $this->options['slot_length'] * 60, 'persons' => $data['people'], 'cost' => $data['price']], 'pending-confirmation', \true);
+                $booking = create_wc_booking($calendar_id, ['product_id' => $calendar_id, 'start_date' => $start, 'end_date' => $start + 60 * (int) $this->options['slot_length'], 'persons' => $data['people'], 'cost' => $data['price']], 'pending-confirmation', \true);
                 if ($booking) {
                     try {
                         $api = $this->plugin->GetApi();
@@ -218,7 +218,7 @@ class Woo implements PluginInterface
                     if ($booking->status !== 'confirmed' && $data['status']) {
                         $booking->update_status('confirmed');
                     }
-                    $meta_args = ['_booking_persons' => $data['people'], '_booking_cost' => $data['price'], '_booking_start' => \date('YmdHis', $start), '_booking_end' => \date('YmdHis', $start + $this->options['slot_length'] * 60)];
+                    $meta_args = ['_booking_persons' => $data['people'], '_booking_cost' => $data['price'], '_booking_start' => \date('YmdHis', $start), '_booking_end' => \date('YmdHis', $start + 60 * (int) $this->options['slot_length'])];
                     foreach ($meta_args as $key => $value) {
                         update_post_meta($booking->get_id(), $key, $value);
                     }

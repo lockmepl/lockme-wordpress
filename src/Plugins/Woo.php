@@ -272,7 +272,7 @@ class Woo implements PluginInterface
                     [
                         'product_id' => $calendar_id,
                         'start_date' => $start,
-                        'end_date' => $start + $this->options['slot_length']*60,
+                        'end_date' => $start + 60 * (int) $this->options['slot_length'],
                         'persons' => $data['people'],
                         'cost' => $data['price']
                     ],
@@ -310,7 +310,7 @@ class Woo implements PluginInterface
                         '_booking_persons' => $data['people'],
                         '_booking_cost' => $data['price'],
                         '_booking_start' => date('YmdHis', $start),
-                        '_booking_end' => date('YmdHis', $start + $this->options['slot_length']*60)
+                        '_booking_end' => date('YmdHis', $start + 60 * (int) $this->options['slot_length'])
                     ];
                     foreach ($meta_args as $key => $value) {
                         update_post_meta($booking->get_id(), $key, $value);
