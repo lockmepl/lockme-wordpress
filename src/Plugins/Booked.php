@@ -361,7 +361,7 @@ class Booked implements PluginInterface
 
     public function getPluginName(): string
     {
-        return 'Booked';
+        return 'Booked lub QuickCal';
     }
 
     public function RegisterSettings(): void
@@ -456,6 +456,9 @@ class Booked implements PluginInterface
 
     public function CheckDependencies(): bool
     {
-        return is_plugin_active('booked/booked.php') || is_plugin_active('bookedall/booked.php');
+        return
+            is_plugin_active('booked/booked.php')
+            || is_plugin_active('bookedall/booked.php')
+            || is_plugin_active('quickcal/quickcal.php');
     }
 }
