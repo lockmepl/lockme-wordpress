@@ -5,7 +5,7 @@ Tags: lustmored
 Requires PHP: 8.0
 Requires at least: 4.8
 Tested up to: 6.4
-Stable tag: 2.3.6
+Stable tag: 2.3.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,7 +19,7 @@ Usage of this plugin isn't required, but if you are Lockme partner and want to s
 
 Currently, publicly supported calendar systems are:
 
-* Booked, recommended version 2.0.9 or newer
+* QuickCal (formerly Booked), recommended version 2.0.9 or newer
 * Pinpoint booking system, recommended version 2.6 or newer
 * Booking Calendar Pro WpDevArt version 10.1 or newer (please don't)
 * Bookly Appointment Booking, recommended version 14.5 or newer
