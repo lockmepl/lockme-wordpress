@@ -237,7 +237,7 @@ class Woo implements PluginInterface
     private function AppData($booking) : array
     {
         $order = $booking->get_order();
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $booking->get_product_id()], 'date' => \date('Y-m-d', $booking->get_start()), 'hour' => \date('H:i:s', $booking->get_start()), 'pricer' => 'API', 'price' => $booking->get_cost(), 'status' => $booking->get_status() === 'in-cart' ? 0 : 1, 'people' => \array_sum($booking->get_person_counts()), 'extid' => $booking->get_id(), 'email' => $order?->get_billing_email() ?? '', 'phone' => $order?->get_billing_phone() ?? '', 'name' => $order?->get_billing_first_name() ?? '', 'surname' => $order?->get_billing_last_name() ?? '']);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $booking->get_product_id()], 'date' => \date('Y-m-d', $booking->get_start()), 'hour' => \date('H:i:s', $booking->get_start()), 'pricer' => 'API', 'price' => $booking->get_cost(), 'status' => $booking->get_status() === 'in-cart' ? 0 : 1, 'people' => \array_sum($booking->get_person_counts()), 'extid' => $booking->get_id(), 'email' => $order ? $order->get_billing_email() : '', 'phone' => $order ? $order->get_billing_phone() : '', 'name' => $order ? $order->get_billing_first_name() : '', 'surname' => $order ? $order->get_billing_last_name() : '']);
     }
     private function GetCalendar($roomid)
     {

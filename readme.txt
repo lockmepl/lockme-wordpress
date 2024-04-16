@@ -5,7 +5,7 @@ Tags: lustmored
 Requires PHP: 8.0
 Requires at least: 4.8
 Tested up to: 6.4
-Stable tag: 2.3.7
+Stable tag: 2.3.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 

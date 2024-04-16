@@ -343,10 +343,10 @@ class Woo implements PluginInterface
                     'status' => $booking->get_status() === 'in-cart' ? 0 : 1,
                     'people' => array_sum($booking->get_person_counts()),
                     'extid' => $booking->get_id(),
-                    'email' => $order?->get_billing_email() ?? '',
-                    'phone' => $order?->get_billing_phone() ?? '',
-                    'name' => $order?->get_billing_first_name() ?? '',
-                    'surname' => $order?->get_billing_last_name() ?? '',
+                    'email' => $order ? $order->get_billing_email() : '',
+                    'phone' => $order ? $order->get_billing_phone() : '',
+                    'name' => $order ? $order->get_billing_first_name() : '',
+                    'surname' => $order ? $order->get_billing_last_name() : '',
                 ]
             );
     }
