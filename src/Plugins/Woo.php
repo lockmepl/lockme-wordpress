@@ -118,7 +118,8 @@ class Woo implements PluginInterface
             }
 
             $args = [
-                'post_type' => 'product'
+                'post_type' => 'product',
+                'numberposts' => -1,
             ];
             $calendars = get_posts($args);
 
@@ -354,7 +355,8 @@ class Woo implements PluginInterface
     private function GetCalendar($roomid)
     {
         $args = [
-            'post_type' => 'product'
+            'numberposts' => -1,
+            'post_type' => 'product',
         ];
         $calendars = get_posts($args);
         foreach ($calendars as $calendar) {

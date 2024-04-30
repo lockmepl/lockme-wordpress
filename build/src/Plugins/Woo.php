@@ -75,7 +75,7 @@ class Woo implements PluginInterface
                 } catch (IdentityProviderException $e) {
                 }
             }
-            $args = ['post_type' => 'product'];
+            $args = ['post_type' => 'product', 'numberposts' => -1];
             $calendars = get_posts($args);
             foreach ($calendars as $calendar) {
                 add_settings_field('calendar_' . $calendar->ID, 'Pokój dla ' . $calendar->post_title, function () use($rooms, $calendar) {
@@ -241,7 +241,7 @@ class Woo implements PluginInterface
     }
     private function GetCalendar($roomid)
     {
-        $args = ['post_type' => 'product'];
+        $args = ['numberposts' => -1, 'post_type' => 'product'];
         $calendars = get_posts($args);
         foreach ($calendars as $calendar) {
             if ($this->options['calendar_' . $calendar->ID] == $roomid) {
