@@ -4,7 +4,7 @@
 Plugin Name: Lockme calendars integration
 Plugin URI:  https://github.com/Lustmored/lockme
 Description: This plugin integrates popular booking systems with Lockme OAuth2 API.
-Version:     2.3.9
+Version:     2.4.0
 Author:      Jakub Caban
 Author URI:  https://lockme.pl
 License:     GPLv2 or later
