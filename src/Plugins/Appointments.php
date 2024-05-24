@@ -54,16 +54,16 @@ class Appointments implements PluginInterface
 
         add_settings_section(
             'lockme_app_section',
-            'Ustawienia wtyczki Appointments',
+            'Appointments plugin settings',
             static function () {
-                echo '<p>Ustawienia integracji z wtyczką Appointments</p>';
+                echo '<p>Integration settings with the Appointments plugin</p>';
             },
             'lockme-app'
         );
 
         add_settings_field(
             'app_use',
-            'Włącz integrację',
+            'Enable integration',
             function () {
                 echo '<input name="lockme_app[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'] ?? null,
                         false).' />';
@@ -89,10 +89,10 @@ class Appointments implements PluginInterface
                     $user = get_userdata($worker->ID);
                     add_settings_field(
                         'service_'.$service->ID.'_'.$worker->ID,
-                        'Pokój dla '.$service->name.' - '.$user->user_login,
+                        'Room for '.$service->name.' - '.$user->user_login,
                         function () use ($rooms, $service, $worker) {
                             echo '<select name="lockme_app[service_'.$service->ID.'_'.$worker->ID.']">';
-                            echo '<option value="">--wybierz--</option>';
+                            echo '<option value="">--select--</option>';
                             foreach ($rooms as $room) {
                                 echo '<option value="'.$room['roomid'].'" '.selected(1,
                                         $room['roomid'] == $this->options['service_'.$service->ID.'_'.$worker->ID],
@@ -108,9 +108,9 @@ class Appointments implements PluginInterface
             }
             add_settings_field(
                 'export_apps',
-                'Wyślij dane do LockMe',
+                'Send data to LockMe',
                 static function () {
-                    echo '<a href="?page=lockme_integration&tab=appointments_plugin&app_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
+                    echo '<a href="?page=lockme_integration&tab=appointments_plugin&app_export=1">Click here</a> to send all reservations to the LockMe calendar. This operation should only be required once, during the initial integration.';
                 },
                 'lockme-app',
                 'lockme_app_section',

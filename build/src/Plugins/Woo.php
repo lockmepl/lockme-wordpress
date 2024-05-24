@@ -57,10 +57,10 @@ class Woo implements PluginInterface
             return;
         }
         register_setting('lockme-woo', 'lockme_woo');
-        add_settings_section('lockme_woo_section', 'Ustawienia wtyczki Woocommerce Bookings', static function () {
-            echo '<p>Ustawienia integracji z wtyczką Woocommerce Bookings</p>';
+        add_settings_section('lockme_woo_section', 'Woocommerce Bookings plugin settings', static function () {
+            echo '<p>Integration settings with the Woocommerce Bookings plugin</p>';
         }, 'lockme-woo');
-        add_settings_field('woo_use', 'Włącz integrację', function () {
+        add_settings_field('woo_use', 'Enable integration', function () {
             echo '<input name="lockme_woo[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'] ?? null, \false) . ' />';
         }, 'lockme-woo', 'lockme_woo_section', []);
         if (($this->options['use'] ?? null) && $this->plugin->tab === 'woo_plugin') {
@@ -78,17 +78,17 @@ class Woo implements PluginInterface
             $args = ['post_type' => 'product', 'numberposts' => -1];
             $calendars = get_posts($args);
             foreach ($calendars as $calendar) {
-                add_settings_field('calendar_' . $calendar->ID, 'Pokój dla ' . $calendar->post_title, function () use($rooms, $calendar) {
+                add_settings_field('calendar_' . $calendar->ID, 'Room for ' . $calendar->post_title, function () use($rooms, $calendar) {
                     echo '<select name="lockme_woo[calendar_' . $calendar->ID . ']">';
-                    echo '<option value="">--wybierz--</option>';
+                    echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
                         echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_' . $calendar->ID], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
                     }
                     echo '</select>';
                 }, 'lockme-woo', 'lockme_woo_section', []);
             }
-            add_settings_field('export_woo', 'Wyślij dane do LockMe', static function () {
-                echo '<a href="?page=lockme_integration&tab=woo_plugin&woo_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
+            add_settings_field('export_woo', 'Send data to LockMe', static function () {
+                echo '<a href="?page=lockme_integration&tab=woo_plugin&woo_export=1">Click here</a> to send all reservations to the LockMe calendar. This operation should only be required once, during the initial integration.';
             }, 'lockme-woo', 'lockme_woo_section', []);
         }
     }

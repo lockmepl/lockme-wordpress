@@ -43,10 +43,10 @@ class Appointments implements PluginInterface
             return;
         }
         register_setting('lockme-app', 'lockme_app');
-        add_settings_section('lockme_app_section', 'Ustawienia wtyczki Appointments', static function () {
-            echo '<p>Ustawienia integracji z wtyczką Appointments</p>';
+        add_settings_section('lockme_app_section', 'Appointments plugin settings', static function () {
+            echo '<p>Integration settings with the Appointments plugin</p>';
         }, 'lockme-app');
-        add_settings_field('app_use', 'Włącz integrację', function () {
+        add_settings_field('app_use', 'Enable integration', function () {
             echo '<input name="lockme_app[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'] ?? null, \false) . ' />';
         }, 'lockme-app', 'lockme_app_section', []);
         if (($this->options['use'] ?? null) && $this->plugin->tab === 'appointments_plugin') {
@@ -63,9 +63,9 @@ class Appointments implements PluginInterface
                 $workers = appointments_get_workers_by_service($service->ID);
                 foreach ($workers as $worker) {
                     $user = get_userdata($worker->ID);
-                    add_settings_field('service_' . $service->ID . '_' . $worker->ID, 'Pokój dla ' . $service->name . ' - ' . $user->user_login, function () use($rooms, $service, $worker) {
+                    add_settings_field('service_' . $service->ID . '_' . $worker->ID, 'Room for ' . $service->name . ' - ' . $user->user_login, function () use($rooms, $service, $worker) {
                         echo '<select name="lockme_app[service_' . $service->ID . '_' . $worker->ID . ']">';
-                        echo '<option value="">--wybierz--</option>';
+                        echo '<option value="">--select--</option>';
                         foreach ($rooms as $room) {
                             echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['service_' . $service->ID . '_' . $worker->ID], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
                         }
@@ -73,8 +73,8 @@ class Appointments implements PluginInterface
                     }, 'lockme-app', 'lockme_app_section', []);
                 }
             }
-            add_settings_field('export_apps', 'Wyślij dane do LockMe', static function () {
-                echo '<a href="?page=lockme_integration&tab=appointments_plugin&app_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
+            add_settings_field('export_apps', 'Send data to LockMe', static function () {
+                echo '<a href="?page=lockme_integration&tab=appointments_plugin&app_export=1">Click here</a> to send all reservations to the LockMe calendar. This operation should only be required once, during the initial integration.';
             }, 'lockme-app', 'lockme_app_section', []);
         }
     }

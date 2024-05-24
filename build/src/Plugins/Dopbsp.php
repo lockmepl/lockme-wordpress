@@ -183,10 +183,10 @@ class Dopbsp implements PluginInterface
             return;
         }
         register_setting('lockme-dopbsp', 'lockme_dopbsp');
-        add_settings_section('lockme_dopbsp_section', 'Ustawienia wtyczki Booking System PRO', static function () {
-            echo '<p>Ustawienia integracji z wtyczką Booking System PRO</p>';
+        add_settings_section('lockme_dopbsp_section', 'Booking System PRO plugin settings', static function () {
+            echo '<p>Integration settings with the Booking System PRO plugin</p>';
         }, 'lockme-dopbsp');
-        add_settings_field('dopbsp_use', 'Włącz integrację', function () {
+        add_settings_field('dopbsp_use', 'Enable integration', function () {
             echo '<input name="lockme_dopbsp[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'] ?? null, \false) . ' />';
         }, 'lockme-dopbsp', 'lockme_dopbsp_section', []);
         if (($this->options['use'] ?? null) && $this->plugin->tab === 'dopbsp_plugin') {
@@ -200,20 +200,20 @@ class Dopbsp implements PluginInterface
             }
             $calendars = $wpdb->get_results('SELECT * FROM ' . $DOPBSP->tables->calendars . ' ORDER BY id DESC');
             foreach ($calendars as $calendar) {
-                add_settings_field('calendar_' . $calendar->id, 'Pokój dla ' . $calendar->name, function () use($rooms, $calendar) {
+                add_settings_field('calendar_' . $calendar->id, 'Room for ' . $calendar->name, function () use($rooms, $calendar) {
                     echo '<select name="lockme_dopbsp[calendar_' . $calendar->id . ']">';
-                    echo '<option value="">--wybierz--</option>';
+                    echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
                         echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_' . $calendar->id], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
                     }
                     echo '</select>';
                 }, 'lockme-dopbsp', 'lockme_dopbsp_section', []);
             }
-            add_settings_field('export_dopbsp', 'Wyślij dane do LockMe', static function () {
-                echo '<a href="?page=lockme_integration&tab=dopbsp_plugin&dopbsp_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
+            add_settings_field('export_dopbsp', 'Send data to LockMe', static function () {
+                echo '<a href="?page=lockme_integration&tab=dopbsp_plugin&dopbsp_export=1">Click here</a> to send all reservations to the LockMe calendar. This operation should only be required once, during the initial integration.';
             }, 'lockme-dopbsp', 'lockme_dopbsp_section', []);
-            add_settings_field('fix_dopbsp', 'Napraw ustawienia', static function () {
-                echo '<a href="?page=lockme_integration&tab=dopbsp_plugin&dopbsp_fix=1" onclick="return confirm(\'Na pewno wykonać naprawę? Pamiętaj o backupie bazy danych! Nie ponosimy odpowiedzialności za skutki automatycznej naprawy!\');">Kliknij tutaj</a> aby naprawić ustawienia godzin BSP ("11:20-12:30" -> "11:20"). Ta operacja powinna być wykonywana tylko raz, <b>po uprzednim zbackupowaniu bazy danych!</b>';
+            add_settings_field('fix_dopbsp', 'Fix settings', static function () {
+                echo '<a href="?page=lockme_integration&tab=dopbsp_plugin&dopbsp_fix=1" onclick="return confirm(\'Are you sure you want to perform the repair? Remember to backup your database! We are not responsible for the consequences of automatic repair!\');">Click here</a> to repair BSP hours settings ("11:20-12:30" -> "11:20"). This operation should only be performed once, <b>after backing up the database!</b>';
             }, 'lockme-dopbsp', 'lockme_dopbsp_section', []);
         }
     }

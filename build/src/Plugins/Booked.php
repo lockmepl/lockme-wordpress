@@ -297,10 +297,10 @@ class Booked implements PluginInterface
             return;
         }
         register_setting('lockme-booked', 'lockme_booked');
-        add_settings_section('lockme_booked_section', 'Ustawienia wtyczki Booked', static function () {
-            echo '<p>Ustawienia integracji z wtyczką Booked</p>';
+        add_settings_section('lockme_booked_section', 'Booked plugin settings', static function () {
+            echo '<p>Integration settings with the Booked plugin</p>';
         }, 'lockme-booked');
-        add_settings_field('booked_use', 'Włącz integrację', function () {
+        add_settings_field('booked_use', 'Enable integration', function () {
             echo '<input name="lockme_booked[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'] ?? null, \false) . ' />';
         }, 'lockme-booked', 'lockme_booked_section', []);
         if (($this->options['use'] ?? null) && $this->plugin->tab === 'booked_plugin') {
@@ -312,9 +312,9 @@ class Booked implements PluginInterface
                 } catch (IdentityProviderException $e) {
                 }
             }
-            add_settings_field('calendar_default', 'Pokój dla domyślnego kalendarza', function () use($rooms) {
+            add_settings_field('calendar_default', 'Room for default calendar', function () use($rooms) {
                 echo '<select name="lockme_booked[calendar_default]">';
-                echo '<option value="">--wybierz--</option>';
+                echo '<option value="">--select--</option>';
                 foreach ($rooms as $room) {
                     echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_default'], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
                 }
@@ -322,17 +322,17 @@ class Booked implements PluginInterface
             }, 'lockme-booked', 'lockme_booked_section', []);
             $calendars = get_terms('booked_custom_calendars', 'orderby=slug&hide_empty=0');
             foreach ($calendars as $calendar) {
-                add_settings_field('calendar_' . $calendar->term_id, 'Pokój dla ' . $calendar->name, function () use($rooms, $calendar) {
+                add_settings_field('calendar_' . $calendar->term_id, 'Room for ' . $calendar->name, function () use($rooms, $calendar) {
                     echo '<select name="lockme_booked[calendar_' . $calendar->term_id . ']">';
-                    echo '<option value="">--wybierz--</option>';
+                    echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
                         echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_' . $calendar->term_id], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
                     }
                     echo '</select>';
                 }, 'lockme-booked', 'lockme_booked_section', []);
             }
-            add_settings_field('export_booked', 'Wyślij dane do LockMe', static function () {
-                echo '<a href="?page=lockme_integration&tab=booked_plugin&booked_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
+            add_settings_field('export_booked', 'Send data to LockMe', static function () {
+                echo '<a href="?page=lockme_integration&tab=booked_plugin&booked_export=1">Click here</a> to send all reservations to the LockMe calendar. This operation should only be required once, during the initial integration.';
             }, 'lockme-booked', 'lockme_booked_section', []);
         }
     }

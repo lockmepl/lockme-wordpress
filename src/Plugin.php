@@ -173,7 +173,7 @@ class Plugin
 
     public function admin_init(): void
     {
-        add_options_page('Integracja z Lockme', 'Lockme', 'manage_options', 'lockme_integration', array(&$this, 'admin_page'));
+        add_options_page('LockMe integration', 'Lockme', 'manage_options', 'lockme_integration', array(&$this, 'admin_page'));
     }
 
     public function admin_register_settings(): void
@@ -182,9 +182,9 @@ class Plugin
 
         add_settings_section(
             'lockme_settings_section',
-            'Ustawienia API',
+            'API settings',
             static function () {
-                echo '<p>Podstawowe dane partnera LockMe - dostępne na <a href="https://panel.lockme.pl/" target="_blank">panel.lockme.pl</a></p>';
+                echo '<p>Basic data of the LockMe partner - available at <a href="https://lock.me/cockpit/" target="_blank">lock.me/cockpit</a></p>';
             },
             'lockme-admin'
         );
@@ -215,7 +215,7 @@ class Plugin
             'rodo_mode',
             'RODO mode (anonymize data)',
             function () {
-                echo '<input type="checkbox" name="lockme_settings[rodo_mode]" value="1"  '.checked(1, $this->options['rodo_mode'] ?? false, false).' /> <small>Jeśli włączysz tę funkcję to w ramach wymiany danych przez API pomiędzy Twoją stroną a Lockme będzie wysyłana jedynie informacja o dacie i godzinie wizyty. Wszystkie dane osobowe klienta zostaną tylko na Twojej stronie. <strong>Uwaga!</strong> jeśli taką rezerwację wyedytujesz z poziomu panelu lockme to istnieje ryzyko, że skasuje to dane w Twoim systemie rezerwacyjnym. Pamiętaj aby takimi rezerwacjami zarządzać tylko przez swój system.</small>';
+                echo '<input type="checkbox" name="lockme_settings[rodo_mode]" value="1"  '.checked(1, $this->options['rodo_mode'] ?? false, false).' /> <small>If you enable this function, only information about the date and time of the visit will be sent as part of the data exchange via API between your website and Lockme. All customer personal data will remain only on your website. Note! If you edit such a reservation from the lockme panel, there is a risk that it will delete the data in your reservation system. Remember to manage such reservations only through your system.</small>';
             },
             'lockme-admin',
             'lockme_settings_section',
@@ -235,9 +235,9 @@ class Plugin
 
         add_settings_field(
             'api_url',
-            'URL callback dla Lockme',
+            'Callback URL for Lockme',
             function () {
-                echo '<input readonly type="text" value="'.get_site_url().'/?lockme_api='.$this->url_key.'" onfocus="select()" /> - remember to enable OAuth2 based callbacks!';
+                echo '<input readonly type="text" value="'.get_site_url().'/?lockme_api='.$this->url_key.'" onfocus="select()" />';
             },
             'lockme-admin',
             'lockme_settings_section',
@@ -267,15 +267,15 @@ class Plugin
         }
 
         echo '<div class="wrap">';
-        echo '<h2>Integracja LockMe</h2>';
+        echo '<h2>LockMe integration</h2>';
 
         echo '<p><strong>IMPORTANT!</strong> Please remember that this plugin purpose is to help you with synchronizing data between your site and Lockme. Author does not take any responsibility for correct data synchronization or any side effects of using it.</p>';
 
         echo '<h2 class="nav-tab-wrapper">';
         echo '    <a href="?page=lockme_integration&tab=api_options" class="nav-tab '.($this->tab ===
-                                                                                       'api_options'?'nav-tab-active':'').'">Ustawienia API</a>';
+                                                                                       'api_options'?'nav-tab-active':'').'">API settings</a>';
         foreach ($this->available_plugins as $k=>$plugin) {
-            echo '    <a href="?page=lockme_integration&tab='.$k.'_plugin" class="nav-tab '.($this->tab === $k.'_plugin'?'nav-tab-active':'').'">Wtyczka '.$plugin->getPluginName().'</a>';
+            echo '    <a href="?page=lockme_integration&tab='.$k.'_plugin" class="nav-tab '.($this->tab === $k.'_plugin'?'nav-tab-active':'').'">'.$plugin->getPluginName().' plugin</a>';
         }
         echo '    <a href="?page=lockme_integration&tab=api_logs" class="nav-tab '.($this->tab ===
                                                                                        'api_logs'?'nav-tab-active':'').'">API error logs</a>';
@@ -306,24 +306,24 @@ class Plugin
                 try {
                     $test = $api->Test();
                     if ($test === 'OK') {
-                        echo '<p>Połączenie z LockMe API <strong>POPRAWNE</strong>.</p>';
+                        echo '<p>Connection to LockMe API <strong>CORRECT</strong>.</p>';
                         $user = $api->getResourceOwner();
-                        echo '<p>Zalogowano do Lockme jako: <strong>'.$user->toArray()['nick'].'</strong></p>';
+                        echo '<p>Logged in to Lockme as: <strong>'.$user->toArray()['nick'].'</strong></p>';
                     } else {
-                        echo '<p><strong>BŁĄD</strong> odpowiedzi.</p>';
+                        echo '<p>Response <strong>ERROR</strong>.</p>';
                     }
                 } catch (Exception $e) {
-                    echo '<p><strong>BŁĄD API: '.$e->getMessage().'.</p>';
+                    echo '<p><strong>API ERROR: '.$e->getMessage().'.</p>';
                     if ($e instanceof IdentityProviderException) {
                         echo '<p>Response from Lockme:<br><textarea readonly>'.$e->getResponseBody().'</textarea></p>';
                     }
                 }
                 $authorizationUrl = $api->getAuthorizationUrl(['rooms_manage']);
-                echo '<p><a href="'.$authorizationUrl.'">Kliknij tutaj</a>, aby połączyć wtyczkę z Lockme.</p>';
+                echo '<p><a href="'.$authorizationUrl.'">Click here</a> to connect the plugin with Lockme.</p>';
                 echo '<p>Custom Oauth2 Access Token (use <b>only if you know what are you doing</b>):</p>';
                 echo '<p><textarea name="oauth_token"></textarea></p>';
             } else {
-                echo '<p><strong>BRAK połączenia z API</strong>.</p>';
+                echo '<p><strong>NO API connection</strong>.</p>';
             }
             $token = get_option('lockme_oauth2_token');
             echo '<p>Current access token (don\'t share with anyone!)</p>';

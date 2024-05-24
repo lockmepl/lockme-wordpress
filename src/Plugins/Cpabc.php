@@ -48,9 +48,9 @@ class Cpabc implements PluginInterface {
 
         add_settings_section(
             'lockme_cpabc_section',
-            'Ustawienia wtyczki Appointment Booking Calendar',
+            'Appointment Booking Calendar plugin settings',
             static function(){
-                echo '<p>Ustawienia integracji z wtyczką Appointment Booking Calendar</p>';
+                echo '<p>Integration settings with the Appointment Booking Calendar plugin</p>';
             },
             'lockme-cpabc');
 
@@ -58,7 +58,7 @@ class Cpabc implements PluginInterface {
 
         add_settings_field(
             'cpabc_use',
-            'Włącz integrację',
+            'Enable integration',
             static function() use($options){
                 echo '<input name="lockme_cpabc[use]" type="checkbox" value="1"  '.checked(1, $options['use'] ?? null, false).' />';
             },
@@ -80,10 +80,10 @@ class Cpabc implements PluginInterface {
             foreach($calendars as $calendar){
                 add_settings_field(
                     'calendar_'.$calendar->id,
-                    'Pokój dla '.$calendar->uname,
+                    'Room for '.$calendar->uname,
                     static function() use($options, $rooms, $calendar){
                         echo '<select name="lockme_cpabc[calendar_'.$calendar->id.']">';
-                        echo '<option value="">--wybierz--</option>';
+                        echo '<option value="">--select--</option>';
                         foreach($rooms as $room){
                             echo '<option value="'.$room['roomid'].'" '.selected(1, $room['roomid']==$options['calendar_'.$calendar->id], false).'>'.$room['room'].' ('.$room['department'].')</options>';
                         }
@@ -96,9 +96,9 @@ class Cpabc implements PluginInterface {
             }
             add_settings_field(
                 'export_cpabc',
-                'Wyślij dane do LockMe',
+                'Send data to LockMe',
                 static function(){
-                    echo '<a href="?page=lockme_integration&tab=cpabc_plugin&cpabc_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
+                    echo '<a href="?page=lockme_integration&tab=cpabc_plugin&cpabc_export=1">Click here</a> to send all reservations to the LockMe calendar. This operation should only be required once, during the initial integration.';
                 },
                 'lockme-cpabc',
                 'lockme_cpabc_section',

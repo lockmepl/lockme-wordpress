@@ -97,16 +97,16 @@ class Easyapp implements PluginInterface
 
         add_settings_section(
             'lockme_easyapp_section',
-            'Ustawienia wtyczki Easy Appointments',
+            'Easy Appointments plugin settings',
             static function () {
-                echo '<p>Ustawienia integracji z wtyczką Easy Appointments</p>';
+                echo '<p>Integration settings with the Easy Appointments plugin</p>';
             },
             'lockme-easyapp'
         );
 
         add_settings_field(
             'easyapp_use',
-            'Włącz integrację',
+            'Enable integration',
             function () {
                 echo '<input name="lockme_easyapp[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'] ?? null,
                         false).' />';
@@ -130,10 +130,10 @@ class Easyapp implements PluginInterface
             foreach ($calendars as $calendar) {
                 add_settings_field(
                     'calendar_'.$calendar->id,
-                    'Pokój dla '.$calendar->name,
+                    'Room for '.$calendar->name,
                     function () use ($rooms, $calendar) {
                         echo '<select name="lockme_easyapp[calendar_'.$calendar->id.']">';
-                        echo '<option value="">--wybierz--</option>';
+                        echo '<option value="">--select--</option>';
                         foreach ($rooms as $room) {
                             echo '<option value="'.$room['roomid'].'" '.selected(1,
                                     $room['roomid'] == $this->options['calendar_'.$calendar->id],
@@ -148,9 +148,9 @@ class Easyapp implements PluginInterface
             }
             add_settings_field(
                 'export_easyapp',
-                'Wyślij dane do LockMe',
+                'Send data to LockMe',
                 static function () {
-                    echo '<a href="?page=lockme_integration&tab=easyapp_plugin&easyapp_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
+                    echo '<a href="?page=lockme_integration&tab=easyapp_plugin&easyapp_export=1">Click here</a> to send all reservations to the LockMe calendar. This operation should only be required once, during the initial integration.';
                 },
                 'lockme-easyapp',
                 'lockme_easyapp_section',

@@ -77,16 +77,16 @@ class Woo implements PluginInterface
 
         add_settings_section(
             'lockme_woo_section',
-            'Ustawienia wtyczki Woocommerce Bookings',
+            'Woocommerce Bookings plugin settings',
             static function () {
-                echo '<p>Ustawienia integracji z wtyczką Woocommerce Bookings</p>';
+                echo '<p>Integration settings with the Woocommerce Bookings plugin</p>';
             },
             'lockme-woo'
         );
 
         add_settings_field(
             'woo_use',
-            'Włącz integrację',
+            'Enable integration',
             function () {
                 echo '<input name="lockme_woo[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'] ?? null,
                         false).' />';
@@ -126,10 +126,10 @@ class Woo implements PluginInterface
             foreach ($calendars as $calendar) {
                 add_settings_field(
                     'calendar_'.$calendar->ID,
-                    'Pokój dla '.$calendar->post_title,
+                    'Room for '.$calendar->post_title,
                     function () use ($rooms, $calendar) {
                         echo '<select name="lockme_woo[calendar_'.$calendar->ID.']">';
-                        echo '<option value="">--wybierz--</option>';
+                        echo '<option value="">--select--</option>';
                         foreach ($rooms as $room) {
                             echo '<option value="'.$room['roomid'].'" '.selected(1,
                                     $room['roomid'] == $this->options['calendar_'.$calendar->ID],
@@ -144,9 +144,9 @@ class Woo implements PluginInterface
             }
             add_settings_field(
                 'export_woo',
-                'Wyślij dane do LockMe',
+                'Send data to LockMe',
                 static function () {
-                    echo '<a href="?page=lockme_integration&tab=woo_plugin&woo_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
+                    echo '<a href="?page=lockme_integration&tab=woo_plugin&woo_export=1">Click here</a> to send all reservations to the LockMe calendar. This operation should only be required once, during the initial integration.';
                 },
                 'lockme-woo',
                 'lockme_woo_section',

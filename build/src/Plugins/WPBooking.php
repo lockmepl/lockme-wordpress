@@ -109,10 +109,10 @@ class WPBooking implements PluginInterface
             return;
         }
         register_setting('lockme-wpb', 'lockme_wpb');
-        add_settings_section('lockme_wpb_section', 'Ustawienia wtyczki WP Booking Calendar', static function () {
-            echo '<p>Ustawienia integracji z wtyczką WP Booking Calendar</p>';
+        add_settings_section('lockme_wpb_section', 'WP Booking Calendar plugin settings', static function () {
+            echo '<p>Integration settings with the WP Booking Calendar plugin</p>';
         }, 'lockme-wpb');
-        add_settings_field('wpb_use', 'Włącz integrację', function () {
+        add_settings_field('wpb_use', 'Enable integration', function () {
             echo '<input name="lockme_wpb[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'] ?? null, \false) . ' />';
         }, 'lockme-wpb', 'lockme_wpb_section', []);
         if (($this->options['use'] ?? null) && $this->plugin->tab === 'wp_booking_plugin') {
@@ -127,17 +127,17 @@ class WPBooking implements PluginInterface
             $bookingListObj = new wp_booking_calendar_lists();
             $calendars = $bookingListObj->getCalendarsList('');
             foreach ($calendars as $cid => $calendar) {
-                add_settings_field('calendar_' . $cid, 'Pokój dla ' . $calendar['calendar_title'], function () use($rooms, $cid) {
+                add_settings_field('calendar_' . $cid, 'Room for ' . $calendar['calendar_title'], function () use($rooms, $cid) {
                     echo '<select name="lockme_wpb[calendar_' . $cid . ']">';
-                    echo '<option value="">--wybierz--</option>';
+                    echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
                         echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_' . $cid], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
                     }
                     echo '</select>';
                 }, 'lockme-wpb', 'lockme_wpb_section', []);
             }
-            add_settings_field('export_wpb', 'Wyślij dane do LockMe', static function () {
-                echo '<a href="?page=lockme_integration&tab=wpb_plugin&wpb_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
+            add_settings_field('export_wpb', 'Send data to LockMe', static function () {
+                echo '<a href="?page=lockme_integration&tab=wpb_plugin&wpb_export=1">Click here</a> to send all reservations to the LockMe calendar. This operation should only be required once, during the initial integration.';
             }, 'lockme-wpb', 'lockme_wpb_section', []);
         }
     }

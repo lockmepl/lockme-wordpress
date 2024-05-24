@@ -65,10 +65,10 @@ class Easyapp implements PluginInterface
             return;
         }
         register_setting('lockme-easyapp', 'lockme_easyapp');
-        add_settings_section('lockme_easyapp_section', 'Ustawienia wtyczki Easy Appointments', static function () {
-            echo '<p>Ustawienia integracji z wtyczką Easy Appointments</p>';
+        add_settings_section('lockme_easyapp_section', 'Easy Appointments plugin settings', static function () {
+            echo '<p>Integration settings with the Easy Appointments plugin</p>';
         }, 'lockme-easyapp');
-        add_settings_field('easyapp_use', 'Włącz integrację', function () {
+        add_settings_field('easyapp_use', 'Enable integration', function () {
             echo '<input name="lockme_easyapp[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'] ?? null, \false) . ' />';
         }, 'lockme-easyapp', 'lockme_easyapp_section', []);
         if (($this->options['use'] ?? null) && $this->plugin->tab === 'easyapp_plugin') {
@@ -82,17 +82,17 @@ class Easyapp implements PluginInterface
             }
             $calendars = $wpdb->get_results('SELECT DISTINCT concat(l.`id`,"_",s.`id`,"_",ss.`id`) `id`, concat(l.`name`," - ",s.`name`," - ",ss.`name`) `name` FROM ' . $wpdb->prefix . 'ea_locations l join ' . $wpdb->prefix . 'ea_services s join ' . $wpdb->prefix . 'ea_staff ss');
             foreach ($calendars as $calendar) {
-                add_settings_field('calendar_' . $calendar->id, 'Pokój dla ' . $calendar->name, function () use($rooms, $calendar) {
+                add_settings_field('calendar_' . $calendar->id, 'Room for ' . $calendar->name, function () use($rooms, $calendar) {
                     echo '<select name="lockme_easyapp[calendar_' . $calendar->id . ']">';
-                    echo '<option value="">--wybierz--</option>';
+                    echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
                         echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_' . $calendar->id], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
                     }
                     echo '</select>';
                 }, 'lockme-easyapp', 'lockme_easyapp_section', []);
             }
-            add_settings_field('export_easyapp', 'Wyślij dane do LockMe', static function () {
-                echo '<a href="?page=lockme_integration&tab=easyapp_plugin&easyapp_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
+            add_settings_field('export_easyapp', 'Send data to LockMe', static function () {
+                echo '<a href="?page=lockme_integration&tab=easyapp_plugin&easyapp_export=1">Click here</a> to send all reservations to the LockMe calendar. This operation should only be required once, during the initial integration.';
             }, 'lockme-easyapp', 'lockme_easyapp_section', []);
         }
     }

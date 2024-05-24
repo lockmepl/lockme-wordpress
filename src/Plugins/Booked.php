@@ -374,16 +374,16 @@ class Booked implements PluginInterface
 
         add_settings_section(
             'lockme_booked_section',
-            'Ustawienia wtyczki Booked',
+            'Booked plugin settings',
             static function () {
-                echo '<p>Ustawienia integracji z wtyczką Booked</p>';
+                echo '<p>Integration settings with the Booked plugin</p>';
             },
             'lockme-booked'
         );
 
         add_settings_field(
             'booked_use',
-            'Włącz integrację',
+            'Enable integration',
             function () {
                 echo '<input name="lockme_booked[use]" type="checkbox" value="1"  '.checked(1, $this->options['use'] ?? null,
                         false).' />';
@@ -405,10 +405,10 @@ class Booked implements PluginInterface
 
             add_settings_field(
                 'calendar_default',
-                'Pokój dla domyślnego kalendarza',
+                'Room for default calendar',
                 function () use ($rooms) {
                     echo '<select name="lockme_booked[calendar_default]">';
-                    echo '<option value="">--wybierz--</option>';
+                    echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
                         echo '<option value="'.$room['roomid'].'" '.selected(1,
                                 $room['roomid'] == $this->options['calendar_default'],
@@ -425,10 +425,10 @@ class Booked implements PluginInterface
             foreach ($calendars as $calendar) {
                 add_settings_field(
                     'calendar_'.$calendar->term_id,
-                    'Pokój dla '.$calendar->name,
+                    'Room for '.$calendar->name,
                     function () use ($rooms, $calendar) {
                         echo '<select name="lockme_booked[calendar_'.$calendar->term_id.']">';
-                        echo '<option value="">--wybierz--</option>';
+                        echo '<option value="">--select--</option>';
                         foreach ($rooms as $room) {
                             echo '<option value="'.$room['roomid'].'" '.selected(1,
                                     $room['roomid'] == $this->options['calendar_'.$calendar->term_id],
@@ -443,9 +443,9 @@ class Booked implements PluginInterface
             }
             add_settings_field(
                 'export_booked',
-                'Wyślij dane do LockMe',
+                'Send data to LockMe',
                 static function () {
-                    echo '<a href="?page=lockme_integration&tab=booked_plugin&booked_export=1">Kliknij tutaj</a> aby wysłać wszystkie rezerwacje do kalendarza LockMe. Ta operacja powinna być wymagana tylko raz, przy początkowej integracji.';
+                    echo '<a href="?page=lockme_integration&tab=booked_plugin&booked_export=1">Click here</a> to send all reservations to the LockMe calendar. This operation should only be required once, during the initial integration.';
                 },
                 'lockme-booked',
                 'lockme_booked_section',
