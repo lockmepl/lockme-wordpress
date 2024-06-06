@@ -239,7 +239,7 @@ class Booked implements PluginInterface
         $phone = '';
         if ($res->post_author) {
             $user_info = get_userdata($res->post_author);
-            $name = booked_get_name($res->post_author);
+            $name = \function_exists('LockmeDep\\quickcal_get_name') ? quickcal_get_name($res->post_author) : booked_get_name($res->post_author);
             $email = $user_info->user_email;
             $phone = get_user_meta($res->post_author, 'booked_phone', \true);
         }
@@ -265,8 +265,12 @@ class Booked implements PluginInterface
         }
         $day_name = \date('D', $date);
         $formatted_date = date_i18n('Ymd', $date);
-        if (\function_exists('LockmeDep\\booked_apply_custom_timeslots_details_filter')) {
+        if (\function_exists('LockmeDep\\quickcal_apply_custom_timeslots_details_filter')) {
+            $booked_defaults = quickcal_apply_custom_timeslots_details_filter($booked_defaults, $calendar_id);
+        } elseif (\function_exists('LockmeDep\\booked_apply_custom_timeslots_details_filter')) {
             $booked_defaults = booked_apply_custom_timeslots_details_filter($booked_defaults, $calendar_id);
+        } elseif (\function_exists('LockmeDep\\quickcal_apply_custom_timeslots_filter')) {
+            $booked_defaults = quickcal_apply_custom_timeslots_filter($booked_defaults, $calendar_id);
         } elseif (\function_exists('LockmeDep\\booked_apply_custom_timeslots_filter')) {
             $booked_defaults = booked_apply_custom_timeslots_filter($booked_defaults, $calendar_id);
         }
