@@ -7,6 +7,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
+use LockmeDep\WP_Error;
 use WP_Query;
 class Booked implements PluginInterface
 {
@@ -232,6 +233,9 @@ class Booked implements PluginInterface
     private function AppData($res) : array
     {
         $cal = wp_get_object_terms($res->ID, 'booked_custom_calendars');
+        if (!$cal || is_wp_error($cal)) {
+            return [];
+        }
         $timeslot = \explode('-', get_post_meta($res->ID, '_appointment_timeslot', \true));
         $time = \str_split($timeslot[0], 2);
         $name = '';
@@ -239,7 +243,7 @@ class Booked implements PluginInterface
         $phone = '';
         if ($res->post_author) {
             $user_info = get_userdata($res->post_author);
-            $name = \function_exists('\\quickcal_get_name') ? \quickcal_get_name($res->post_author) : \booked_get_name($res->post_author);
+            $name = \function_exists('quickcal_get_name') ? \quickcal_get_name($res->post_author) : \booked_get_name($res->post_author);
             $email = $user_info->user_email;
             $phone = get_user_meta($res->post_author, 'booked_phone', \true);
         }
