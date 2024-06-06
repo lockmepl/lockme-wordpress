@@ -288,7 +288,7 @@ class Booked implements PluginInterface
 
         if ($res->post_author) {
             $user_info = get_userdata($res->post_author);
-            $name = function_exists('quickcal_get_name')
+            $name = function_exists('\\quickcal_get_name')
                 ? quickcal_get_name($res->post_author)
                 : booked_get_name($res->post_author);
             $email = $user_info->user_email;

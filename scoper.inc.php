@@ -94,6 +94,15 @@ return [
         'wpdevart_bc_ModelThemes',
     ],
 
+    'exclude-functions' => [
+        'booked_get_name',
+        'quickcal_get_name',
+        'quickcal_apply_custom_timeslots_details_filter',
+        'booked_apply_custom_timeslots_details_filter',
+        'quickcal_apply_custom_timeslots_filter',
+        'booked_apply_custom_timeslots_filter'
+    ],
+
     // If `true` then the user defined functions belonging to the global namespace will not be prefixed.
     //
     // For more see https://github.com/humbug/php-scoper#constants--constants--functions-from-the-global-namespace

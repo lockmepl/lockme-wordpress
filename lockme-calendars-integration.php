@@ -12,9 +12,24 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
 
 namespace LockmeDep {
+    if (function_exists('\\quickcal_get_name')) {
+        function quickcal_get_name(...$args) {
+            \quickcal_get_name(...$args);
+        }
+    }
+    if (function_exists('\\quickcal_apply_custom_timeslots_details_filter')) {
+        function quickcal_apply_custom_timeslots_details_filter(...$args) {
+            \quickcal_apply_custom_timeslots_details_filter(...$args);
+        }
+    }
     if (function_exists('\\booked_apply_custom_timeslots_details_filter')) {
         function booked_apply_custom_timeslots_details_filter(...$args) {
             \booked_apply_custom_timeslots_details_filter(...$args);
+        }
+    }
+    if (function_exists('\\quickcal_apply_custom_timeslots_filter')) {
+        function quickcal_apply_custom_timeslots_filter(...$args) {
+            \quickcal_apply_custom_timeslots_filter(...$args);
         }
     }
     if (function_exists('\\booked_apply_custom_timeslots_filter')) {

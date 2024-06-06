@@ -37,12 +37,7 @@ humbug_phpscoper_expose_class('ComposerAutoloaderInitd4cbf4ed8610848fdd2afdd92de
 if (!function_exists('RandomCompat_intval')) { function RandomCompat_intval() { return \LockmeDep\RandomCompat_intval(...func_get_args()); } }
 if (!function_exists('RandomCompat_strlen')) { function RandomCompat_strlen() { return \LockmeDep\RandomCompat_strlen(...func_get_args()); } }
 if (!function_exists('RandomCompat_substr')) { function RandomCompat_substr() { return \LockmeDep\RandomCompat_substr(...func_get_args()); } }
-if (!function_exists('booked_apply_custom_timeslots_details_filter')) { function booked_apply_custom_timeslots_details_filter() { return \LockmeDep\booked_apply_custom_timeslots_details_filter(...func_get_args()); } }
-if (!function_exists('booked_apply_custom_timeslots_filter')) { function booked_apply_custom_timeslots_filter() { return \LockmeDep\booked_apply_custom_timeslots_filter(...func_get_args()); } }
 if (!function_exists('getallheaders')) { function getallheaders() { return \LockmeDep\getallheaders(...func_get_args()); } }
-if (!function_exists('quickcal_apply_custom_timeslots_details_filter')) { function quickcal_apply_custom_timeslots_details_filter() { return \LockmeDep\quickcal_apply_custom_timeslots_details_filter(...func_get_args()); } }
-if (!function_exists('quickcal_apply_custom_timeslots_filter')) { function quickcal_apply_custom_timeslots_filter() { return \LockmeDep\quickcal_apply_custom_timeslots_filter(...func_get_args()); } }
-if (!function_exists('quickcal_get_name')) { function quickcal_get_name() { return \LockmeDep\quickcal_get_name(...func_get_args()); } }
 if (!function_exists('random_bytes')) { function random_bytes() { return \LockmeDep\random_bytes(...func_get_args()); } }
 if (!function_exists('random_int')) { function random_int() { return \LockmeDep\random_int(...func_get_args()); } }
 if (!function_exists('trigger_deprecation')) { function trigger_deprecation() { return \LockmeDep\trigger_deprecation(...func_get_args()); } }
