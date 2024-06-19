@@ -28,8 +28,9 @@ class Woo implements PluginInterface
             add_action('woocommerce_booking_cancelled', [$this, 'Delete'], 5, 1);
             add_action('woocommerce_booking_trash', [$this, 'Delete'], 5, 1);
             add_action('woocommerce_booking_was-in-cart', [$this, 'Delete'], 5, 1);
+            add_action('trashed_post', [$this, 'Delete'], 5, 1);
             add_action('before_delete_post', [$this, 'Delete'], 5, 1);
-            add_action('edit_post', [$this, 'AddEditReservation']);
+            add_action('post_updated', [$this, 'AddEditReservation']);
 
             add_action('init', function () {
                 if ($_GET['woo_export'] ?? null) {
