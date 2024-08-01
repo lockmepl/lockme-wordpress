@@ -143,10 +143,10 @@ class Plugin
         add_settings_section('lockme_settings_section', 'API settings', static function () {
             echo '<p>Basic data of the LockMe partner - available at <a href="https://lock.me/cockpit/" target="_blank">lock.me/cockpit</a></p>';
         }, 'lockme-admin');
-        add_settings_field('client_id', 'Client ID', function () {
+        add_settings_field('client_id', 'App ID', function () {
             echo '<input name="lockme_settings[client_id]"  type="text" value="' . $this->options['client_id'] . '" />';
         }, 'lockme-admin', 'lockme_settings_section', array());
-        add_settings_field('client_secret', 'Client secret', function () {
+        add_settings_field('client_secret', 'App secret', function () {
             echo '<input name="lockme_settings[client_secret]" type="text" value="' . $this->options['client_secret'] . '" />';
         }, 'lockme-admin', 'lockme_settings_section', array());
         add_settings_field('rodo_mode', 'RODO mode (anonymize data)', function () {
@@ -155,11 +155,11 @@ class Plugin
         add_settings_field('api_domain', 'API domain', function () {
             echo '<input name="lockme_settings[api_domain]" type="text" value="' . $this->options['api_domain'] . '" placeholder="https://api.lock.me" />';
         }, 'lockme-admin', 'lockme_settings_section', array());
-        add_settings_field('api_url', 'Callback URL for Lockme', function () {
-            echo '<input readonly type="text" value="' . get_site_url() . '/?lockme_api=' . $this->url_key . '" onfocus="select()" />';
+        add_settings_field('api_url', 'Webhook URL', function () {
+            echo '<input readonly type="text" value="' . get_site_url() . '/?lockme_api=' . $this->url_key . '" onfocus="select()" /> <small>You need to add an integration of type webhook on Lockme to get updates about bookings automatically. Use this value as a webhook URL address and use the nevest API version from 2.x options.</small>';
         }, 'lockme-admin', 'lockme_settings_section', array());
         add_settings_field('redirect_uri', 'Redirect URI', function () {
-            echo '<input readonly type="text" value="' . get_admin_url() . 'options-general.php?page=lockme_integration&tab=api_options" onfocus="select()" /> - set in Lockme panel to be able to connect';
+            echo '<input readonly type="text" value="' . get_admin_url() . 'options-general.php?page=lockme_integration&tab=api_options" onfocus="select()" /> <small>set in Lockme cockpit as a redirect URI for your API app.</small>';
         }, 'lockme-admin', 'lockme_settings_section', array());
         foreach ($this->available_plugins as $k => $plugin) {
             $plugin->RegisterSettings();

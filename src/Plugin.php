@@ -191,7 +191,7 @@ class Plugin
 
         add_settings_field(
             'client_id',
-            'Client ID',
+            'App ID',
             function () {
                 echo '<input name="lockme_settings[client_id]"  type="text" value="'.$this->options['client_id'].'" />';
             },
@@ -202,7 +202,7 @@ class Plugin
 
         add_settings_field(
             'client_secret',
-            'Client secret',
+            'App secret',
             function () {
                 echo '<input name="lockme_settings[client_secret]" type="text" value="'.$this->options['client_secret'].'" />';
             },
@@ -235,9 +235,9 @@ class Plugin
 
         add_settings_field(
             'api_url',
-            'Callback URL for Lockme',
+            'Webhook URL',
             function () {
-                echo '<input readonly type="text" value="'.get_site_url().'/?lockme_api='.$this->url_key.'" onfocus="select()" />';
+                echo '<input readonly type="text" value="'.get_site_url().'/?lockme_api='.$this->url_key.'" onfocus="select()" /> <small>You need to add an integration of type webhook on Lockme to get updates about bookings automatically. Use this value as a webhook URL address and use the nevest API version from 2.x options.</small>';
             },
             'lockme-admin',
             'lockme_settings_section',
@@ -248,7 +248,7 @@ class Plugin
             'redirect_uri',
             'Redirect URI',
             function () {
-                echo '<input readonly type="text" value="'.get_admin_url().'options-general.php?page=lockme_integration&tab=api_options" onfocus="select()" /> - set in Lockme panel to be able to connect';
+                echo '<input readonly type="text" value="'.get_admin_url().'options-general.php?page=lockme_integration&tab=api_options" onfocus="select()" /> <small>set in Lockme cockpit as a redirect URI for your API app.</small>';
             },
             'lockme-admin',
             'lockme_settings_section',
