@@ -209,7 +209,7 @@ class Woo implements PluginInterface
             case 'edit':
                 if ($data['extid']) {
                     $post = get_post($data['extid']);
-                    if ($post->post_type !== 'wc_booking') {
+                    if (!$post || $post->post_type !== 'wc_booking') {
                         return \false;
                     }
                     $booking = new WC_Booking($data['extid']);
