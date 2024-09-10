@@ -36,7 +36,7 @@ class Ezscm implements PluginInterface
                     wp_redirect('?page=lockme_integration&tab=ezscm_plugin');
                     exit;
                 }
-            });
+            }, \PHP_INT_MAX);
         }
     }
     public function CheckDependencies() : bool

@@ -25,7 +25,7 @@ class Cpabc implements PluginInterface
                     wp_redirect('?page=lockme_integration&tab=cpabc_plugin');
                     exit;
                 }
-            });
+            }, \PHP_INT_MAX);
         }
     }
     public function CheckDependencies() : bool

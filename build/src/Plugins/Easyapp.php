@@ -35,7 +35,7 @@ class Easyapp implements PluginInterface
                     wp_redirect('?page=lockme_integration&tab=easyapp_plugin');
                     exit;
                 }
-            });
+            }, \PHP_INT_MAX);
         }
     }
     public function CheckDependencies() : bool
