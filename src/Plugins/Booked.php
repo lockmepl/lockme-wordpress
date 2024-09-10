@@ -36,7 +36,7 @@ class Booked implements PluginInterface
                     wp_redirect('?page=lockme_integration&tab=booked_plugin');
                     exit;
                 }
-            });
+            }, PHP_INT_MAX);
         }
     }
 

@@ -56,7 +56,7 @@ class Bookly implements PluginInterface
                     wp_redirect('?page=lockme_integration&tab=bookly_plugin');
                     exit;
                 }
-            });
+            }, PHP_INT_MAX);
         }
     }
 

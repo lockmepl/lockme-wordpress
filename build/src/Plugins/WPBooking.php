@@ -50,7 +50,7 @@ class WPBooking implements PluginInterface
                     wp_redirect('?page=lockme_integration&tab=wp_booking_plugin');
                     exit;
                 }
-            });
+            }, \PHP_INT_MAX);
         }
     }
     private function AppData($id, $res) : array

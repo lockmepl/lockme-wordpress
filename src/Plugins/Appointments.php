@@ -30,7 +30,7 @@ class Appointments implements PluginInterface
                     wp_redirect('?page=lockme_integration&tab=appointments_plugin');
                     exit;
                 }
-            });
+            }, PHP_INT_MAX);
         }
     }
 

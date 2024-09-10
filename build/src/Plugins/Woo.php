@@ -35,7 +35,7 @@ class Woo implements PluginInterface
                     wp_redirect('?page=lockme_integration&tab=woo_plugin');
                     exit;
                 }
-            });
+            }, \PHP_INT_MAX);
         }
     }
     public function ExportToLockMe() : void

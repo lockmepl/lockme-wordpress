@@ -38,7 +38,7 @@ class Dopbsp implements PluginInterface
                     wp_redirect('?page=lockme_integration&tab=dopbsp_plugin');
                     exit;
                 }
-            });
+            }, PHP_INT_MAX);
         }
     }
 

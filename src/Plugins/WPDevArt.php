@@ -42,7 +42,7 @@ class WPDevArt implements PluginInterface
                     wp_redirect('?page=lockme_integration&tab=wpdevart_plugin');
                     exit;
                 }
-            });
+            }, PHP_INT_MAX);
         }
     }
 
