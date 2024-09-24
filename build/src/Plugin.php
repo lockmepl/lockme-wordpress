@@ -41,7 +41,7 @@ class Plugin
             } catch (Exception $e) {
                 $this->url_key = '39836295616564325481';
             }
-            update_option('lockme_url_key', $this->url_key);
+            update_option('lockme_url_key', $this->url_key, \false);
         }
         add_action('init', array(&$this, 'api_call'), \PHP_INT_MAX);
         foreach ($this->plugins as $k => $v) {
@@ -70,7 +70,7 @@ class Plugin
                 $api = $this->GetApi();
                 $token = $api->getTokenForCode($code, $state);
                 if ($token instanceof AccessToken) {
-                    update_option('lockme_oauth2_token', $token);
+                    update_option('lockme_oauth2_token', $token, \false);
                 }
                 wp_redirect('options-general.php?page=lockme_integration&tab=api_options');
                 exit;
@@ -86,7 +86,7 @@ class Plugin
                 $api->loadAccessToken(function () use($token) {
                     return \json_decode($token, \true);
                 }, function ($token) {
-                    update_option('lockme_oauth2_token', $token);
+                    update_option('lockme_oauth2_token', $token, \false);
                 });
             } catch (Exception $e) {
             }
@@ -124,7 +124,7 @@ class Plugin
                 $lm->loadAccessToken(function () {
                     return get_option('lockme_oauth2_token');
                 }, function ($token) {
-                    update_option('lockme_oauth2_token', $token);
+                    update_option('lockme_oauth2_token', $token, \false);
                 });
             } catch (Exception $e) {
                 return $this->api = $lm;
@@ -246,6 +246,11 @@ class Plugin
         }
         return $data;
     }
+    public function activate() : void
+    {
+        wp_set_options_autoload(['lockme_settings', 'lockme_url_key', 'lockme_oauth2_token', 'lockme_db_ver', 'lockme_app', 'lockme_booked', 'lockme_bookly', 'lockme_cpabc', 'lockme_dopbsp', 'lockme_easyapp', 'lockme_ezscm', 'lockme_woo', 'lockme_wpb', 'lockme_wpdevart'], \false);
+        $this->createDatabase();
+    }
     public function createDatabase() : void
     {
         global $wpdb;
@@ -254,7 +259,7 @@ class Plugin
             $charset_collate = $wpdb->get_charset_collate();
             $sql = "CREATE TABLE {$table} (\n              id int(11) NOT NULL AUTO_INCREMENT,\n              time timestamp DEFAULT current_timestamp NOT NULL,\n              method varchar(10) NOT NULL,\n              uri varchar(255) NOT NULL,\n              params mediumtext NOT NULL,\n              response mediumtext NOT NULL,\n              PRIMARY KEY  (id)\n            ) {$charset_collate}";
             require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-            update_option('lockme_db_ver', self::DB_VER);
+            update_option('lockme_db_ver', self::DB_VER, \false);
         }
     }
 }

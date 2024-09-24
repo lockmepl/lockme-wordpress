@@ -368,6 +368,28 @@ class Plugin
         return $data;
     }
 
+    public function activate(): void
+    {
+        wp_set_options_autoload([
+            'lockme_settings',
+            'lockme_url_key',
+            'lockme_oauth2_token',
+            'lockme_db_ver',
+            'lockme_app',
+            'lockme_booked',
+            'lockme_bookly',
+            'lockme_cpabc',
+            'lockme_dopbsp',
+            'lockme_easyapp',
+            'lockme_ezscm',
+            'lockme_woo',
+            'lockme_wpb',
+            'lockme_wpdevart',
+        ], false);
+
+        $this->createDatabase();
+    }
+
     public function createDatabase(): void
     {
         global $wpdb;

@@ -46,6 +46,6 @@ namespace {
     require_once __DIR__.'/build/vendor/scoper-autoload.php';
 
     $lockme = new LockmeDep\LockmeIntegration\Plugin();
-    register_activation_hook(__FILE__, [$lockme, 'createDatabase']);
+    register_activation_hook(__FILE__, [$lockme, 'activate']);
     add_action('plugins_loaded', [$lockme, 'createDatabase']);
 }

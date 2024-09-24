@@ -4,7 +4,7 @@
     "type": "wordpress-plugin",
     "config": {
         "platform": {
-            "php": "8.0.28"
+            "php": "8.1.29"
         },
         "sort-packages": true
     },
