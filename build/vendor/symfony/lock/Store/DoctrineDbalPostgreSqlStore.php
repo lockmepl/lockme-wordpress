@@ -10,9 +10,12 @@
  */
 namespace LockmeDep\Symfony\Component\Lock\Store;
 
+use LockmeDep\Doctrine\DBAL\Configuration;
 use LockmeDep\Doctrine\DBAL\Connection;
 use LockmeDep\Doctrine\DBAL\DriverManager;
 use LockmeDep\Doctrine\DBAL\Platforms\PostgreSQLPlatform;
+use LockmeDep\Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
+use LockmeDep\Doctrine\DBAL\Tools\DsnParser;
 use LockmeDep\Symfony\Component\Lock\BlockingSharedLockStoreInterface;
 use LockmeDep\Symfony\Component\Lock\BlockingStoreInterface;
 use LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException;
@@ -27,28 +30,40 @@ use LockmeDep\Symfony\Component\Lock\SharedLockStoreInterface;
  */
 class DoctrineDbalPostgreSqlStore implements BlockingSharedLockStoreInterface, BlockingStoreInterface
 {
-    private $conn;
-    private static $storeRegistry = [];
+    private Connection $conn;
+    private static array $storeRegistry = [];
     /**
      * You can either pass an existing database connection a Doctrine DBAL Connection
      * or a URL that will be used to connect to the database.
      *
      * @throws InvalidArgumentException When first argument is not Connection nor string
      */
-    public function __construct(Connection|string $connOrUrl)
+    public function __construct(#[\SensitiveParameter] Connection|string $connOrUrl)
     {
         if ($connOrUrl instanceof Connection) {
             if (!$connOrUrl->getDatabasePlatform() instanceof PostgreSQLPlatform) {
-                throw new InvalidArgumentException(\sprintf('The adapter "%s" does not support the "%s" platform.', __CLASS__, \get_class($connOrUrl->getDatabasePlatform())));
+                throw new InvalidArgumentException(\sprintf('The adapter "%s" does not support the "%s" platform.', __CLASS__, $connOrUrl->getDatabasePlatform()::class));
             }
             $this->conn = $connOrUrl;
         } else {
             if (!\class_exists(DriverManager::class)) {
-                throw new InvalidArgumentException(\sprintf('Failed to parse the DSN "%s". Try running "composer require doctrine/dbal".', $connOrUrl));
+                throw new InvalidArgumentException('Failed to parse DSN. Try running "composer require doctrine/dbal".');
             }
-            $this->conn = DriverManager::getConnection(['url' => $this->filterDsn($connOrUrl)]);
+            if (\class_exists(DsnParser::class)) {
+                $params = (new DsnParser(['db2' => 'ibm_db2', 'mssql' => 'pdo_sqlsrv', 'mysql' => 'pdo_mysql', 'mysql2' => 'pdo_mysql', 'postgres' => 'pdo_pgsql', 'postgresql' => 'pdo_pgsql', 'pgsql' => 'pdo_pgsql', 'sqlite' => 'pdo_sqlite', 'sqlite3' => 'pdo_sqlite']))->parse($this->filterDsn($connOrUrl));
+            } else {
+                $params = ['url' => $this->filterDsn($connOrUrl)];
+            }
+            $config = new Configuration();
+            if (\class_exists(DefaultSchemaManagerFactory::class)) {
+                $config->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
+            }
+            $this->conn = DriverManager::getConnection($params, $config);
         }
     }
+    /**
+     * @return void
+     */
     public function save(Key $key)
     {
         // prevent concurrency within the same connection
@@ -72,6 +87,9 @@ class DoctrineDbalPostgreSqlStore implements BlockingSharedLockStoreInterface, B
         }
         throw new LockConflictedException();
     }
+    /**
+     * @return void
+     */
     public function saveRead(Key $key)
     {
         // prevent concurrency within the same connection
@@ -95,6 +113,9 @@ class DoctrineDbalPostgreSqlStore implements BlockingSharedLockStoreInterface, B
         }
         throw new LockConflictedException();
     }
+    /**
+     * @return void
+     */
     public function putOffExpiration(Key $key, float $ttl)
     {
         // postgresql locks forever.
@@ -103,6 +124,9 @@ class DoctrineDbalPostgreSqlStore implements BlockingSharedLockStoreInterface, B
             throw new LockConflictedException();
         }
     }
+    /**
+     * @return void
+     */
     public function delete(Key $key)
     {
         // Prevent deleting locks own by an other key in the same connection
@@ -116,7 +140,7 @@ class DoctrineDbalPostgreSqlStore implements BlockingSharedLockStoreInterface, B
             // If lock acquired = there is no other ReadLock
             $store->save($key);
             $this->unlockShared($key);
-        } catch (LockConflictedException $e) {
+        } catch (LockConflictedException) {
             // an other key exists in this ReadLock
         }
         $store->delete($key);
@@ -131,6 +155,9 @@ class DoctrineDbalPostgreSqlStore implements BlockingSharedLockStoreInterface, B
         }
         return \false;
     }
+    /**
+     * @return void
+     */
     public function waitAndSave(Key $key)
     {
         // prevent concurrency within the same connection
@@ -149,6 +176,9 @@ class DoctrineDbalPostgreSqlStore implements BlockingSharedLockStoreInterface, B
         // release lock in case of promotion
         $this->unlockShared($key);
     }
+    /**
+     * @return void
+     */
     public function waitAndSaveRead(Key $key)
     {
         // prevent concurrency within the same connection
@@ -194,10 +224,10 @@ class DoctrineDbalPostgreSqlStore implements BlockingSharedLockStoreInterface, B
      *
      * @throws InvalidArgumentException when driver is not supported
      */
-    private function filterDsn(string $dsn) : string
+    private function filterDsn(#[\SensitiveParameter] string $dsn) : string
     {
         if (!\str_contains($dsn, '://')) {
-            throw new InvalidArgumentException(\sprintf('String "%" is not a valid DSN for Doctrine DBAL.', $dsn));
+            throw new InvalidArgumentException('DSN is invalid for Doctrine DBAL.');
         }
         [$scheme, $rest] = \explode(':', $dsn, 2);
         $driver = \strtok($scheme, '+');
@@ -209,6 +239,6 @@ class DoctrineDbalPostgreSqlStore implements BlockingSharedLockStoreInterface, B
     private function getInternalStore() : SharedLockStoreInterface
     {
         $namespace = \spl_object_hash($this->conn);
-        return self::$storeRegistry[$namespace] ?? (self::$storeRegistry[$namespace] = new InMemoryStore());
+        return self::$storeRegistry[$namespace] ??= new InMemoryStore();
     }
 }

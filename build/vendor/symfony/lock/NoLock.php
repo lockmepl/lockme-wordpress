@@ -24,14 +24,14 @@ final class NoLock implements LockInterface
     {
         return \true;
     }
-    public function refresh(float $ttl = null)
+    public function refresh(?float $ttl = null) : void
     {
     }
     public function isAcquired() : bool
     {
         return \true;
     }
-    public function release()
+    public function release() : void
     {
     }
     public function isExpired() : bool

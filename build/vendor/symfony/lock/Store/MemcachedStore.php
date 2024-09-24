@@ -23,9 +23,12 @@ use LockmeDep\Symfony\Component\Lock\PersistingStoreInterface;
 class MemcachedStore implements PersistingStoreInterface
 {
     use ExpiringStoreTrait;
-    private $memcached;
+    private \Memcached $memcached;
     private int $initialTtl;
     private bool $useExtendedReturn;
+    /**
+     * @return bool
+     */
     public static function isSupported()
     {
         return \extension_loaded('memcached');
@@ -45,7 +48,7 @@ class MemcachedStore implements PersistingStoreInterface
         $this->initialTtl = $initialTtl;
     }
     /**
-     * {@inheritdoc}
+     * @return void
      */
     public function save(Key $key)
     {
@@ -58,7 +61,7 @@ class MemcachedStore implements PersistingStoreInterface
         $this->checkNotExpired($key);
     }
     /**
-     * {@inheritdoc}
+     * @return void
      */
     public function putOffExpiration(Key $key, float $ttl)
     {
@@ -88,7 +91,7 @@ class MemcachedStore implements PersistingStoreInterface
         $this->checkNotExpired($key);
     }
     /**
-     * {@inheritdoc}
+     * @return void
      */
     public function delete(Key $key)
     {
@@ -106,9 +109,6 @@ class MemcachedStore implements PersistingStoreInterface
         // Now, we are the owner of the lock for 2 more seconds, we can delete it.
         $this->memcached->delete((string) $key);
     }
-    /**
-     * {@inheritdoc}
-     */
     public function exists(Key $key) : bool
     {
         return $this->memcached->get((string) $key) === $this->getUniqueToken($key);
