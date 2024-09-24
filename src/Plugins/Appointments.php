@@ -26,8 +26,7 @@ class Appointments implements PluginInterface
             add_action('init', function () {
                 if ($_GET['app_export'] ?? null) {
                     $this->ExportToLockMe();
-                    $_SESSION['app_export'] = 1;
-                    wp_redirect('?page=lockme_integration&tab=appointments_plugin');
+                    wp_redirect('?page=lockme_integration&tab=appointments_plugin&app_exported=1');
                     exit;
                 }
             }, PHP_INT_MAX);
@@ -128,11 +127,10 @@ class Appointments implements PluginInterface
 //     $sql = "SELECT * FROM {$wpdb->prefix}app_appointments WHERE `start` > now() ORDER BY ID";
 //     $rows = $wpdb->get_results($sql);
 
-        if ($_SESSION['app_export']) {
+        if ($_GET['app_exported']) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
-            unset($_SESSION['app_export']);
         }
         settings_fields('lockme-app');
         do_settings_sections('lockme-app');

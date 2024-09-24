@@ -52,8 +52,7 @@ class Bookly implements PluginInterface
                 }
                 if ($_GET['bookly_export'] ?? null) {
                     $this->ExportToLockMe();
-                    $_SESSION['bookly_export'] = 1;
-                    wp_redirect('?page=lockme_integration&tab=bookly_plugin');
+                    wp_redirect('?page=lockme_integration&tab=bookly_plugin&bookly_exported=1');
                     exit;
                 }
             }, PHP_INT_MAX);
@@ -149,11 +148,10 @@ class Bookly implements PluginInterface
             return;
         }
 
-        if ($_SESSION['bookly_export'] ?? null) {
+        if ($_GET['bookly_exported'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
-            unset($_SESSION['bookly_export']);
         }
         settings_fields('lockme-bookly');
         do_settings_sections('lockme-bookly');

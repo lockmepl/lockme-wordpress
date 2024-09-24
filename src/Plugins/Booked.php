@@ -32,8 +32,7 @@ class Booked implements PluginInterface
             add_action('init', function () {
                 if ($_GET['booked_export'] ?? null) {
                     $this->ExportToLockMe();
-                    $_SESSION['booked_export'] = 1;
-                    wp_redirect('?page=lockme_integration&tab=booked_plugin');
+                    wp_redirect('?page=lockme_integration&tab=booked_plugin&booked_exported=1');
                     exit;
                 }
             }, PHP_INT_MAX);
@@ -124,11 +123,10 @@ class Booked implements PluginInterface
 //
 //     var_dump($timeslot);
 
-        if ($_SESSION['booked_export'] ?? null) {
+        if ($_GET['booked_exported'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
-            unset($_SESSION['booked_export']);
         }
         settings_fields('lockme-booked');
         do_settings_sections('lockme-booked');

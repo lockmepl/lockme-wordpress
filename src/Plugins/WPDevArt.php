@@ -38,8 +38,7 @@ class WPDevArt implements PluginInterface
             add_action('init', function () {
                 if ($_GET['wpdevart_export'] ?? null) {
                     $this->ExportToLockMe();
-                    $_SESSION['wpdevart_export'] = 1;
-                    wp_redirect('?page=lockme_integration&tab=wpdevart_plugin');
+                    wp_redirect('?page=lockme_integration&tab=wpdevart_plugin&wpdevart_exported=1');
                     exit;
                 }
             }, PHP_INT_MAX);
@@ -195,11 +194,10 @@ class WPDevArt implements PluginInterface
             return;
         }
 
-        if ($_SESSION['wpdevart_export'] ?? null) {
+        if ($_GET['wpdevart_exported'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
-            unset($_SESSION['wpdevart_export']);
         }
         settings_fields('lockme-wpdevart');
         do_settings_sections('lockme-wpdevart');
