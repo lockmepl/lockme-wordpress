@@ -66,6 +66,7 @@ Show answer - no. Long answer - please contact us at kontakt@lockme.pl, and we'l
 = 2.5 =
 
 * Drop support for PHP 8.0 and WordPress lower than 6.4
+* Mark lockme related options as not autoloaded
 
 = 2.4 =
 
