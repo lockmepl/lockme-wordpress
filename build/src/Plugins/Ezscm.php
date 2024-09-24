@@ -32,8 +32,7 @@ class Ezscm implements PluginInterface
             add_action('init', function () {
                 if ($_GET['ezscm_export'] ?? null) {
                     $this->ExportToLockMe();
-                    $_SESSION['ezscm_export'] = 1;
-                    wp_redirect('?page=lockme_integration&tab=ezscm_plugin');
+                    wp_redirect('?page=lockme_integration&tab=ezscm_plugin&ezscm_exported=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -91,11 +90,10 @@ class Ezscm implements PluginInterface
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
             return;
         }
-        if ($_SESSION['ezscm_export'] ?? null) {
+        if ($_GET['ezscm_exported'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
-            unset($_SESSION['ezscm_export']);
         }
         settings_fields('lockme-ezscm');
         do_settings_sections('lockme-ezscm');

@@ -31,8 +31,7 @@ class Easyapp implements PluginInterface
             add_action('init', function () {
                 if ($_GET['easyapp_export'] ?? null) {
                     $this->ExportToLockMe();
-                    $_SESSION['easyapp_export'] = 1;
-                    wp_redirect('?page=lockme_integration&tab=easyapp_plugin');
+                    wp_redirect('?page=lockme_integration&tab=easyapp_plugin&easyapp_exported=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -102,16 +101,10 @@ class Easyapp implements PluginInterface
             echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
             return;
         }
-        if ($_SESSION['easyapp_export'] ?? null) {
+        if ($_GET['easyapp_exported'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
-            unset($_SESSION['easyapp_export']);
-        } elseif ($_SESSION['easyapp_fix'] ?? null) {
-            echo '<div class="updated">';
-            echo '  <p>Ustawienia zostały naprawione. <b>Sprawdź działanie kalendarza i migrację ustawień!</b></p>';
-            echo '</div>';
-            unset($_SESSION['easyapp_fix']);
         }
         settings_fields('lockme-easyapp');
         do_settings_sections('lockme-easyapp');

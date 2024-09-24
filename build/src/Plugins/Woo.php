@@ -31,8 +31,7 @@ class Woo implements PluginInterface
             add_action('init', function () {
                 if ($_GET['woo_export'] ?? null) {
                     $this->ExportToLockMe();
-                    $_SESSION['woo_export'] = 1;
-                    wp_redirect('?page=lockme_integration&tab=woo_plugin');
+                    wp_redirect('?page=lockme_integration&tab=woo_plugin&woo_exported=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -101,11 +100,10 @@ class Woo implements PluginInterface
         }
         //     $booking = new WC_Booking(2918);
         //     var_dump(get_post_meta(2918));
-        if ($_SESSION['woo_export'] ?? null) {
+        if ($_GET['woo_exported'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
-            unset($_SESSION['woo_export']);
         }
         settings_fields('lockme-woo');
         do_settings_sections('lockme-woo');

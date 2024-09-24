@@ -1,6 +1,7 @@
 <?php
 namespace LockmeIntegration;
 
+use Closure;
 use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
@@ -78,19 +79,30 @@ class Plugin
         }
     }
 
-    public function api_call(): void
+    private function withSession(Closure $callback): mixed
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            return $callback();
         }
 
+        session_start();
+        $return = $callback();
+        session_write_close();
+
+        return $return;
+    }
+
+    public function api_call(): void
+    {
         // Check for OAuth2 state
         $code = $_GET['code'] ?? null;
         $state = $_GET['state'] ?? null;
         if ($code && $state) {
             try {
                 $api = $this->GetApi();
-                $token = $api->getTokenForCode($code, $state);
+                $token = $this->withSession(
+                    fn () => $api->getTokenForCode($code, $state)
+                );
                 if ($token instanceof AccessToken) {
                     update_option('lockme_oauth2_token', $token, false);
                 }
@@ -318,7 +330,10 @@ class Plugin
                         echo '<p>Response from Lockme:<br><textarea readonly>'.$e->getResponseBody().'</textarea></p>';
                     }
                 }
-                $authorizationUrl = $api->getAuthorizationUrl(['rooms_manage']);
+
+                $authorizationUrl = $this->withSession(
+                    fn () => $api->getAuthorizationUrl(['rooms_manage'])
+                );
                 echo '<p><a href="'.$authorizationUrl.'">Click here</a> to connect the plugin with Lockme.</p>';
                 echo '<p>Custom Oauth2 Access Token (use <b>only if you know what are you doing</b>):</p>';
                 echo '<p><textarea name="oauth_token"></textarea></p>';

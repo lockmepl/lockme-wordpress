@@ -46,8 +46,7 @@ class WPBooking implements PluginInterface
                 }
                 if ($_GET['wpb_export'] ?? null) {
                     $this->ExportToLockMe();
-                    $_SESSION['wpb_export'] = 1;
-                    wp_redirect('?page=lockme_integration&tab=wp_booking_plugin');
+                    wp_redirect('?page=lockme_integration&tab=wp_booking_plugin&wpb_exported=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -150,11 +149,10 @@ class WPBooking implements PluginInterface
         //     $data = $wpdb->get_row("SELECT * FROM ".$DOPBSP->tables->reservations." WHERE `id` = 60", ARRAY_A);
         //     var_dump($data);
         //     var_dump($this->Add($data));
-        if ($_SESSION['wpb_export'] ?? null) {
+        if ($_GET['wpb_exported'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
-            unset($_SESSION['wpb_export']);
         }
         settings_fields('lockme-wpb');
         do_settings_sections('lockme-wpb');

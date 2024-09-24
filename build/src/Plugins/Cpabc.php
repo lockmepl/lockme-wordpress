@@ -21,8 +21,7 @@ class Cpabc implements PluginInterface
                 $this->CheckAdminActions();
                 if ($_GET['cpabc_export'] ?? null) {
                     $this->ExportToLockMe();
-                    $_SESSION['cpabc_export'] = 1;
-                    wp_redirect('?page=lockme_integration&tab=cpabc_plugin');
+                    wp_redirect('?page=lockme_integration&tab=cpabc_plugin&cpabc_exported=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -82,11 +81,10 @@ class Cpabc implements PluginInterface
         //     var_dump($res);
         //     var_dump($this->AddEditReservation($row['id']));
         //     $this->Delete(3010);
-        if ($_SESSION['cpabc_export'] ?? null) {
+        if ($_GET['cpabc_exported'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
-            unset($_SESSION['cpabc_export']);
         }
         settings_fields('lockme-cpabc');
         do_settings_sections('lockme-cpabc');

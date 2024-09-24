@@ -23,14 +23,12 @@ class Dopbsp implements PluginInterface
             add_action('init', function () {
                 if ($_GET['dopbsp_export'] ?? null) {
                     $this->ExportToLockMe();
-                    $_SESSION['dopbsp_export'] = 1;
-                    wp_redirect('?page=lockme_integration&tab=dopbsp_plugin');
+                    wp_redirect('?page=lockme_integration&tab=dopbsp_plugin&dopbsp_exported=1');
                     exit;
                 }
                 if ($_GET['dopbsp_fix'] ?? null) {
                     $this->FixSettings();
-                    $_SESSION['dopbsp_fix'] = 1;
-                    wp_redirect('?page=lockme_integration&tab=dopbsp_plugin');
+                    wp_redirect('?page=lockme_integration&tab=dopbsp_plugin&dopbsp_fixed=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -228,16 +226,14 @@ class Dopbsp implements PluginInterface
             return;
         }
         //     var_dump($DOPBSP->classes->backend_calendar_schedule->setApproved(1740));
-        if ($_SESSION['dopbsp_export'] ?? null) {
+        if ($_GET['dopbsp_exported'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Eksport został wykonany.</p>';
             echo '</div>';
-            unset($_SESSION['dopbsp_export']);
-        } elseif ($_SESSION['dopbsp_fix'] ?? null) {
+        } elseif ($_GET['dopbsp_fixed'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Ustawienia zostały naprawione. <b>Sprawdź działanie kalendarza i migrację ustawień!</b></p>';
             echo '</div>';
-            unset($_SESSION['dopbsp_fix']);
         }
         settings_fields('lockme-dopbsp');
         do_settings_sections('lockme-dopbsp');
