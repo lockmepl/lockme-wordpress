@@ -44,7 +44,7 @@ trait ProviderRedirectTrait
      *
      * @return GuzzleHttp\ClientInterface
      */
-    public abstract function getHttpClient();
+    abstract public function getHttpClient();
     /**
      * Retrieves current redirect limit.
      *
@@ -93,7 +93,7 @@ trait ProviderRedirectTrait
      */
     public function setRedirectLimit($limit)
     {
-        if (!\is_int($limit)) {
+        if (!is_int($limit)) {
             throw new InvalidArgumentException('redirectLimit must be an integer.');
         }
         if ($limit < 1) {

@@ -39,7 +39,7 @@ trait GuardedPropertyTrait
             unset($options['guarded']);
         }
         foreach ($options as $option => $value) {
-            if (\property_exists($this, $option) && !$this->isGuarded($option)) {
+            if (property_exists($this, $option) && !$this->isGuarded($option)) {
                 $this->{$option} = $value;
             }
         }
@@ -61,6 +61,6 @@ trait GuardedPropertyTrait
      */
     public function isGuarded($property)
     {
-        return \in_array($property, $this->getGuarded());
+        return in_array($property, $this->getGuarded());
     }
 }

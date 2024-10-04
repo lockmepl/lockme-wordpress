@@ -17,11 +17,11 @@ namespace LockmeDep\Symfony\Component\Lock\Strategy;
  */
 class UnanimousStrategy implements StrategyInterface
 {
-    public function isMet(int $numberOfSuccess, int $numberOfItems) : bool
+    public function isMet(int $numberOfSuccess, int $numberOfItems): bool
     {
         return $numberOfSuccess === $numberOfItems;
     }
-    public function canBeMet(int $numberOfFailure, int $numberOfItems) : bool
+    public function canBeMet(int $numberOfFailure, int $numberOfItems): bool
     {
         return 0 === $numberOfFailure;
     }

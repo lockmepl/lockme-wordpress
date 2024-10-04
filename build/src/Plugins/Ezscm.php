@@ -19,16 +19,16 @@ class Ezscm implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option('lockme_ezscm');
         $this->tables = array('entries' => "{$wpdb->prefix}ezscm_entries", 'schedules' => "{$wpdb->prefix}ezscm_schedules", 'settings' => "{$wpdb->prefix}ezscm_settings", 'settings_schedule' => "{$wpdb->prefix}ezscm_settings_schedule");
-        if (\is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             if ($_POST['action'] === 'ezscm_frontend' || $_POST['action'] === 'ezscm_backend') {
-                \parse_str($_REQUEST['data'], $data);
+                parse_str($_REQUEST['data'], $data);
                 $action = $data['action'];
                 $id = $data['id'];
                 if ($action === 'entry_delete') {
                     $this->resdata = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->tables['entries']} WHERE e_id = %d", $id), ARRAY_A);
                 }
             }
-            \register_shutdown_function([$this, 'ShutDown']);
+            register_shutdown_function([$this, 'ShutDown']);
             add_action('init', function () {
                 if ($_GET['ezscm_export'] ?? null) {
                     $this->ExportToLockMe();
@@ -38,11 +38,11 @@ class Ezscm implements PluginInterface
             }, \PHP_INT_MAX);
         }
     }
-    public function CheckDependencies() : bool
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('ez-schedule-manager/ezscm.php');
     }
-    public function RegisterSettings() : void
+    public function RegisterSettings(): void
     {
         global $wpdb;
         if (!$this->CheckDependencies()) {
@@ -53,7 +53,7 @@ class Ezscm implements PluginInterface
             echo '<p>Integration settings with the ez Schedule Manager plugin</p>';
         }, 'lockme-ezscm');
         $options = $this->options;
-        add_settings_field('ezscm_use', 'Enable integration', static function () use($options) {
+        add_settings_field('ezscm_use', 'Enable integration', static function () use ($options) {
             echo '<input name="lockme_ezscm[use]" type="checkbox" value="1"  ' . checked(1, $options['use'] ?? null, \false) . ' />';
         }, 'lockme-ezscm', 'lockme_ezscm_section', array());
         if (($this->options['use'] ?? null) && $this->plugin->tab === 'ezscm_plugin') {
@@ -69,7 +69,7 @@ class Ezscm implements PluginInterface
         SELECT sc.s_id, sc.name
         FROM ' . $this->tables['schedules'] . ' AS sc');
             foreach ($calendars as $calendar) {
-                add_settings_field("calendar_{$calendar->s_id}", "Room for {$calendar->name}", static function () use($options, $rooms, $calendar) {
+                add_settings_field("calendar_{$calendar->s_id}", "Room for {$calendar->name}", static function () use ($options, $rooms, $calendar) {
                     echo '<select name="lockme_ezscm[calendar_' . $calendar->s_id . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
@@ -84,7 +84,7 @@ class Ezscm implements PluginInterface
             }, 'lockme-ezscm', 'lockme_ezscm_section', array());
         }
     }
-    public function DrawForm() : void
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo "<p>You don't have required plugin</p>";
@@ -98,12 +98,12 @@ class Ezscm implements PluginInterface
         settings_fields('lockme-ezscm');
         do_settings_sections('lockme-ezscm');
     }
-    private function AppData($res) : array
+    private function AppData($res): array
     {
-        $details = \json_decode($res['data'], \true);
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['s_id']] ?: $this->options['calendar_' . $res['details-s_id']], 'date' => \date('Y-m-d', \strtotime($res['date'])), 'hour' => \date('H:i:s', \strtotime($res['time_begin'])), 'people' => 0, 'pricer' => 'API', 'price' => 0, 'email' => $details['Adres e-mail:'], 'status' => 1, 'extid' => $res['e_id']]);
+        $details = json_decode($res['data'], \true);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['s_id']] ?: $this->options['calendar_' . $res['details-s_id']], 'date' => date('Y-m-d', strtotime($res['date'])), 'hour' => date('H:i:s', strtotime($res['time_begin'])), 'people' => 0, 'pricer' => 'API', 'price' => 0, 'email' => $details['Adres e-mail:'], 'status' => 1, 'extid' => $res['e_id']]);
     }
-    private function Add($res) : void
+    private function Add($res): void
     {
         $api = $this->plugin->GetApi();
         try {
@@ -111,7 +111,7 @@ class Ezscm implements PluginInterface
         } catch (Exception $e) {
         }
     }
-    private function Update($id, $res) : void
+    private function Update($id, $res): void
     {
         $data = $this->AppData($res);
         if (!$data['roomid']) {
@@ -132,7 +132,7 @@ class Ezscm implements PluginInterface
         } catch (Exception $e) {
         }
     }
-    private function Delete($id, $res) : void
+    private function Delete($id, $res): void
     {
         $data = $this->AppData($res);
         if (!$data['roomid']) {
@@ -152,7 +152,7 @@ class Ezscm implements PluginInterface
         } catch (Exception $e) {
         }
     }
-    public function AddReservation($save_data) : void
+    public function AddReservation($save_data): void
     {
         global $wpdb;
         $existing = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->tables['entries']} WHERE time_begin='%s' AND date='%s' AND s_id=%d", $save_data['time_internal'], $save_data['date_internal'], $save_data['s_id']), ARRAY_A);
@@ -161,7 +161,7 @@ class Ezscm implements PluginInterface
         }
         $this->Add($existing);
     }
-    public function AddEditReservation($save_data) : void
+    public function AddEditReservation($save_data): void
     {
         global $wpdb;
         $existing = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->tables['entries']} WHERE time_begin='%s' AND date='%s' AND s_id=%d", $save_data['details-time_internal'], $save_data['details-date_internal'], $save_data['details-s_id']), ARRAY_A);
@@ -170,10 +170,10 @@ class Ezscm implements PluginInterface
         }
         $this->Update($existing['e_id'], $existing);
     }
-    public function ShutDown() : void
+    public function ShutDown(): void
     {
         if ($_POST['action'] === 'ezscm_frontend' || $_POST['action'] === 'ezscm_backend') {
-            \parse_str($_REQUEST['data'], $data);
+            parse_str($_REQUEST['data'], $data);
             $action = $data['action'];
             $id = $data['id'];
             switch ($action) {
@@ -201,7 +201,7 @@ class Ezscm implements PluginInterface
         }
         throw new RuntimeException('No calendar');
     }
-    public function GetMessage(array $message) : bool
+    public function GetMessage(array $message): bool
     {
         global $wpdb;
         if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
@@ -210,10 +210,10 @@ class Ezscm implements PluginInterface
         $data = $message['data'];
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
-        $hour = \date('H:i', \strtotime($data['hour']));
+        $hour = date('H:i', strtotime($data['hour']));
         $calendar_id = $this->GetCalendar($roomid);
         $form = array('Imię:' => $data['name'], 'Nazwisko:' => $data['surname'], 'Adres e-mail:' => $data['email'], 'Telefon:' => $data['phone'], 'Voucher:' => '', 'Dodatkowe uwagi:' => 'Lockme! ' . $data['comment']);
-        $sql_data = \json_encode($form);
+        $sql_data = json_encode($form);
         switch ($message['action']) {
             case 'add':
                 $wpdb->insert($this->tables['entries'], array('s_id' => $calendar_id, 'date' => $data['date'], 'private' => 0, 'time_begin' => $hour, 'data' => $sql_data, 'ip' => $_SERVER['REMOTE_ADDR']), array('%d', '%s', '%d', '%s', '%s', '%s'));
@@ -240,17 +240,17 @@ class Ezscm implements PluginInterface
         }
         return \false;
     }
-    public function ExportToLockMe() : void
+    public function ExportToLockMe(): void
     {
         global $wpdb;
-        \set_time_limit(0);
+        set_time_limit(0);
         $sql = "SELECT * FROM {$this->tables['entries']} WHERE date>=curdate() ORDER BY e_id";
         $rows = $wpdb->get_results($sql, ARRAY_A);
         foreach ($rows as $row) {
             $this->Update($row['e_id'], $row);
         }
     }
-    public function getPluginName() : string
+    public function getPluginName(): string
     {
         return 'ez Schedule Manager';
     }

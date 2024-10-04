@@ -39,7 +39,7 @@ class Plugin
         $this->url_key = get_option('lockme_url_key');
         if (!$this->url_key) {
             try {
-                $this->url_key = \bin2hex(\random_bytes(10));
+                $this->url_key = bin2hex(random_bytes(10));
             } catch (Exception $e) {
                 $this->url_key = '39836295616564325481';
             }
@@ -59,17 +59,17 @@ class Plugin
             add_action('admin_init', array(&$this, 'admin_register_settings'));
         }
     }
-    private function withSession(Closure $callback) : mixed
+    private function withSession(Closure $callback): mixed
     {
-        if (\session_status() === \PHP_SESSION_ACTIVE) {
+        if (session_status() === \PHP_SESSION_ACTIVE) {
             return $callback();
         }
-        \session_start();
+        session_start();
         $return = $callback();
-        \session_write_close();
+        session_write_close();
         return $return;
     }
-    public function api_call() : void
+    public function api_call(): void
     {
         // Check for OAuth2 state
         $code = $_GET['code'] ?? null;
@@ -89,11 +89,11 @@ class Plugin
             }
         }
         if (isset($_POST['oauth_token'])) {
-            $token = \stripslashes($_POST['oauth_token']);
+            $token = stripslashes($_POST['oauth_token']);
             $api = $this->GetApi();
             try {
-                $api->loadAccessToken(function () use($token) {
-                    return \json_decode($token, \true);
+                $api->loadAccessToken(function () use ($token) {
+                    return json_decode($token, \true);
                 }, function ($token) {
                     update_option('lockme_oauth2_token', $token, \false);
                 });
@@ -105,7 +105,7 @@ class Plugin
         if ($api !== $this->url_key) {
             return;
         }
-        \define('LOCKME_MESSAGING', 1);
+        define('LOCKME_MESSAGING', 1);
         try {
             $messageid = $_SERVER['HTTP_X_MESSAGEID'];
             $api = $this->GetApi();
@@ -122,7 +122,7 @@ class Plugin
         }
         die;
     }
-    public function GetApi() : ?Lockme
+    public function GetApi(): ?Lockme
     {
         if (null !== $this->api) {
             return $this->api;
@@ -142,11 +142,11 @@ class Plugin
         }
         return null;
     }
-    public function admin_init() : void
+    public function admin_init(): void
     {
         add_options_page('LockMe integration', 'Lockme', 'manage_options', 'lockme_integration', array(&$this, 'admin_page'));
     }
-    public function admin_register_settings() : void
+    public function admin_register_settings(): void
     {
         register_setting('lockme-admin', 'lockme_settings');
         add_settings_section('lockme_settings_section', 'API settings', static function () {
@@ -174,7 +174,7 @@ class Plugin
             $plugin->RegisterSettings();
         }
     }
-    public function admin_page() : void
+    public function admin_page(): void
     {
         if (!current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.'));
@@ -246,21 +246,21 @@ class Plugin
         echo '</form>';
         echo '</div>';
     }
-    public function AnonymizeData(array $data) : array
+    public function AnonymizeData(array $data): array
     {
         if ($this->options['rodo_mode']) {
-            return \array_filter($data, static function ($key) {
-                return \in_array($key, ['roomid', 'date', 'hour', 'status', 'extid']);
+            return array_filter($data, static function ($key) {
+                return in_array($key, ['roomid', 'date', 'hour', 'status', 'extid']);
             }, \ARRAY_FILTER_USE_KEY);
         }
         return $data;
     }
-    public function activate() : void
+    public function activate(): void
     {
         wp_set_options_autoload(['lockme_settings', 'lockme_url_key', 'lockme_oauth2_token', 'lockme_db_ver', 'lockme_amelia', 'lockme_app', 'lockme_booked', 'lockme_bookly', 'lockme_cpabc', 'lockme_dopbsp', 'lockme_easyapp', 'lockme_ezscm', 'lockme_woo', 'lockme_wpb', 'lockme_wpdevart'], \false);
         $this->createDatabase();
     }
-    public function createDatabase() : void
+    public function createDatabase(): void
     {
         global $wpdb;
         if (get_option('lockme_db_ver') !== self::DB_VER) {

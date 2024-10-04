@@ -78,12 +78,12 @@ class GenericProvider extends \League\OAuth2\Client\Provider\AbstractProvider
     {
         $this->assertRequiredOptions($options);
         $possible = $this->getConfigurableOptions();
-        $configured = \array_intersect_key($options, \array_flip($possible));
+        $configured = array_intersect_key($options, array_flip($possible));
         foreach ($configured as $key => $value) {
             $this->{$key} = $value;
         }
         // Remove all options that are only used locally
-        $options = \array_diff_key($options, $configured);
+        $options = array_diff_key($options, $configured);
         parent::__construct($options, $collaborators);
     }
     /**
@@ -93,7 +93,7 @@ class GenericProvider extends \League\OAuth2\Client\Provider\AbstractProvider
      */
     protected function getConfigurableOptions()
     {
-        return \array_merge($this->getRequiredOptions(), ['accessTokenMethod', 'accessTokenResourceOwnerId', 'scopeSeparator', 'responseError', 'responseCode', 'responseResourceOwnerId', 'scopes', 'pkceMethod']);
+        return array_merge($this->getRequiredOptions(), ['accessTokenMethod', 'accessTokenResourceOwnerId', 'scopeSeparator', 'responseError', 'responseCode', 'responseResourceOwnerId', 'scopes', 'pkceMethod']);
     }
     /**
      * Returns all options that are required.
@@ -113,9 +113,9 @@ class GenericProvider extends \League\OAuth2\Client\Provider\AbstractProvider
      */
     private function assertRequiredOptions(array $options)
     {
-        $missing = \array_diff_key(\array_flip($this->getRequiredOptions()), $options);
+        $missing = array_diff_key(array_flip($this->getRequiredOptions()), $options);
         if (!empty($missing)) {
-            throw new InvalidArgumentException('Required options not defined: ' . \implode(', ', \array_keys($missing)));
+            throw new InvalidArgumentException('Required options not defined: ' . implode(', ', array_keys($missing)));
         }
     }
     /**
@@ -181,12 +181,12 @@ class GenericProvider extends \League\OAuth2\Client\Provider\AbstractProvider
     {
         if (!empty($data[$this->responseError])) {
             $error = $data[$this->responseError];
-            if (!\is_string($error)) {
-                $error = \var_export($error, \true);
+            if (!is_string($error)) {
+                $error = var_export($error, \true);
             }
             $code = $this->responseCode && !empty($data[$this->responseCode]) ? $data[$this->responseCode] : 0;
-            if (!\is_int($code)) {
-                $code = \intval($code);
+            if (!is_int($code)) {
+                $code = intval($code);
             }
             throw new IdentityProviderException($error, $code, $data);
         }

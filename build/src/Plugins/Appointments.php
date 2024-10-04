@@ -15,7 +15,7 @@ class Appointments implements PluginInterface
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_app');
-        if (\is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_action('wpmudev_appointments_insert_appointment', [$this, 'AddReservation'], 10, 1);
             add_action('app-appointment-inline_edit-after_save', [$this, 'AddEditReservation'], 10, 2);
             add_action('app-appointments-appointment_cancelled', [$this, 'RemoveReservation'], 10, 1);
@@ -28,15 +28,15 @@ class Appointments implements PluginInterface
             }, \PHP_INT_MAX);
         }
     }
-    public function getPluginName() : string
+    public function getPluginName(): string
     {
         return 'Appointments';
     }
-    public function CheckDependencies() : bool
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('appointments/appointments.php');
     }
-    public function RegisterSettings() : void
+    public function RegisterSettings(): void
     {
         if (!$this->CheckDependencies()) {
             return;
@@ -62,7 +62,7 @@ class Appointments implements PluginInterface
                 $workers = appointments_get_workers_by_service($service->ID);
                 foreach ($workers as $worker) {
                     $user = get_userdata($worker->ID);
-                    add_settings_field('service_' . $service->ID . '_' . $worker->ID, 'Room for ' . $service->name . ' - ' . $user->user_login, function () use($rooms, $service, $worker) {
+                    add_settings_field('service_' . $service->ID . '_' . $worker->ID, 'Room for ' . $service->name . ' - ' . $user->user_login, function () use ($rooms, $service, $worker) {
                         echo '<select name="lockme_app[service_' . $service->ID . '_' . $worker->ID . ']">';
                         echo '<option value="">--select--</option>';
                         foreach ($rooms as $room) {
@@ -77,7 +77,7 @@ class Appointments implements PluginInterface
             }, 'lockme-app', 'lockme_app_section', []);
         }
     }
-    public function DrawForm() : void
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo "<p>You don't have required plugin</p>";
@@ -93,22 +93,22 @@ class Appointments implements PluginInterface
         settings_fields('lockme-app');
         do_settings_sections('lockme-app');
     }
-    public function AddReservation($id) : void
+    public function AddReservation($id): void
     {
-        $app = \json_decode(\json_encode(appointments_get_appointment($id)), \true);
+        $app = json_decode(json_encode(appointments_get_appointment($id)), \true);
         $this->Add($id, $app);
     }
-    public function AddEditReservation($id, $data = []) : void
+    public function AddEditReservation($id, $data = []): void
     {
         $id = $id ?: $data['ID'];
-        $app = $data ?: \json_decode(\json_encode(appointments_get_appointment($id)), \true);
+        $app = $data ?: json_decode(json_encode(appointments_get_appointment($id)), \true);
         $this->Update($id, $app);
     }
-    public function RemoveReservation($id) : void
+    public function RemoveReservation($id): void
     {
         $this->Delete($id);
     }
-    public function GetMessage(array $message) : bool
+    public function GetMessage(array $message): bool
     {
         global $appointments, $wpdb;
         if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
@@ -117,11 +117,11 @@ class Appointments implements PluginInterface
         $data = $message['data'];
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
-        $start = \strtotime($data['date'] . ' ' . $data['hour']);
+        $start = strtotime($data['date'] . ' ' . $data['hour']);
         [$service, $worker] = $this->GetService($roomid);
         switch ($message['action']) {
             case 'add':
-                $result = $wpdb->insert($wpdb->prefix . 'app_appointments', ['created' => \date('Y-m-d H:i:s', $appointments->local_time), 'user' => 0, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'service' => $service->ID, 'worker' => $worker, 'price' => $data['price'], 'status' => $data['status'] ? 'paid' : 'pending', 'start' => \date('Y-m-d H:i:s', $start), 'end' => \date('Y-m-d H:i:s', $start + $service->duration * 60), 'note' => $data['comment'] . "\n\n#LOCKME!"]);
+                $result = $wpdb->insert($wpdb->prefix . 'app_appointments', ['created' => date('Y-m-d H:i:s', $appointments->local_time), 'user' => 0, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'service' => $service->ID, 'worker' => $worker, 'price' => $data['price'], 'status' => $data['status'] ? 'paid' : 'pending', 'start' => date('Y-m-d H:i:s', $start), 'end' => date('Y-m-d H:i:s', $start + $service->duration * 60), 'note' => $data['comment'] . "\n\n#LOCKME!"]);
                 if ($result === \false) {
                     throw new RuntimeException('Error saving to database');
                 }
@@ -140,7 +140,7 @@ class Appointments implements PluginInterface
                     if (!$app) {
                         throw new RuntimeException('No appointment');
                     }
-                    $result = $wpdb->update($wpdb->prefix . 'app_appointments', ['user' => 0, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'service' => $service->ID, 'worker' => $worker, 'price' => $data['price'], 'status' => $data['status'] ? 'paid' : 'pending', 'start' => \date('Y-m-d H:i:s', $start), 'end' => \date('Y-m-d H:i:s', $start + $service->duration * 60), 'note' => $data['comment'] . "\n\n#LOCKME!"], ['ID' => $app->ID]);
+                    $result = $wpdb->update($wpdb->prefix . 'app_appointments', ['user' => 0, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'service' => $service->ID, 'worker' => $worker, 'price' => $data['price'], 'status' => $data['status'] ? 'paid' : 'pending', 'start' => date('Y-m-d H:i:s', $start), 'end' => date('Y-m-d H:i:s', $start + $service->duration * 60), 'note' => $data['comment'] . "\n\n#LOCKME!"], ['ID' => $app->ID]);
                     if ($result === \false) {
                         throw new RuntimeException('Error saving to database');
                     }
@@ -163,7 +163,7 @@ class Appointments implements PluginInterface
         }
         return \false;
     }
-    public function ExportToLockMe() : void
+    public function ExportToLockMe(): void
     {
         global $wpdb;
         $sql = "SELECT * FROM {$wpdb->prefix}app_appointments WHERE `start` > now() ORDER BY ID";
@@ -172,15 +172,15 @@ class Appointments implements PluginInterface
             $this->AddEditReservation($row->ID);
         }
     }
-    private function AppData($id) : array
+    private function AppData($id): array
     {
         global $appointments;
-        $app = \json_decode(\json_encode(appointments_get_appointment($id)), \true);
-        $date = \date('Y-m-d', \strtotime($app['start']));
-        $hour = \date('H:i:s', \strtotime($app['start']));
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['service_' . $app['service'] . '_' . $app['worker']], 'date' => $date, 'hour' => $hour, 'people' => 0, 'pricer' => $appointments->get_service_name($app['service']), 'price' => $app['price'], 'name' => $app['name'], 'surname' => $app['surname'], 'email' => $app['email'], 'phone' => $app['phone'], 'comment' => $app['note'], 'status' => \in_array($app['status'], ['confirmed', 'paid']), 'extid' => $id]);
+        $app = json_decode(json_encode(appointments_get_appointment($id)), \true);
+        $date = date('Y-m-d', strtotime($app['start']));
+        $hour = date('H:i:s', strtotime($app['start']));
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['service_' . $app['service'] . '_' . $app['worker']], 'date' => $date, 'hour' => $hour, 'people' => 0, 'pricer' => $appointments->get_service_name($app['service']), 'price' => $app['price'], 'name' => $app['name'], 'surname' => $app['surname'], 'email' => $app['email'], 'phone' => $app['phone'], 'comment' => $app['note'], 'status' => in_array($app['status'], ['confirmed', 'paid']), 'extid' => $id]);
     }
-    private function Add($app_id, $app) : void
+    private function Add($app_id, $app): void
     {
         if ($app['status'] === 'removed') {
             return;
@@ -220,7 +220,7 @@ class Appointments implements PluginInterface
         }
         return null;
     }
-    private function Delete($app_id) : void
+    private function Delete($app_id): void
     {
         $api = $this->plugin->GetApi();
         $appdata = $this->AppData($app_id);
@@ -237,7 +237,7 @@ class Appointments implements PluginInterface
      * @return array
      * @throws Exception
      */
-    private function GetService($roomid) : array
+    private function GetService($roomid): array
     {
         $services = appointments_get_services();
         foreach ($services as $k => $v) {

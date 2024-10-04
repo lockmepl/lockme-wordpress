@@ -48,7 +48,7 @@ class RequestFactory
     {
         // Should match default values for getRequest
         $defaults = ['headers' => [], 'body' => null, 'version' => '1.1'];
-        return \array_merge($defaults, $options);
+        return array_merge($defaults, $options);
     }
     /**
      * Creates a request using a simplified array of options.

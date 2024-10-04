@@ -17,7 +17,7 @@ class Woo implements PluginInterface
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_woo');
-        if (\is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_action('woocommerce_new_booking', [$this, 'AddEditReservation'], 5, 1);
             foreach (['unpaid', 'pending-confirmation', 'confirmed', 'paid', 'complete', 'in-cart'] as $action) {
                 add_action('woocommerce_booking_' . $action, [$this, 'AddEditReservation'], 5, 1);
@@ -37,9 +37,9 @@ class Woo implements PluginInterface
             }, \PHP_INT_MAX);
         }
     }
-    public function ExportToLockMe() : void
+    public function ExportToLockMe(): void
     {
-        $args = ['post_type' => 'wc_booking', 'meta_key' => '_booking_start', 'meta_value' => \date('YmdHis'), 'meta_compare' => '>=', 'posts_per_page' => -1, 'post_status' => 'any'];
+        $args = ['post_type' => 'wc_booking', 'meta_key' => '_booking_start', 'meta_value' => date('YmdHis'), 'meta_compare' => '>=', 'posts_per_page' => -1, 'post_status' => 'any'];
         $loop = new WP_Query($args);
         while ($loop->have_posts()) {
             $loop->the_post();
@@ -47,11 +47,11 @@ class Woo implements PluginInterface
             $this->AddEditReservation($post->ID);
         }
     }
-    public function CheckDependencies() : bool
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('woocommerce-bookings/woocommmerce-bookings.php') || is_plugin_active('woocommerce-bookings/woocommerce-bookings.php');
     }
-    public function RegisterSettings() : void
+    public function RegisterSettings(): void
     {
         if (!$this->CheckDependencies()) {
             return;
@@ -78,7 +78,7 @@ class Woo implements PluginInterface
             $args = ['post_type' => 'product', 'numberposts' => -1];
             $calendars = get_posts($args);
             foreach ($calendars as $calendar) {
-                add_settings_field('calendar_' . $calendar->ID, 'Room for ' . $calendar->post_title, function () use($rooms, $calendar) {
+                add_settings_field('calendar_' . $calendar->ID, 'Room for ' . $calendar->post_title, function () use ($rooms, $calendar) {
                     echo '<select name="lockme_woo[calendar_' . $calendar->ID . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
@@ -92,7 +92,7 @@ class Woo implements PluginInterface
             }, 'lockme-woo', 'lockme_woo_section', []);
         }
     }
-    public function DrawForm() : void
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo "<p>You don't have required plugin</p>";
@@ -110,10 +110,10 @@ class Woo implements PluginInterface
     }
     public function AddEditReservation($postid)
     {
-        if (!\is_numeric($postid)) {
+        if (!is_numeric($postid)) {
             return \false;
         }
-        if (\defined('LOCKME_MESSAGING')) {
+        if (defined('LOCKME_MESSAGING')) {
             return \false;
         }
         clean_post_cache($postid);
@@ -125,7 +125,7 @@ class Woo implements PluginInterface
         if (!$booking->populated) {
             return \false;
         }
-        if (\in_array($booking->status, ['cancelled', 'trash', 'was-in-cart'])) {
+        if (in_array($booking->status, ['cancelled', 'trash', 'was-in-cart'])) {
             return $this->Delete($postid);
         }
         $appdata = $this->AppData($booking);
@@ -152,7 +152,7 @@ class Woo implements PluginInterface
     }
     public function Delete($postid)
     {
-        if (\defined('LOCKME_MESSAGING')) {
+        if (defined('LOCKME_MESSAGING')) {
             return null;
         }
         clean_post_cache($postid);
@@ -164,7 +164,7 @@ class Woo implements PluginInterface
         if (!$booking->populated) {
             return \false;
         }
-        if (!\in_array($booking->status, ['cancelled', 'trash', 'was-in-cart'])) {
+        if (!in_array($booking->status, ['cancelled', 'trash', 'was-in-cart'])) {
             return $this->AddEditReservation($postid);
         }
         $appdata = $this->AppData($booking);
@@ -178,7 +178,7 @@ class Woo implements PluginInterface
         }
         return null;
     }
-    public function GetMessage(array $message) : bool
+    public function GetMessage(array $message): bool
     {
         if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return \false;
@@ -187,8 +187,8 @@ class Woo implements PluginInterface
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
         $date = $data['date'];
-        $hour = \date('H:i:s', \strtotime($data['hour']));
-        $start = \strtotime($date . ' ' . $hour);
+        $hour = date('H:i:s', strtotime($data['hour']));
+        $start = strtotime($date . ' ' . $hour);
         $calendar_id = $this->GetCalendar($roomid);
         switch ($message['action']) {
             case 'add':
@@ -217,7 +217,7 @@ class Woo implements PluginInterface
                     if ($booking->status !== 'confirmed' && $data['status']) {
                         $booking->update_status('confirmed');
                     }
-                    $meta_args = ['_booking_persons' => $data['people'], '_booking_cost' => $data['price'], '_booking_start' => \date('YmdHis', $start), '_booking_end' => \date('YmdHis', $start + 60 * (int) $this->options['slot_length'])];
+                    $meta_args = ['_booking_persons' => $data['people'], '_booking_cost' => $data['price'], '_booking_start' => date('YmdHis', $start), '_booking_end' => date('YmdHis', $start + 60 * (int) $this->options['slot_length'])];
                     foreach ($meta_args as $key => $value) {
                         update_post_meta($booking->get_id(), $key, $value);
                     }
@@ -233,10 +233,10 @@ class Woo implements PluginInterface
         }
         return \false;
     }
-    private function AppData($booking) : array
+    private function AppData($booking): array
     {
         $order = $booking->get_order();
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $booking->get_product_id()], 'date' => \date('Y-m-d', $booking->get_start()), 'hour' => \date('H:i:s', $booking->get_start()), 'pricer' => 'API', 'price' => $booking->get_cost(), 'status' => $booking->get_status() === 'in-cart' ? 0 : 1, 'people' => \array_sum($booking->get_person_counts()), 'extid' => $booking->get_id(), 'email' => $order ? $order->get_billing_email() : '', 'phone' => $order ? $order->get_billing_phone() : '', 'name' => $order ? $order->get_billing_first_name() : '', 'surname' => $order ? $order->get_billing_last_name() : '']);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $booking->get_product_id()], 'date' => date('Y-m-d', $booking->get_start()), 'hour' => date('H:i:s', $booking->get_start()), 'pricer' => 'API', 'price' => $booking->get_cost(), 'status' => $booking->get_status() === 'in-cart' ? 0 : 1, 'people' => array_sum($booking->get_person_counts()), 'extid' => $booking->get_id(), 'email' => $order ? $order->get_billing_email() : '', 'phone' => $order ? $order->get_billing_phone() : '', 'name' => $order ? $order->get_billing_first_name() : '', 'surname' => $order ? $order->get_billing_last_name() : '']);
     }
     private function GetCalendar($roomid)
     {
@@ -249,7 +249,7 @@ class Woo implements PluginInterface
         }
         return null;
     }
-    public function getPluginName() : string
+    public function getPluginName(): string
     {
         return 'WooCommerce Bookings';
     }

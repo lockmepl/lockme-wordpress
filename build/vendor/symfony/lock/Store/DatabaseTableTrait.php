@@ -24,13 +24,13 @@ trait DatabaseTableTrait
     private string $expirationCol = 'key_expiration';
     private float $gcProbability;
     private int $initialTtl;
-    private function init(array $options, float $gcProbability, int $initialTtl) : void
+    private function init(array $options, float $gcProbability, int $initialTtl): void
     {
         if ($gcProbability < 0 || $gcProbability > 1) {
-            throw new InvalidArgumentException(\sprintf('"%s" requires gcProbability between 0 and 1, "%f" given.', __METHOD__, $gcProbability));
+            throw new InvalidArgumentException(sprintf('"%s" requires gcProbability between 0 and 1, "%f" given.', __METHOD__, $gcProbability));
         }
         if ($initialTtl < 1) {
-            throw new InvalidTtlException(\sprintf('"%s()" expects a strictly positive TTL, "%d" given.', __METHOD__, $initialTtl));
+            throw new InvalidTtlException(sprintf('"%s()" expects a strictly positive TTL, "%d" given.', __METHOD__, $initialTtl));
         }
         $this->table = $options['db_table'] ?? $this->table;
         $this->idCol = $options['db_id_col'] ?? $this->idCol;
@@ -42,14 +42,14 @@ trait DatabaseTableTrait
     /**
      * Returns a hashed version of the key.
      */
-    private function getHashedKey(Key $key) : string
+    private function getHashedKey(Key $key): string
     {
-        return \hash('sha256', (string) $key);
+        return hash('sha256', (string) $key);
     }
-    private function getUniqueToken(Key $key) : string
+    private function getUniqueToken(Key $key): string
     {
         if (!$key->hasState(__CLASS__)) {
-            $token = \base64_encode(\random_bytes(32));
+            $token = base64_encode(random_bytes(32));
             $key->setState(__CLASS__, $token);
         }
         return $key->getState(__CLASS__);
@@ -57,9 +57,9 @@ trait DatabaseTableTrait
     /**
      * Prune the table randomly, based on GC probability.
      */
-    private function randomlyPrune() : void
+    private function randomlyPrune(): void
     {
-        if ($this->gcProbability > 0 && (1.0 === $this->gcProbability || \random_int(0, \PHP_INT_MAX) / \PHP_INT_MAX <= $this->gcProbability)) {
+        if ($this->gcProbability > 0 && (1.0 === $this->gcProbability || random_int(0, \PHP_INT_MAX) / \PHP_INT_MAX <= $this->gcProbability)) {
             $this->prune();
         }
     }

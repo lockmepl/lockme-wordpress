@@ -33,15 +33,19 @@ if (!\class_exists('Error', \false)) {
     class Error extends \Exception
     {
     }
+    // We can't really avoid making this extend Exception in PHP 5.
+    \class_alias('LockmeDep\Error', 'Error', \false);
 }
 if (!\class_exists('TypeError', \false)) {
     if (\is_subclass_of('Error', 'Exception')) {
         class TypeError extends \Error
         {
         }
+        \class_alias('LockmeDep\TypeError', 'TypeError', \false);
     } else {
         class TypeError extends \Exception
         {
         }
+        \class_alias('LockmeDep\TypeError', 'TypeError', \false);
     }
 }

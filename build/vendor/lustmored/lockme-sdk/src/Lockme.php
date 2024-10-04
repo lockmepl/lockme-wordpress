@@ -43,23 +43,23 @@ class Lockme
         $this->provider = $options['provider'] ?? new LockmeProvider($options);
         $this->lockFactory = new LockFactory($this->lockStore($options));
     }
-    private function lockStore(array $options = []) : BlockingStoreInterface
+    private function lockStore(array $options = []): BlockingStoreInterface
     {
         try {
             return new SemaphoreStore();
         } catch (InvalidArgumentException $exception) {
             // Semaphore is not supported
         }
-        return new FlockStore($options['tmp_dir'] ?? \sys_get_temp_dir());
+        return new FlockStore($options['tmp_dir'] ?? sys_get_temp_dir());
     }
     /**
      * Generate authorization URL
      * @param  array  $scopes Array of requested scopes
      * @return string         Redirect URL
      */
-    public function getAuthorizationUrl(array $scopes = []) : string
+    public function getAuthorizationUrl(array $scopes = []): string
     {
-        $authorizationUrl = $this->provider->getAuthorizationUrl(['scope' => \implode(' ', $scopes)]);
+        $authorizationUrl = $this->provider->getAuthorizationUrl(['scope' => implode(' ', $scopes)]);
         $_SESSION['oauth2_lockme_state'] = $this->provider->getState();
         return $authorizationUrl;
     }
@@ -70,7 +70,7 @@ class Lockme
      * @return AccessToken       Access Token
      * @throws Exception
      */
-    public function getTokenForCode(string $code, string $state) : AccessToken
+    public function getTokenForCode(string $code, string $state): AccessToken
     {
         if ($state !== $_SESSION['oauth2_lockme_state']) {
             unset($_SESSION['oauth2_lockme_state']);
@@ -86,7 +86,7 @@ class Lockme
      * @return AccessToken        Refreshed token
      * @throws IdentityProviderException
      */
-    public function refreshToken(?AccessToken $accessToken = null) : AccessToken
+    public function refreshToken(?AccessToken $accessToken = null): AccessToken
     {
         $accessToken = $accessToken ?: $this->accessToken;
         $this->accessToken = $this->provider->getAccessToken('refresh_token', ['refresh_token' => $accessToken->getRefreshToken()]);
@@ -99,10 +99,10 @@ class Lockme
      * @throws Exception
      * @deprecated use loadAccessToken to solve race conditions on token refreshing
      */
-    public function setDefaultAccessToken($token) : AccessToken
+    public function setDefaultAccessToken($token): AccessToken
     {
-        if (\is_string($token)) {
-            $this->accessToken = new AccessToken(\json_decode($token, \true));
+        if (is_string($token)) {
+            $this->accessToken = new AccessToken(json_decode($token, \true));
         } elseif ($token instanceof AccessToken) {
             $this->accessToken = $token;
         } else {
@@ -117,12 +117,12 @@ class Lockme
      * @param  callable  $load
      * @return AccessToken
      */
-    private function reloadToken(callable $load) : AccessToken
+    private function reloadToken(callable $load): AccessToken
     {
         if (is_callable($load)) {
             $token = $load();
-            if (\is_string($token)) {
-                $this->accessToken = new AccessToken(\json_decode($token, \true));
+            if (is_string($token)) {
+                $this->accessToken = new AccessToken(json_decode($token, \true));
             } elseif ($token instanceof AccessToken) {
                 $this->accessToken = $token;
             }
@@ -138,7 +138,7 @@ class Lockme
      * @return AccessToken
      * @throws Exception
      */
-    public function loadAccessToken(callable $load, ?callable $save = null) : AccessToken
+    public function loadAccessToken(callable $load, ?callable $save = null): AccessToken
     {
         $this->reloadToken($load);
         if ($this->accessToken->hasExpired()) {
@@ -161,7 +161,7 @@ class Lockme
      * @return string
      * @throws IdentityProviderException
      */
-    public function Test($accessToken = null) : string
+    public function Test($accessToken = null): string
     {
         return $this->provider->executeRequest("GET", "/test", $accessToken ?: $this->accessToken);
     }
@@ -171,7 +171,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function RoomList($accessToken = null) : array
+    public function RoomList($accessToken = null): array
     {
         return $this->provider->executeRequest("GET", "/rooms", $accessToken ?: $this->accessToken);
     }
@@ -183,7 +183,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function Reservation(int $roomId, string $id, $accessToken = null) : array
+    public function Reservation(int $roomId, string $id, $accessToken = null): array
     {
         return $this->provider->executeRequest("GET", "/room/{$roomId}/reservation/{$id}", $accessToken ?: $this->accessToken);
     }
@@ -194,7 +194,7 @@ class Lockme
      * @return int
      * @throws Exception
      */
-    public function AddReservation(array $data, $accessToken = null) : int
+    public function AddReservation(array $data, $accessToken = null): int
     {
         if (!$data['roomid']) {
             throw new RuntimeException("No room ID");
@@ -215,7 +215,7 @@ class Lockme
      * @return bool
      * @throws IdentityProviderException
      */
-    public function DeleteReservation(int $roomId, string $id, $accessToken = null) : bool
+    public function DeleteReservation(int $roomId, string $id, $accessToken = null): bool
     {
         return $this->provider->executeRequest("DELETE", "/room/{$roomId}/reservation/{$id}", $accessToken ?: $this->accessToken);
     }
@@ -228,7 +228,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function EditReservation(int $roomId, string $id, array $data, $accessToken = null) : array
+    public function EditReservation(int $roomId, string $id, array $data, $accessToken = null): array
     {
         return $this->provider->executeRequest("POST", "/room/{$roomId}/reservation/{$id}", $accessToken ?: $this->accessToken, $data);
     }
@@ -240,7 +240,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function MoveReservation(int $roomId, string $id, array $data, $accessToken = null) : array
+    public function MoveReservation(int $roomId, string $id, array $data, $accessToken = null): array
     {
         return $this->provider->executeRequest("POST", "/room/{$roomId}/reservation/{$id}/move", $accessToken ?: $this->accessToken, $data);
     }
@@ -251,7 +251,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function GetReservations(int $roomId, DateTime $date, $accessToken = null) : array
+    public function GetReservations(int $roomId, DateTime $date, $accessToken = null): array
     {
         return $this->provider->executeRequest("GET", "/room/{$roomId}/reservations/" . $date->format("Y-m-d"), $accessToken ?: $this->accessToken);
     }
@@ -260,7 +260,7 @@ class Lockme
      * @param  string|AccessToken|null $accessToken Access token
      * @return ResourceOwnerInterface              Resource owner
      */
-    public function getResourceOwner($accessToken = null) : ResourceOwnerInterface
+    public function getResourceOwner($accessToken = null): ResourceOwnerInterface
     {
         return $this->provider->getResourceOwner($accessToken ?: $this->accessToken);
     }
@@ -271,7 +271,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function GetMessage(int $messageId, $accessToken = null) : array
+    public function GetMessage(int $messageId, $accessToken = null): array
     {
         return $this->provider->executeRequest("GET", "/message/{$messageId}", $accessToken ?: $this->accessToken);
     }
@@ -282,7 +282,7 @@ class Lockme
      * @return bool
      * @throws IdentityProviderException
      */
-    public function MarkMessageRead(int $messageId, $accessToken = null) : bool
+    public function MarkMessageRead(int $messageId, $accessToken = null): bool
     {
         return $this->provider->executeRequest("POST", "/message/{$messageId}", $accessToken ?: $this->accessToken);
     }
@@ -293,7 +293,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function GetDateSettings(int $roomId, DateTime $date, $accessToken = null) : array
+    public function GetDateSettings(int $roomId, DateTime $date, $accessToken = null): array
     {
         return $this->provider->executeRequest("GET", "/room/{$roomId}/date/" . $date->format("Y-m-d"), $accessToken ?: $this->accessToken);
     }
@@ -305,7 +305,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function SetDateSettings(int $roomId, DateTime $date, array $settings, $accessToken = null) : array
+    public function SetDateSettings(int $roomId, DateTime $date, array $settings, $accessToken = null): array
     {
         return $this->provider->executeRequest("POST", "/room/{$roomId}/date/" . $date->format("Y-m-d"), $accessToken ?: $this->accessToken, $settings);
     }
@@ -316,7 +316,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function RemoveDateSettings(int $roomId, DateTime $date, $accessToken = null) : array
+    public function RemoveDateSettings(int $roomId, DateTime $date, $accessToken = null): array
     {
         return $this->provider->executeRequest("DELETE", "/room/{$roomId}/date/" . $date->format("Y-m-d"), $accessToken ?: $this->accessToken);
     }
@@ -327,7 +327,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function GetDaySettings(int $roomId, int $day, $accessToken = null) : array
+    public function GetDaySettings(int $roomId, int $day, $accessToken = null): array
     {
         return $this->provider->executeRequest("GET", "/room/{$roomId}/day/{$day}", $accessToken ?: $this->accessToken);
     }
@@ -339,7 +339,7 @@ class Lockme
      * @return array
      * @throws IdentityProviderException
      */
-    public function SetDaySettings(int $roomId, int $day, array $settings, $accessToken = null) : array
+    public function SetDaySettings(int $roomId, int $day, array $settings, $accessToken = null): array
     {
         return $this->provider->executeRequest("POST", "/room/{$roomId}/day/{$day}", $accessToken ?: $this->accessToken, $settings);
     }

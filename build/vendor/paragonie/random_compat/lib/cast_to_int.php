@@ -28,7 +28,7 @@ namespace LockmeDep;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-if (!\is_callable('RandomCompat_intval')) {
+if (!\is_callable('LockmeDep\RandomCompat_intval')) {
     /**
      * Cast to an integer if we can, safely.
      *

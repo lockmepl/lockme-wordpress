@@ -88,16 +88,16 @@ class InMemoryStore implements SharedLockStoreInterface
             unset($this->locks[$hashKey]);
         }
     }
-    public function exists(Key $key) : bool
+    public function exists(Key $key): bool
     {
         $hashKey = (string) $key;
         $token = $this->getUniqueToken($key);
         return isset($this->readLocks[$hashKey][$token]) || ($this->locks[$hashKey] ?? null) === $token;
     }
-    private function getUniqueToken(Key $key) : string
+    private function getUniqueToken(Key $key): string
     {
         if (!$key->hasState(__CLASS__)) {
-            $token = \base64_encode(\random_bytes(32));
+            $token = base64_encode(random_bytes(32));
             $key->setState(__CLASS__, $token);
         }
         return $key->getState(__CLASS__);

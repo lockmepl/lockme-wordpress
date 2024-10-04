@@ -71,7 +71,7 @@ class AccessToken implements \League\OAuth2\Client\Token\AccessTokenInterface, \
      */
     public function getTimeNow()
     {
-        return self::$timeNow ? self::$timeNow : \time();
+        return self::$timeNow ? self::$timeNow : time();
     }
     /**
      * Constructs an access token.
@@ -96,7 +96,7 @@ class AccessToken implements \League\OAuth2\Client\Token\AccessTokenInterface, \
         // 'expires_in' since it is defined in RFC6749 Section 5.1.
         // Defer to 'expires' if it is provided instead.
         if (isset($options['expires_in'])) {
-            if (!\is_numeric($options['expires_in'])) {
+            if (!is_numeric($options['expires_in'])) {
                 throw new \InvalidArgumentException('expires_in value must be an integer');
             }
             $this->expires = $options['expires_in'] != 0 ? $this->getTimeNow() + $options['expires_in'] : 0;
@@ -112,7 +112,7 @@ class AccessToken implements \League\OAuth2\Client\Token\AccessTokenInterface, \
         // Capture any additional values that might exist in the token but are
         // not part of the standard response. Vendors will sometimes pass
         // additional user data this way.
-        $this->values = \array_diff_key($options, \array_flip(['access_token', 'resource_owner_id', 'refresh_token', 'expires_in', 'expires']));
+        $this->values = array_diff_key($options, array_flip(['access_token', 'resource_owner_id', 'refresh_token', 'expires_in', 'expires']));
     }
     /**
      * Check if a value is an expiration timestamp or second value.
@@ -165,7 +165,7 @@ class AccessToken implements \League\OAuth2\Client\Token\AccessTokenInterface, \
         if (empty($expires)) {
             throw new RuntimeException('"expires" is not set on the token');
         }
-        return $expires < \time();
+        return $expires < time();
     }
     /**
      * @inheritdoc

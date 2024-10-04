@@ -27,7 +27,7 @@ interface LockInterface
      * @throws LockConflictedException If the lock is acquired by someone else in blocking mode
      * @throws LockAcquiringException  If the lock cannot be acquired
      */
-    public function acquire(bool $blocking = \false) : bool;
+    public function acquire(bool $blocking = \false): bool;
     /**
      * Increase the duration of an acquired lock.
      *
@@ -42,7 +42,7 @@ interface LockInterface
     /**
      * Returns whether or not the lock is acquired.
      */
-    public function isAcquired() : bool;
+    public function isAcquired(): bool;
     /**
      * Release the lock.
      *
@@ -51,9 +51,9 @@ interface LockInterface
      * @throws LockReleasingException If the lock cannot be released
      */
     public function release();
-    public function isExpired() : bool;
+    public function isExpired(): bool;
     /**
      * Returns the remaining lifetime in seconds.
      */
-    public function getRemainingLifetime() : ?float;
+    public function getRemainingLifetime(): ?float;
 }

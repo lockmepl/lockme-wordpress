@@ -39,7 +39,7 @@ class CombinedStore implements SharedLockStoreInterface, LoggerAwareInterface
     {
         foreach ($stores as $store) {
             if (!$store instanceof PersistingStoreInterface) {
-                throw new InvalidArgumentException(\sprintf('The store must implement "%s". Got "%s".', PersistingStoreInterface::class, \get_debug_type($store)));
+                throw new InvalidArgumentException(sprintf('The store must implement "%s". Got "%s".', PersistingStoreInterface::class, get_debug_type($store)));
             }
         }
         $this->stores = $stores;
@@ -115,10 +115,10 @@ class CombinedStore implements SharedLockStoreInterface, LoggerAwareInterface
         $successCount = 0;
         $failureCount = 0;
         $storesCount = \count($this->stores);
-        $expireAt = \microtime(\true) + $ttl;
+        $expireAt = microtime(\true) + $ttl;
         foreach ($this->stores as $store) {
             try {
-                if (0.0 >= ($adjustedTtl = $expireAt - \microtime(\true))) {
+                if (0.0 >= $adjustedTtl = $expireAt - microtime(\true)) {
                     $this->logger?->debug('Stores took to long to put off the expiration of the "{resource}" lock.', ['resource' => $key, 'store' => $store, 'ttl' => $ttl]);
                     $key->reduceLifetime(0);
                     break;
@@ -155,7 +155,7 @@ class CombinedStore implements SharedLockStoreInterface, LoggerAwareInterface
             }
         }
     }
-    public function exists(Key $key) : bool
+    public function exists(Key $key): bool
     {
         $successCount = 0;
         $failureCount = 0;

@@ -14,7 +14,7 @@ use LockmeDep\Symfony\Component\Lock\Exception\LockExpiredException;
 use LockmeDep\Symfony\Component\Lock\Key;
 trait ExpiringStoreTrait
 {
-    private function checkNotExpired(Key $key) : void
+    private function checkNotExpired(Key $key): void
     {
         if ($key->isExpired()) {
             try {
@@ -22,7 +22,7 @@ trait ExpiringStoreTrait
             } catch (\Exception) {
                 // swallow exception to not hide the original issue
             }
-            throw new LockExpiredException(\sprintf('Failed to store the "%s" lock.', $key));
+            throw new LockExpiredException(sprintf('Failed to store the "%s" lock.', $key));
         }
     }
 }

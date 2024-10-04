@@ -67,7 +67,7 @@ if (!\is_callable('random_bytes')) {
      */
     if (\extension_loaded('libsodium')) {
         // See random_bytes_libsodium.php
-        if (\PHP_VERSION_ID >= 50300 && \is_callable('LockmeDep\\Sodium\\randombytes_buf')) {
+        if (\PHP_VERSION_ID >= 50300 && \is_callable('\Sodium\randombytes_buf')) {
             require_once $RandomCompatDIR . \DIRECTORY_SEPARATOR . 'random_bytes_libsodium.php';
         } elseif (\method_exists('Sodium', 'randombytes_buf')) {
             require_once $RandomCompatDIR . \DIRECTORY_SEPARATOR . 'random_bytes_libsodium_legacy.php';
@@ -128,7 +128,7 @@ if (!\is_callable('random_bytes')) {
      * isn't loaded.
      */
     if (!\is_callable('random_bytes') && \extension_loaded('com_dotnet') && \class_exists('COM')) {
-        $RandomCompat_disabled_classes = \preg_split('#\\s*,\\s*#', \strtolower(\ini_get('disable_classes')));
+        $RandomCompat_disabled_classes = \preg_split('#\s*,\s*#', \strtolower(\ini_get('disable_classes')));
         if (!\in_array('com', $RandomCompat_disabled_classes)) {
             try {
                 $RandomCompatCOMtest = new \COM('CAPICOM.Utilities.1');

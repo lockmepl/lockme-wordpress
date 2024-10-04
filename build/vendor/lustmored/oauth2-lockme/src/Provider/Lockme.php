@@ -82,7 +82,7 @@ class Lockme extends AbstractProvider
     {
         $options = [];
         if ($body) {
-            $options['body'] = \json_encode($body);
+            $options['body'] = json_encode($body);
             $options['headers']['Content-Type'] = 'application/json';
         }
         $request = $this->getAuthenticatedRequest($method, $this->apiDomain . '/' . $this->version . $url, $token, $options);

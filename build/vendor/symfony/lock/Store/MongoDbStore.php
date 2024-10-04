@@ -96,7 +96,7 @@ class MongoDbStore implements PersistingStoreInterface
             $options['gcProbability'] = $options['gcProbablity'];
             unset($options['gcProbablity']);
         }
-        $this->options = \array_merge(['gcProbability' => 0.001, 'database' => null, 'collection' => null, 'uriOptions' => [], 'driverOptions' => []], $options);
+        $this->options = array_merge(['gcProbability' => 0.001, 'database' => null, 'collection' => null, 'uriOptions' => [], 'driverOptions' => []], $options);
         $this->initialTtl = $initialTtl;
         if ($mongo instanceof Collection) {
             $this->options['database'] ??= $mongo->getDatabaseName();
@@ -113,17 +113,17 @@ class MongoDbStore implements PersistingStoreInterface
             $this->uri = $this->skimUri($mongo);
         }
         if (null === $this->options['database']) {
-            throw new InvalidArgumentException(\sprintf('"%s()" requires the "database" in the URI path or option.', __METHOD__));
+            throw new InvalidArgumentException(sprintf('"%s()" requires the "database" in the URI path or option.', __METHOD__));
         }
         if (null === $this->options['collection']) {
-            throw new InvalidArgumentException(\sprintf('"%s()" requires the "collection" in the URI querystring or option.', __METHOD__));
+            throw new InvalidArgumentException(sprintf('"%s()" requires the "collection" in the URI querystring or option.', __METHOD__));
         }
         $this->namespace = $this->options['database'] . '.' . $this->options['collection'];
         if ($this->options['gcProbability'] < 0.0 || $this->options['gcProbability'] > 1.0) {
-            throw new InvalidArgumentException(\sprintf('"%s()" gcProbability must be a float from 0.0 to 1.0, "%f" given.', __METHOD__, $this->options['gcProbability']));
+            throw new InvalidArgumentException(sprintf('"%s()" gcProbability must be a float from 0.0 to 1.0, "%f" given.', __METHOD__, $this->options['gcProbability']));
         }
         if ($this->initialTtl <= 0) {
-            throw new InvalidTtlException(\sprintf('"%s()" expects a strictly positive TTL, got "%d".', __METHOD__, $this->initialTtl));
+            throw new InvalidTtlException(sprintf('"%s()" expects a strictly positive TTL, got "%d".', __METHOD__, $this->initialTtl));
         }
     }
     /**
@@ -133,24 +133,24 @@ class MongoDbStore implements PersistingStoreInterface
      *
      * @see https://www.php.net/manual/en/mongodb.connection-handling.php
      */
-    private function skimUri(string $uri) : string
+    private function skimUri(string $uri): string
     {
-        if (!\str_starts_with($uri, 'mongodb://') && !\str_starts_with($uri, 'mongodb+srv://')) {
-            throw new InvalidArgumentException(\sprintf('The given MongoDB Connection URI "%s" is invalid. Expecting "mongodb://" or "mongodb+srv://".', $uri));
+        if (!str_starts_with($uri, 'mongodb://') && !str_starts_with($uri, 'mongodb+srv://')) {
+            throw new InvalidArgumentException(sprintf('The given MongoDB Connection URI "%s" is invalid. Expecting "mongodb://" or "mongodb+srv://".', $uri));
         }
-        if (\false === ($params = \parse_url($uri))) {
-            throw new InvalidArgumentException(\sprintf('The given MongoDB Connection URI "%s" is invalid.', $uri));
+        if (\false === $params = parse_url($uri)) {
+            throw new InvalidArgumentException(sprintf('The given MongoDB Connection URI "%s" is invalid.', $uri));
         }
-        $pathDb = \ltrim($params['path'] ?? '', '/') ?: null;
+        $pathDb = ltrim($params['path'] ?? '', '/') ?: null;
         if (null !== $pathDb) {
             $this->options['database'] = $pathDb;
         }
         $matches = [];
-        if (\preg_match('/^(.*[\\?&])collection=([^&#]*)&?(([^#]*).*)$/', $uri, $matches)) {
+        if (preg_match('/^(.*[\?&])collection=([^&#]*)&?(([^#]*).*)$/', $uri, $matches)) {
             $prefix = $matches[1];
             $this->options['collection'] = $matches[2];
             if (empty($matches[4])) {
-                $prefix = \substr($prefix, 0, -1);
+                $prefix = substr($prefix, 0, -1);
             }
             $uri = $prefix . $matches[3];
         }
@@ -207,7 +207,7 @@ class MongoDbStore implements PersistingStoreInterface
             }
             throw new LockAcquiringException('Failed to acquire lock.', 0, $e);
         }
-        if ($this->options['gcProbability'] > 0.0 && (1.0 === $this->options['gcProbability'] || \random_int(0, \PHP_INT_MAX) / \PHP_INT_MAX <= $this->options['gcProbability'])) {
+        if ($this->options['gcProbability'] > 0.0 && (1.0 === $this->options['gcProbability'] || random_int(0, \PHP_INT_MAX) / \PHP_INT_MAX <= $this->options['gcProbability'])) {
             $this->createTtlIndex();
         }
         $this->checkNotExpired($key);
@@ -240,9 +240,9 @@ class MongoDbStore implements PersistingStoreInterface
         $write->delete(['_id' => (string) $key, 'token' => $this->getUniqueToken($key)], ['limit' => 1]);
         $this->getManager()->executeBulkWrite($this->namespace, $write);
     }
-    public function exists(Key $key) : bool
+    public function exists(Key $key): bool
     {
-        $cursor = $this->manager->executeQuery($this->namespace, new Query(['_id' => (string) $key, 'token' => $this->getUniqueToken($key), 'expires_at' => ['$gt' => $this->createMongoDateTime(\microtime(\true))]], ['limit' => 1, 'projection' => ['_id' => 1]]));
+        $cursor = $this->manager->executeQuery($this->namespace, new Query(['_id' => (string) $key, 'token' => $this->getUniqueToken($key), 'expires_at' => ['$gt' => $this->createMongoDateTime(microtime(\true))]], ['limit' => 1, 'projection' => ['_id' => 1]]));
         return [] !== $cursor->toArray();
     }
     /**
@@ -250,15 +250,15 @@ class MongoDbStore implements PersistingStoreInterface
      *
      * @param float $ttl Expiry in seconds from now
      */
-    private function upsert(Key $key, float $ttl) : void
+    private function upsert(Key $key, float $ttl): void
     {
-        $now = \microtime(\true);
+        $now = microtime(\true);
         $token = $this->getUniqueToken($key);
         $write = new BulkWrite();
         $write->update(['_id' => (string) $key, '$or' => [['token' => $token], ['expires_at' => ['$lte' => $this->createMongoDateTime($now)]]]], ['$set' => ['_id' => (string) $key, 'token' => $token, 'expires_at' => $this->createMongoDateTime($now + $ttl)]], ['upsert' => \true]);
         $this->getManager()->executeBulkWrite($this->namespace, $write);
     }
-    private function isDuplicateKeyException(WriteException $e) : bool
+    private function isDuplicateKeyException(WriteException $e): bool
     {
         $code = $e->getCode();
         $writeErrors = $e->getWriteResult()->getWriteErrors();
@@ -268,14 +268,14 @@ class MongoDbStore implements PersistingStoreInterface
         // Mongo error E11000 - DuplicateKey
         return 11000 === $code;
     }
-    private function getManager() : Manager
+    private function getManager(): Manager
     {
         return $this->manager ??= new Manager($this->uri, $this->options['uriOptions'], $this->options['driverOptions']);
     }
     /**
      * @param float $seconds Seconds since 1970-01-01T00:00:00.000Z supporting millisecond precision. Defaults to now.
      */
-    private function createMongoDateTime(float $seconds) : UTCDateTime
+    private function createMongoDateTime(float $seconds): UTCDateTime
     {
         return new UTCDateTime($seconds * 1000);
     }
@@ -284,10 +284,10 @@ class MongoDbStore implements PersistingStoreInterface
      *
      * @param Key $key lock state container
      */
-    private function getUniqueToken(Key $key) : string
+    private function getUniqueToken(Key $key): string
     {
         if (!$key->hasState(__CLASS__)) {
-            $token = \base64_encode(\random_bytes(32));
+            $token = base64_encode(random_bytes(32));
             $key->setState(__CLASS__, $token);
         }
         return $key->getState(__CLASS__);

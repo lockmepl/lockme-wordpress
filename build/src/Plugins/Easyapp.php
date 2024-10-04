@@ -22,12 +22,12 @@ class Easyapp implements PluginInterface
         global $wpdb;
         $this->plugin = $plugin;
         $this->options = get_option('lockme_easyapp');
-        if (\is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             $this->models = new EADBModels($wpdb, new EATableColumns(), []);
             if (isset($_GET['action'], $_GET['id']) && $_GET['action'] === 'ea_appointment' && $_GET['id']) {
                 $this->resdata = $this->AppData($_GET['id']);
             }
-            \register_shutdown_function([$this, 'ShutDown']);
+            register_shutdown_function([$this, 'ShutDown']);
             add_action('init', function () {
                 if ($_GET['easyapp_export'] ?? null) {
                     $this->ExportToLockMe();
@@ -37,18 +37,18 @@ class Easyapp implements PluginInterface
             }, \PHP_INT_MAX);
         }
     }
-    public function CheckDependencies() : bool
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('easy-appointments/main.php');
     }
-    private function AppData($resid) : array
+    private function AppData($resid): array
     {
         $res = $this->models->get_appintment_by_id($resid);
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['location'] . '_' . $res['service'] . '_' . $res['worker']], 'date' => \date('Y-m-d', \strtotime($res['date'])), 'hour' => \date('H:i:s', \strtotime($res['start'])), 'people' => 0, 'pricer' => 'API', 'price' => $res['price'], 'name' => $res['name'], 'email' => $res['email'], 'phone' => $res['phone'], 'status' => $res['status'] === 'confirmed', 'extid' => $res['id']]);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['location'] . '_' . $res['service'] . '_' . $res['worker']], 'date' => date('Y-m-d', strtotime($res['date'])), 'hour' => date('H:i:s', strtotime($res['start'])), 'people' => 0, 'pricer' => 'API', 'price' => $res['price'], 'name' => $res['name'], 'email' => $res['email'], 'phone' => $res['phone'], 'status' => $res['status'] === 'confirmed', 'extid' => $res['id']]);
     }
-    public function ExportToLockMe() : void
+    public function ExportToLockMe(): void
     {
-        \set_time_limit(0);
+        set_time_limit(0);
         $start = new DateTime();
         $end = new DateTime();
         $end->add(new DateInterval('P1Y'));
@@ -57,7 +57,7 @@ class Easyapp implements PluginInterface
             $this->Update($row->id, (array) $row);
         }
     }
-    public function RegisterSettings() : void
+    public function RegisterSettings(): void
     {
         global $wpdb;
         if (!$this->CheckDependencies()) {
@@ -81,7 +81,7 @@ class Easyapp implements PluginInterface
             }
             $calendars = $wpdb->get_results('SELECT DISTINCT concat(l.`id`,"_",s.`id`,"_",ss.`id`) `id`, concat(l.`name`," - ",s.`name`," - ",ss.`name`) `name` FROM ' . $wpdb->prefix . 'ea_locations l join ' . $wpdb->prefix . 'ea_services s join ' . $wpdb->prefix . 'ea_staff ss');
             foreach ($calendars as $calendar) {
-                add_settings_field('calendar_' . $calendar->id, 'Room for ' . $calendar->name, function () use($rooms, $calendar) {
+                add_settings_field('calendar_' . $calendar->id, 'Room for ' . $calendar->name, function () use ($rooms, $calendar) {
                     echo '<select name="lockme_easyapp[calendar_' . $calendar->id . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
@@ -95,7 +95,7 @@ class Easyapp implements PluginInterface
             }, 'lockme-easyapp', 'lockme_easyapp_section', []);
         }
     }
-    public function DrawForm() : void
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo "<p>You don't have required plugin</p>";
@@ -109,7 +109,7 @@ class Easyapp implements PluginInterface
         settings_fields('lockme-easyapp');
         do_settings_sections('lockme-easyapp');
     }
-    public function AddEditReservation($id) : void
+    public function AddEditReservation($id): void
     {
         $data = $this->models->get_appintment_by_id($id);
         if (!$data) {
@@ -117,14 +117,14 @@ class Easyapp implements PluginInterface
         }
         $this->Update($id, $data);
     }
-    public function ShutDown() : void
+    public function ShutDown(): void
     {
         global $wpdb;
-        if (\defined('DOING_AJAX') && DOING_AJAX) {
+        if (defined('DOING_AJAX') && DOING_AJAX) {
             switch ($_GET['action']) {
                 case 'ea_res_appointment':
                 case 'nopriv_ea_res_appointment':
-                    $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s", $_GET['location'], $_GET['service'], $_GET['worker'], $_GET['date'], \date('H:i:s', \strtotime($_GET['start']))), ARRAY_A);
+                    $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s", $_GET['location'], $_GET['service'], $_GET['worker'], $_GET['date'], date('H:i:s', strtotime($_GET['start']))), ARRAY_A);
                     if ($res) {
                         $this->Add($res);
                     }
@@ -146,9 +146,9 @@ class Easyapp implements PluginInterface
                             }
                             break;
                         default:
-                            $input = \json_decode(\file_get_contents('php://input'), \true);
+                            $input = json_decode(file_get_contents('php://input'), \true);
                             if (!$_GET['_method'] && $input['date']) {
-                                $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s", $input['location'], $input['service'], $input['worker'], $input['date'], \date('H:i:s', \strtotime($input['start']))), ARRAY_A);
+                                $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s", $input['location'], $input['service'], $input['worker'], $input['date'], date('H:i:s', strtotime($input['start']))), ARRAY_A);
                                 if ($res) {
                                     $this->Add($res);
                                 }
@@ -158,7 +158,7 @@ class Easyapp implements PluginInterface
             }
         }
     }
-    public function GetMessage(array $message) : bool
+    public function GetMessage(array $message): bool
     {
         if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return \false;
@@ -166,12 +166,12 @@ class Easyapp implements PluginInterface
         $data = $message['data'];
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
-        [$location, $service, $worker] = \explode('_', $this->GetCalendar($roomid));
+        [$location, $service, $worker] = explode('_', $this->GetCalendar($roomid));
         switch ($message['action']) {
             case 'add':
                 $s = $this->models->get_row('ea_services', $service);
-                $end_time = \strtotime("{$data['hour']} + {$s->duration} minute");
-                $id = $this->models->replace('ea_appointments', ['location' => $location, 'service' => $service, 'worker' => $worker, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'date' => $data['date'], 'start' => $data['hour'], 'end_date' => $data['date'], 'end' => \date('H:i:s', $end_time), 'price' => $data['price'], 'description' => 'LOCKME!', 'status' => $data['status'] ? 'confirmed' : 'pending'], \true);
+                $end_time = strtotime("{$data['hour']} + {$s->duration} minute");
+                $id = $this->models->replace('ea_appointments', ['location' => $location, 'service' => $service, 'worker' => $worker, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'date' => $data['date'], 'start' => $data['hour'], 'end_date' => $data['date'], 'end' => date('H:i:s', $end_time), 'price' => $data['price'], 'description' => 'LOCKME!', 'status' => $data['status'] ? 'confirmed' : 'pending'], \true);
                 try {
                     $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, ['extid' => $id->id]);
@@ -182,8 +182,8 @@ class Easyapp implements PluginInterface
             case 'edit':
                 if ($data['extid']) {
                     $s = $this->models->get_row('ea_services', $service);
-                    $end_time = \strtotime("{$data['hour']} + {$s->duration} minute");
-                    $this->models->replace('ea_appointments', ['id' => $data['extid'], 'location' => $location, 'service' => $service, 'worker' => $worker, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'date' => $data['date'], 'start' => $data['hour'], 'end_date' => $data['date'], 'end' => \date('H:i:s', $end_time), 'price' => $data['price'], 'description' => 'LOCKME!', 'status' => $data['status'] ? 'confirmed' : 'pending'], \true);
+                    $end_time = strtotime("{$data['hour']} + {$s->duration} minute");
+                    $this->models->replace('ea_appointments', ['id' => $data['extid'], 'location' => $location, 'service' => $service, 'worker' => $worker, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'date' => $data['date'], 'start' => $data['hour'], 'end_date' => $data['date'], 'end' => date('H:i:s', $end_time), 'price' => $data['price'], 'description' => 'LOCKME!', 'status' => $data['status'] ? 'confirmed' : 'pending'], \true);
                     return \true;
                 }
                 break;
@@ -196,9 +196,9 @@ class Easyapp implements PluginInterface
         }
         return \false;
     }
-    private function Add($res) : void
+    private function Add($res): void
     {
-        if (\in_array($res['status'], ['canceled', 'abandoned'])) {
+        if (in_array($res['status'], ['canceled', 'abandoned'])) {
             return;
         }
         $api = $this->plugin->GetApi();
@@ -207,7 +207,7 @@ class Easyapp implements PluginInterface
         } catch (Exception $e) {
         }
     }
-    private function Update($id, $res) : void
+    private function Update($id, $res): void
     {
         $appdata = $this->AppData($res['id']);
         if (!$appdata['roomid']) {
@@ -223,7 +223,7 @@ class Easyapp implements PluginInterface
             $this->Add($res);
             return;
         }
-        if (\in_array($res['status'], ['canceled', 'abandoned'])) {
+        if (in_array($res['status'], ['canceled', 'abandoned'])) {
             $this->Delete($id);
             return;
         }
@@ -232,7 +232,7 @@ class Easyapp implements PluginInterface
         } catch (Exception $e) {
         }
     }
-    private function Delete($resid) : void
+    private function Delete($resid): void
     {
         $res = $this->models->get_appintment_by_id($resid);
         if (!$res) {
@@ -272,7 +272,7 @@ class Easyapp implements PluginInterface
         }
         throw new RuntimeException('No calendar');
     }
-    public function getPluginName() : string
+    public function getPluginName(): string
     {
         return 'Easy Appointments';
     }

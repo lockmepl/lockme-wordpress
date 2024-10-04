@@ -60,8 +60,8 @@ class GrantFactory
     protected function registerDefaultGrant($name)
     {
         // PascalCase the grant. E.g: 'authorization_code' becomes 'AuthorizationCode'
-        $class = \str_replace(' ', '', \ucwords(\str_replace(['-', '_'], ' ', $name)));
-        $class = 'League\\OAuth2\\Client\\Grant\\' . $class;
+        $class = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name)));
+        $class = 'League\OAuth2\Client\Grant\\' . $class;
         $this->checkGrant($class);
         return $this->setGrant($name, new $class());
     }
@@ -73,7 +73,7 @@ class GrantFactory
      */
     public function isGrant($class)
     {
-        return \is_subclass_of($class, \League\OAuth2\Client\Grant\AbstractGrant::class);
+        return is_subclass_of($class, \League\OAuth2\Client\Grant\AbstractGrant::class);
     }
     /**
      * Checks if a variable is a valid grant.
@@ -85,7 +85,7 @@ class GrantFactory
     public function checkGrant($class)
     {
         if (!$this->isGrant($class)) {
-            throw new InvalidGrantException(\sprintf('Grant "%s" must extend AbstractGrant', \is_object($class) ? \get_class($class) : $class));
+            throw new InvalidGrantException(sprintf('Grant "%s" must extend AbstractGrant', is_object($class) ? get_class($class) : $class));
         }
     }
 }

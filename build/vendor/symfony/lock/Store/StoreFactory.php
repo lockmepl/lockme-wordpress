@@ -11,7 +11,7 @@
 namespace LockmeDep\Symfony\Component\Lock\Store;
 
 use LockmeDep\Doctrine\DBAL\Connection;
-use LockmeDep\Relay\Relay;
+use Relay\Relay;
 use LockmeDep\Symfony\Component\Cache\Adapter\AbstractAdapter;
 use LockmeDep\Symfony\Component\Lock\Exception\InvalidArgumentException;
 use LockmeDep\Symfony\Component\Lock\PersistingStoreInterface;
@@ -22,7 +22,7 @@ use LockmeDep\Symfony\Component\Lock\PersistingStoreInterface;
  */
 class StoreFactory
 {
-    public static function createStore(#[\SensitiveParameter] object|string $connection) : PersistingStoreInterface
+    public static function createStore(#[\SensitiveParameter] object|string $connection): PersistingStoreInterface
     {
         switch (\true) {
             case $connection instanceof \Redis:
@@ -42,52 +42,52 @@ class StoreFactory
             case $connection instanceof \Zookeeper:
                 return new ZookeeperStore($connection);
             case !\is_string($connection):
-                throw new InvalidArgumentException(\sprintf('Unsupported Connection: "%s".', \get_debug_type($connection)));
+                throw new InvalidArgumentException(sprintf('Unsupported Connection: "%s".', get_debug_type($connection)));
             case 'flock' === $connection:
                 return new FlockStore();
-            case \str_starts_with($connection, 'flock://'):
-                return new FlockStore(\substr($connection, 8));
+            case str_starts_with($connection, 'flock://'):
+                return new FlockStore(substr($connection, 8));
             case 'semaphore' === $connection:
                 return new SemaphoreStore();
-            case \str_starts_with($connection, 'redis:'):
-            case \str_starts_with($connection, 'rediss:'):
-            case \str_starts_with($connection, 'memcached:'):
-                if (!\class_exists(AbstractAdapter::class)) {
+            case str_starts_with($connection, 'redis:'):
+            case str_starts_with($connection, 'rediss:'):
+            case str_starts_with($connection, 'memcached:'):
+                if (!class_exists(AbstractAdapter::class)) {
                     throw new InvalidArgumentException('Unsupported Redis or Memcached DSN. Try running "composer require symfony/cache".');
                 }
-                $storeClass = \str_starts_with($connection, 'memcached:') ? MemcachedStore::class : RedisStore::class;
+                $storeClass = str_starts_with($connection, 'memcached:') ? MemcachedStore::class : RedisStore::class;
                 $connection = AbstractAdapter::createConnection($connection, ['lazy' => \true]);
                 return new $storeClass($connection);
-            case \str_starts_with($connection, 'mongodb'):
+            case str_starts_with($connection, 'mongodb'):
                 return new MongoDbStore($connection);
-            case \str_starts_with($connection, 'mssql://'):
-            case \str_starts_with($connection, 'mysql://'):
-            case \str_starts_with($connection, 'mysql2://'):
-            case \str_starts_with($connection, 'oci8://'):
-            case \str_starts_with($connection, 'pdo_oci://'):
-            case \str_starts_with($connection, 'pgsql://'):
-            case \str_starts_with($connection, 'postgres://'):
-            case \str_starts_with($connection, 'postgresql://'):
-            case \str_starts_with($connection, 'sqlite://'):
-            case \str_starts_with($connection, 'sqlite3://'):
+            case str_starts_with($connection, 'mssql://'):
+            case str_starts_with($connection, 'mysql://'):
+            case str_starts_with($connection, 'mysql2://'):
+            case str_starts_with($connection, 'oci8://'):
+            case str_starts_with($connection, 'pdo_oci://'):
+            case str_starts_with($connection, 'pgsql://'):
+            case str_starts_with($connection, 'postgres://'):
+            case str_starts_with($connection, 'postgresql://'):
+            case str_starts_with($connection, 'sqlite://'):
+            case str_starts_with($connection, 'sqlite3://'):
                 return new DoctrineDbalStore($connection);
-            case \str_starts_with($connection, 'mysql:'):
-            case \str_starts_with($connection, 'oci:'):
-            case \str_starts_with($connection, 'pgsql:'):
-            case \str_starts_with($connection, 'sqlsrv:'):
-            case \str_starts_with($connection, 'sqlite:'):
+            case str_starts_with($connection, 'mysql:'):
+            case str_starts_with($connection, 'oci:'):
+            case str_starts_with($connection, 'pgsql:'):
+            case str_starts_with($connection, 'sqlsrv:'):
+            case str_starts_with($connection, 'sqlite:'):
                 return new PdoStore($connection);
-            case \str_starts_with($connection, 'pgsql+advisory://'):
-            case \str_starts_with($connection, 'postgres+advisory://'):
-            case \str_starts_with($connection, 'postgresql+advisory://'):
+            case str_starts_with($connection, 'pgsql+advisory://'):
+            case str_starts_with($connection, 'postgres+advisory://'):
+            case str_starts_with($connection, 'postgresql+advisory://'):
                 return new DoctrineDbalPostgreSqlStore($connection);
-            case \str_starts_with($connection, 'pgsql+advisory:'):
-                return new PostgreSqlStore(\preg_replace('/^([^:+]+)\\+advisory/', '$1', $connection));
-            case \str_starts_with($connection, 'zookeeper://'):
+            case str_starts_with($connection, 'pgsql+advisory:'):
+                return new PostgreSqlStore(preg_replace('/^([^:+]+)\+advisory/', '$1', $connection));
+            case str_starts_with($connection, 'zookeeper://'):
                 return new ZookeeperStore(ZookeeperStore::createConnection($connection));
             case 'in-memory' === $connection:
                 return new InMemoryStore();
         }
-        throw new InvalidArgumentException(\sprintf('Unsupported Connection: "%s".', $connection));
+        throw new InvalidArgumentException(sprintf('Unsupported Connection: "%s".', $connection));
     }
 }

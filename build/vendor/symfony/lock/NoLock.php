@@ -20,25 +20,25 @@ namespace LockmeDep\Symfony\Component\Lock;
  */
 final class NoLock implements LockInterface
 {
-    public function acquire(bool $blocking = \false) : bool
+    public function acquire(bool $blocking = \false): bool
     {
         return \true;
     }
-    public function refresh(?float $ttl = null) : void
+    public function refresh(?float $ttl = null): void
     {
     }
-    public function isAcquired() : bool
+    public function isAcquired(): bool
     {
         return \true;
     }
-    public function release() : void
+    public function release(): void
     {
     }
-    public function isExpired() : bool
+    public function isExpired(): bool
     {
         return \false;
     }
-    public function getRemainingLifetime() : ?float
+    public function getRemainingLifetime(): ?float
     {
         return null;
     }

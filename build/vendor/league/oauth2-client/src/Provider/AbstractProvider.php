@@ -127,7 +127,7 @@ abstract class AbstractProvider
         $this->setRequestFactory($collaborators['requestFactory']);
         if (empty($collaborators['httpClient'])) {
             $client_options = $this->getAllowedClientOptions($options);
-            $collaborators['httpClient'] = new HttpClient(\array_intersect_key($options, \array_flip($client_options)));
+            $collaborators['httpClient'] = new HttpClient(array_intersect_key($options, array_flip($client_options)));
         }
         $this->setHttpClient($collaborators['httpClient']);
         if (empty($collaborators['optionProvider'])) {
@@ -274,7 +274,7 @@ abstract class AbstractProvider
      *
      * @return string
      */
-    public abstract function getBaseAuthorizationUrl();
+    abstract public function getBaseAuthorizationUrl();
     /**
      * Returns the base URL for requesting an access token.
      *
@@ -283,14 +283,14 @@ abstract class AbstractProvider
      * @param array $params
      * @return string
      */
-    public abstract function getBaseAccessTokenUrl(array $params);
+    abstract public function getBaseAccessTokenUrl(array $params);
     /**
      * Returns the URL for requesting the resource owner's details.
      *
      * @param AccessToken $token
      * @return string
      */
-    public abstract function getResourceOwnerDetailsUrl(AccessToken $token);
+    abstract public function getResourceOwnerDetailsUrl(AccessToken $token);
     /**
      * Returns a new random string to use as the state parameter in an
      * authorization flow.
@@ -302,7 +302,7 @@ abstract class AbstractProvider
     {
         // Converting bytes to hex will always double length. Hence, we can reduce
         // the amount of bytes by half to produce the correct length.
-        return \bin2hex(\random_bytes($length / 2));
+        return bin2hex(random_bytes($length / 2));
     }
     /**
      * Returns a new random string to use as PKCE code_verifier and
@@ -314,7 +314,7 @@ abstract class AbstractProvider
      */
     protected function getRandomPkceCode($length = 64)
     {
-        return \substr(\strtr(\base64_encode(\random_bytes($length)), '+/', '-_'), 0, $length);
+        return substr(strtr(base64_encode(random_bytes($length)), '+/', '-_'), 0, $length);
     }
     /**
      * Returns the default scopes used by this provider.
@@ -324,7 +324,7 @@ abstract class AbstractProvider
      *
      * @return array
      */
-    protected abstract function getDefaultScopes();
+    abstract protected function getDefaultScopes();
     /**
      * Returns the string that should be used to separate scopes when building
      * the URL for requesting an access token.
@@ -357,9 +357,9 @@ abstract class AbstractProvider
             $options['scope'] = $this->getDefaultScopes();
         }
         $options += ['response_type' => 'code', 'approval_prompt' => 'auto'];
-        if (\is_array($options['scope'])) {
+        if (is_array($options['scope'])) {
             $separator = $this->getScopeSeparator();
-            $options['scope'] = \implode($separator, $options['scope']);
+            $options['scope'] = implode($separator, $options['scope']);
         }
         // Store the state as it may need to be accessed later on.
         $this->state = $options['state'];
@@ -367,7 +367,7 @@ abstract class AbstractProvider
         if (!empty($pkceMethod)) {
             $this->pkceCode = $this->getRandomPkceCode();
             if ($pkceMethod === static::PKCE_METHOD_S256) {
-                $options['code_challenge'] = \trim(\strtr(\base64_encode(\hash('sha256', $this->pkceCode, \true)), '+/', '-_'), '=');
+                $options['code_challenge'] = trim(strtr(base64_encode(hash('sha256', $this->pkceCode, \true)), '+/', '-_'), '=');
             } elseif ($pkceMethod === static::PKCE_METHOD_PLAIN) {
                 $options['code_challenge'] = $this->pkceCode;
             } else {
@@ -420,7 +420,7 @@ abstract class AbstractProvider
             return $redirectHandler($url, $this);
         }
         // @codeCoverageIgnoreStart
-        \header('Location: ' . $url);
+        header('Location: ' . $url);
         exit;
         // @codeCoverageIgnoreEnd
     }
@@ -433,9 +433,9 @@ abstract class AbstractProvider
      */
     protected function appendQuery($url, $query)
     {
-        $query = \trim($query, '?&');
+        $query = trim($query, '?&');
         if ($query) {
-            $glue = \strstr($url, '?') === \false ? '?' : '&';
+            $glue = strstr($url, '?') === \false ? '?' : '&';
             return $url . $glue . $query;
         }
         return $url;
@@ -477,7 +477,7 @@ abstract class AbstractProvider
      */
     protected function verifyGrant($grant)
     {
-        if (\is_string($grant)) {
+        if (is_string($grant)) {
             return $this->grantFactory->getGrant($grant);
         }
         $this->grantFactory->checkGrant($grant);
@@ -529,7 +529,7 @@ abstract class AbstractProvider
         $params = $grant->prepareRequestParameters($params, $options);
         $request = $this->getAccessTokenRequest($params);
         $response = $this->getParsedResponse($request);
-        if (\false === \is_array($response)) {
+        if (\false === is_array($response)) {
             throw new UnexpectedValueException('Invalid response received from Authorization Server. Expected JSON.');
         }
         $prepared = $this->prepareAccessTokenResponse($response);
@@ -573,7 +573,7 @@ abstract class AbstractProvider
     protected function createRequest($method, $url, $token, array $options)
     {
         $defaults = ['headers' => $this->getHeaders($token)];
-        $options = \array_merge_recursive($defaults, $options);
+        $options = array_merge_recursive($defaults, $options);
         $factory = $this->getRequestFactory();
         return $factory->getRequestWithOptions($method, $url, $options);
     }
@@ -617,9 +617,9 @@ abstract class AbstractProvider
      */
     protected function parseJson($content)
     {
-        $content = \json_decode($content, \true);
-        if (\json_last_error() !== \JSON_ERROR_NONE) {
-            throw new UnexpectedValueException(\sprintf("Failed to parse JSON response: %s", \json_last_error_msg()));
+        $content = json_decode($content, \true);
+        if (json_last_error() !== \JSON_ERROR_NONE) {
+            throw new UnexpectedValueException(sprintf("Failed to parse JSON response: %s", json_last_error_msg()));
         }
         return $content;
     }
@@ -631,7 +631,7 @@ abstract class AbstractProvider
      */
     protected function getContentType(ResponseInterface $response)
     {
-        return \join(';', (array) $response->getHeader('content-type'));
+        return join(';', (array) $response->getHeader('content-type'));
     }
     /**
      * Parses the response according to its content-type header.
@@ -644,8 +644,8 @@ abstract class AbstractProvider
     {
         $content = (string) $response->getBody();
         $type = $this->getContentType($response);
-        if (\strpos($type, 'urlencoded') !== \false) {
-            \parse_str($content, $parsed);
+        if (strpos($type, 'urlencoded') !== \false) {
+            parse_str($content, $parsed);
             return $parsed;
         }
         // Attempt to parse the string as JSON regardless of content type,
@@ -654,7 +654,7 @@ abstract class AbstractProvider
         try {
             return $this->parseJson($content);
         } catch (UnexpectedValueException $e) {
-            if (\strpos($type, 'json') !== \false) {
+            if (strpos($type, 'json') !== \false) {
                 throw $e;
             }
             if ($response->getStatusCode() == 500) {
@@ -671,7 +671,7 @@ abstract class AbstractProvider
      * @param  array|string $data Parsed response data
      * @return void
      */
-    protected abstract function checkResponse(ResponseInterface $response, $data);
+    abstract protected function checkResponse(ResponseInterface $response, $data);
     /**
      * Prepares an parsed access token response for a grant.
      *
@@ -710,7 +710,7 @@ abstract class AbstractProvider
      * @param  AccessToken $token
      * @return ResourceOwnerInterface
      */
-    protected abstract function createResourceOwner(array $response, AccessToken $token);
+    abstract protected function createResourceOwner(array $response, AccessToken $token);
     /**
      * Requests and returns the resource owner of given access token.
      *
@@ -733,7 +733,7 @@ abstract class AbstractProvider
         $url = $this->getResourceOwnerDetailsUrl($token);
         $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $token);
         $response = $this->getParsedResponse($request);
-        if (\false === \is_array($response)) {
+        if (\false === is_array($response)) {
             throw new UnexpectedValueException('Invalid response received from Authorization Server. Expected JSON.');
         }
         return $response;
@@ -776,7 +776,7 @@ abstract class AbstractProvider
     public function getHeaders($token = null)
     {
         if ($token) {
-            return \array_merge($this->getDefaultHeaders(), $this->getAuthorizationHeaders($token));
+            return array_merge($this->getDefaultHeaders(), $this->getAuthorizationHeaders($token));
         }
         return $this->getDefaultHeaders();
     }

@@ -42,20 +42,20 @@ class DoctrineDbalPostgreSqlStore implements BlockingSharedLockStoreInterface, B
     {
         if ($connOrUrl instanceof Connection) {
             if (!$connOrUrl->getDatabasePlatform() instanceof PostgreSQLPlatform) {
-                throw new InvalidArgumentException(\sprintf('The adapter "%s" does not support the "%s" platform.', __CLASS__, $connOrUrl->getDatabasePlatform()::class));
+                throw new InvalidArgumentException(sprintf('The adapter "%s" does not support the "%s" platform.', __CLASS__, $connOrUrl->getDatabasePlatform()::class));
             }
             $this->conn = $connOrUrl;
         } else {
-            if (!\class_exists(DriverManager::class)) {
+            if (!class_exists(DriverManager::class)) {
                 throw new InvalidArgumentException('Failed to parse DSN. Try running "composer require doctrine/dbal".');
             }
-            if (\class_exists(DsnParser::class)) {
+            if (class_exists(DsnParser::class)) {
                 $params = (new DsnParser(['db2' => 'ibm_db2', 'mssql' => 'pdo_sqlsrv', 'mysql' => 'pdo_mysql', 'mysql2' => 'pdo_mysql', 'postgres' => 'pdo_pgsql', 'postgresql' => 'pdo_pgsql', 'pgsql' => 'pdo_pgsql', 'sqlite' => 'pdo_sqlite', 'sqlite3' => 'pdo_sqlite']))->parse($this->filterDsn($connOrUrl));
             } else {
                 $params = ['url' => $this->filterDsn($connOrUrl)];
             }
             $config = new Configuration();
-            if (\class_exists(DefaultSchemaManagerFactory::class)) {
+            if (class_exists(DefaultSchemaManagerFactory::class)) {
                 $config->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
             }
             $this->conn = DriverManager::getConnection($params, $config);
@@ -145,7 +145,7 @@ class DoctrineDbalPostgreSqlStore implements BlockingSharedLockStoreInterface, B
         }
         $store->delete($key);
     }
-    public function exists(Key $key) : bool
+    public function exists(Key $key): bool
     {
         $sql = "SELECT count(*) FROM pg_locks WHERE locktype='advisory' AND objid=:key AND pid=pg_backend_pid()";
         $result = $this->conn->executeQuery($sql, ['key' => $this->getHashedKey($key)]);
@@ -200,18 +200,18 @@ class DoctrineDbalPostgreSqlStore implements BlockingSharedLockStoreInterface, B
     /**
      * Returns a hashed version of the key.
      */
-    private function getHashedKey(Key $key) : int
+    private function getHashedKey(Key $key): int
     {
-        return \crc32((string) $key);
+        return crc32((string) $key);
     }
-    private function unlock(Key $key) : void
+    private function unlock(Key $key): void
     {
         do {
             $sql = "SELECT pg_advisory_unlock(objid::bigint) FROM pg_locks WHERE locktype='advisory' AND mode='ExclusiveLock' AND objid=:key AND pid=pg_backend_pid()";
             $result = $this->conn->executeQuery($sql, ['key' => $this->getHashedKey($key)]);
         } while (0 !== $result->rowCount());
     }
-    private function unlockShared(Key $key) : void
+    private function unlockShared(Key $key): void
     {
         do {
             $sql = "SELECT pg_advisory_unlock_shared(objid::bigint) FROM pg_locks WHERE locktype='advisory' AND mode='ShareLock' AND objid=:key AND pid=pg_backend_pid()";
@@ -224,21 +224,21 @@ class DoctrineDbalPostgreSqlStore implements BlockingSharedLockStoreInterface, B
      *
      * @throws InvalidArgumentException when driver is not supported
      */
-    private function filterDsn(#[\SensitiveParameter] string $dsn) : string
+    private function filterDsn(#[\SensitiveParameter] string $dsn): string
     {
-        if (!\str_contains($dsn, '://')) {
+        if (!str_contains($dsn, '://')) {
             throw new InvalidArgumentException('DSN is invalid for Doctrine DBAL.');
         }
-        [$scheme, $rest] = \explode(':', $dsn, 2);
-        $driver = \strtok($scheme, '+');
+        [$scheme, $rest] = explode(':', $dsn, 2);
+        $driver = strtok($scheme, '+');
         if (!\in_array($driver, ['pgsql', 'postgres', 'postgresql'])) {
-            throw new InvalidArgumentException(\sprintf('The adapter "%s" does not support the "%s" driver.', __CLASS__, $driver));
+            throw new InvalidArgumentException(sprintf('The adapter "%s" does not support the "%s" driver.', __CLASS__, $driver));
         }
-        return \sprintf('%s:%s', $driver, $rest);
+        return sprintf('%s:%s', $driver, $rest);
     }
-    private function getInternalStore() : SharedLockStoreInterface
+    private function getInternalStore(): SharedLockStoreInterface
     {
-        $namespace = \spl_object_hash($this->conn);
+        $namespace = spl_object_hash($this->conn);
         return self::$storeRegistry[$namespace] ??= new InMemoryStore();
     }
 }

@@ -50,7 +50,7 @@ class PostgreSqlStore implements BlockingSharedLockStoreInterface, BlockingStore
     {
         if ($connOrDsn instanceof \PDO) {
             if (\PDO::ERRMODE_EXCEPTION !== $connOrDsn->getAttribute(\PDO::ATTR_ERRMODE)) {
-                throw new InvalidArgumentException(\sprintf('"%s" requires PDO error mode attribute be set to throw Exceptions (i.e. $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION)).', __METHOD__));
+                throw new InvalidArgumentException(sprintf('"%s" requires PDO error mode attribute be set to throw Exceptions (i.e. $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION)).', __METHOD__));
             }
             $this->conn = $connOrDsn;
             $this->checkDriver();
@@ -149,7 +149,7 @@ class PostgreSqlStore implements BlockingSharedLockStoreInterface, BlockingStore
         }
         $store->delete($key);
     }
-    public function exists(Key $key) : bool
+    public function exists(Key $key): bool
     {
         $sql = "SELECT count(*) FROM pg_locks WHERE locktype='advisory' AND objid=:key AND pid=pg_backend_pid()";
         $stmt = $this->getConnection()->prepare($sql);
@@ -210,11 +210,11 @@ class PostgreSqlStore implements BlockingSharedLockStoreInterface, BlockingStore
     /**
      * Returns a hashed version of the key.
      */
-    private function getHashedKey(Key $key) : int
+    private function getHashedKey(Key $key): int
     {
-        return \crc32((string) $key);
+        return crc32((string) $key);
     }
-    private function unlock(Key $key) : void
+    private function unlock(Key $key): void
     {
         while (\true) {
             $sql = "SELECT pg_advisory_unlock(objid::bigint) FROM pg_locks WHERE locktype='advisory' AND mode='ExclusiveLock' AND objid=:key AND pid=pg_backend_pid()";
@@ -226,7 +226,7 @@ class PostgreSqlStore implements BlockingSharedLockStoreInterface, BlockingStore
             }
         }
     }
-    private function unlockShared(Key $key) : void
+    private function unlockShared(Key $key): void
     {
         while (\true) {
             $sql = "SELECT pg_advisory_unlock_shared(objid::bigint) FROM pg_locks WHERE locktype='advisory' AND mode='ShareLock' AND objid=:key AND pid=pg_backend_pid()";
@@ -238,7 +238,7 @@ class PostgreSqlStore implements BlockingSharedLockStoreInterface, BlockingStore
             }
         }
     }
-    private function getConnection() : \PDO
+    private function getConnection(): \PDO
     {
         if (!isset($this->conn)) {
             $this->conn = new \PDO($this->dsn, $this->username, $this->password, $this->connectionOptions);
@@ -247,15 +247,15 @@ class PostgreSqlStore implements BlockingSharedLockStoreInterface, BlockingStore
         }
         return $this->conn;
     }
-    private function checkDriver() : void
+    private function checkDriver(): void
     {
-        if ('pgsql' !== ($driver = $this->conn->getAttribute(\PDO::ATTR_DRIVER_NAME))) {
-            throw new InvalidArgumentException(\sprintf('The adapter "%s" does not support the "%s" driver.', __CLASS__, $driver));
+        if ('pgsql' !== $driver = $this->conn->getAttribute(\PDO::ATTR_DRIVER_NAME)) {
+            throw new InvalidArgumentException(sprintf('The adapter "%s" does not support the "%s" driver.', __CLASS__, $driver));
         }
     }
-    private function getInternalStore() : SharedLockStoreInterface
+    private function getInternalStore(): SharedLockStoreInterface
     {
-        $namespace = \spl_object_hash($this->getConnection());
+        $namespace = spl_object_hash($this->getConnection());
         return self::$storeRegistry[$namespace] ??= new InMemoryStore();
     }
 }

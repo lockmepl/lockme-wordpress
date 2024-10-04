@@ -29,22 +29,22 @@ class ZookeeperStore implements PersistingStoreInterface
     {
         $this->zookeeper = $zookeeper;
     }
-    public static function createConnection(#[\SensitiveParameter] string $dsn) : \Zookeeper
+    public static function createConnection(#[\SensitiveParameter] string $dsn): \Zookeeper
     {
-        if (!\str_starts_with($dsn, 'zookeeper:')) {
+        if (!str_starts_with($dsn, 'zookeeper:')) {
             throw new InvalidArgumentException('Unsupported DSN for Zookeeper.');
         }
-        if (\false === ($params = \parse_url($dsn))) {
+        if (\false === $params = parse_url($dsn)) {
             throw new InvalidArgumentException('Invalid Zookeeper DSN.');
         }
         $host = $params['host'] ?? '';
-        $hosts = \explode(',', $host);
+        $hosts = explode(',', $host);
         foreach ($hosts as $index => $host) {
             if (isset($params['port'])) {
                 $hosts[$index] = $host . ':' . $params['port'];
             }
         }
-        return new \Zookeeper(\implode(',', $hosts));
+        return new \Zookeeper(implode(',', $hosts));
     }
     /**
      * @return void
@@ -77,7 +77,7 @@ class ZookeeperStore implements PersistingStoreInterface
             throw new LockReleasingException($exception);
         }
     }
-    public function exists(Key $key) : bool
+    public function exists(Key $key): bool
     {
         $resource = $this->getKeyResource($key);
         try {
@@ -102,7 +102,7 @@ class ZookeeperStore implements PersistingStoreInterface
      * @throws LockConflictedException
      * @throws LockAcquiringException
      */
-    private function createNewLock(string $node, string $value) : void
+    private function createNewLock(string $node, string $value): void
     {
         // Default Node Permissions
         $acl = [['perms' => \Zookeeper::PERM_ALL, 'scheme' => 'world', 'id' => 'anyone']];
@@ -117,23 +117,23 @@ class ZookeeperStore implements PersistingStoreInterface
             throw new LockAcquiringException($ex);
         }
     }
-    private function getKeyResource(Key $key) : string
+    private function getKeyResource(Key $key): string
     {
         // Since we do not support storing locks as multi-level nodes, we convert them to be stored at root level.
         // For example: foo/bar will become /foo-bar and /foo/bar will become /-foo-bar
         $resource = (string) $key;
-        if (\str_contains($resource, '/')) {
-            $resource = \strtr($resource, ['/' => '-']) . '-' . \sha1($resource);
+        if (str_contains($resource, '/')) {
+            $resource = strtr($resource, ['/' => '-']) . '-' . sha1($resource);
         }
         if ('' === $resource) {
-            $resource = \sha1($resource);
+            $resource = sha1($resource);
         }
         return '/' . $resource;
     }
-    private function getUniqueToken(Key $key) : string
+    private function getUniqueToken(Key $key): string
     {
         if (!$key->hasState(self::class)) {
-            $token = \base64_encode(\random_bytes(32));
+            $token = base64_encode(random_bytes(32));
             $key->setState(self::class, $token);
         }
         return $key->getState(self::class);

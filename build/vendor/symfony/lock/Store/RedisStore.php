@@ -11,7 +11,7 @@
 namespace LockmeDep\Symfony\Component\Lock\Store;
 
 use LockmeDep\Predis\Response\ServerException;
-use LockmeDep\Relay\Relay;
+use Relay\Relay;
 use LockmeDep\Symfony\Component\Lock\Exception\InvalidTtlException;
 use LockmeDep\Symfony\Component\Lock\Exception\LockConflictedException;
 use LockmeDep\Symfony\Component\Lock\Exception\LockStorageException;
@@ -34,7 +34,7 @@ class RedisStore implements SharedLockStoreInterface
     public function __construct(private \Redis|Relay|\RedisArray|\RedisCluster|\LockmeDep\Predis\ClientInterface $redis, private float $initialTtl = 300.0)
     {
         if ($initialTtl <= 0) {
-            throw new InvalidTtlException(\sprintf('"%s()" expects a strictly positive TTL. Got %d.', __METHOD__, $initialTtl));
+            throw new InvalidTtlException(sprintf('"%s()" expects a strictly positive TTL. Got %d.', __METHOD__, $initialTtl));
         }
     }
     /**
@@ -77,7 +77,7 @@ class RedisStore implements SharedLockStoreInterface
             return true
         ';
         $key->reduceLifetime($this->initialTtl);
-        if (!$this->evaluate($script, (string) $key, [\microtime(\true), $this->getUniqueToken($key), (int) \ceil($this->initialTtl * 1000)])) {
+        if (!$this->evaluate($script, (string) $key, [microtime(\true), $this->getUniqueToken($key), (int) ceil($this->initialTtl * 1000)])) {
             throw new LockConflictedException();
         }
         $this->checkNotExpired($key);
@@ -117,7 +117,7 @@ class RedisStore implements SharedLockStoreInterface
             return true
         ';
         $key->reduceLifetime($this->initialTtl);
-        if (!$this->evaluate($script, (string) $key, [\microtime(\true), $this->getUniqueToken($key), (int) \ceil($this->initialTtl * 1000)])) {
+        if (!$this->evaluate($script, (string) $key, [microtime(\true), $this->getUniqueToken($key), (int) ceil($this->initialTtl * 1000)])) {
             throw new LockConflictedException();
         }
         $this->checkNotExpired($key);
@@ -157,7 +157,7 @@ class RedisStore implements SharedLockStoreInterface
             return true
         ';
         $key->reduceLifetime($ttl);
-        if (!$this->evaluate($script, (string) $key, [\microtime(\true), $this->getUniqueToken($key), (int) \ceil($ttl * 1000)])) {
+        if (!$this->evaluate($script, (string) $key, [microtime(\true), $this->getUniqueToken($key), (int) ceil($ttl * 1000)])) {
             throw new LockConflictedException();
         }
         $this->checkNotExpired($key);
@@ -193,7 +193,7 @@ class RedisStore implements SharedLockStoreInterface
         ';
         $this->evaluate($script, (string) $key, [$this->getUniqueToken($key)]);
     }
-    public function exists(Key $key) : bool
+    public function exists(Key $key): bool
     {
         $script = '
             local key = KEYS[1]
@@ -215,14 +215,14 @@ class RedisStore implements SharedLockStoreInterface
 
             return false
         ';
-        return (bool) $this->evaluate($script, (string) $key, [\microtime(\true), $this->getUniqueToken($key)]);
+        return (bool) $this->evaluate($script, (string) $key, [microtime(\true), $this->getUniqueToken($key)]);
     }
-    private function evaluate(string $script, string $resource, array $args) : mixed
+    private function evaluate(string $script, string $resource, array $args): mixed
     {
         if ($this->redis instanceof \Redis || $this->redis instanceof Relay || $this->redis instanceof \RedisCluster) {
             $this->redis->clearLastError();
-            $result = $this->redis->eval($script, \array_merge([$resource], $args), 1);
-            if (null !== ($err = $this->redis->getLastError())) {
+            $result = $this->redis->eval($script, array_merge([$resource], $args), 1);
+            if (null !== $err = $this->redis->getLastError()) {
                 throw new LockStorageException($err);
             }
             return $result;
@@ -230,28 +230,28 @@ class RedisStore implements SharedLockStoreInterface
         if ($this->redis instanceof \RedisArray) {
             $client = $this->redis->_instance($this->redis->_target($resource));
             $client->clearLastError();
-            $result = $client->eval($script, \array_merge([$resource], $args), 1);
-            if (null !== ($err = $client->getLastError())) {
+            $result = $client->eval($script, array_merge([$resource], $args), 1);
+            if (null !== $err = $client->getLastError()) {
                 throw new LockStorageException($err);
             }
             return $result;
         }
         \assert($this->redis instanceof \LockmeDep\Predis\ClientInterface);
         try {
-            return $this->redis->eval(...\array_merge([$script, 1, $resource], $args));
+            return $this->redis->eval(...array_merge([$script, 1, $resource], $args));
         } catch (ServerException $e) {
             throw new LockStorageException($e->getMessage(), $e->getCode(), $e);
         }
     }
-    private function getUniqueToken(Key $key) : string
+    private function getUniqueToken(Key $key): string
     {
         if (!$key->hasState(__CLASS__)) {
-            $token = \base64_encode(\random_bytes(32));
+            $token = base64_encode(random_bytes(32));
             $key->setState(__CLASS__, $token);
         }
         return $key->getState(__CLASS__);
     }
-    private function getNowCode() : string
+    private function getNowCode(): string
     {
         if (!isset($this->supportTime)) {
             // Redis < 5.0 does not support TIME (not deterministic) in script.
@@ -266,7 +266,7 @@ class RedisStore implements SharedLockStoreInterface
             try {
                 $this->supportTime = 1 === $this->evaluate($script, 'symfony_check_support_time', []);
             } catch (LockStorageException $e) {
-                if (!\str_contains($e->getMessage(), 'commands not allowed after non deterministic') && !\str_contains($e->getMessage(), 'is not allowed from script script')) {
+                if (!str_contains($e->getMessage(), 'commands not allowed after non deterministic') && !str_contains($e->getMessage(), 'is not allowed from script script')) {
                     throw $e;
                 }
                 $this->supportTime = \false;

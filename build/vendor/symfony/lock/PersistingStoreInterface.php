@@ -38,7 +38,7 @@ interface PersistingStoreInterface
     /**
      * Returns whether or not the resource exists in the storage.
      */
-    public function exists(Key $key) : bool;
+    public function exists(Key $key): bool;
     /**
      * Extends the TTL of a resource.
      *

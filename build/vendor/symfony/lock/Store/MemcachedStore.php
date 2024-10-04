@@ -42,7 +42,7 @@ class MemcachedStore implements PersistingStoreInterface
             throw new InvalidArgumentException('Memcached extension is required.');
         }
         if ($initialTtl < 1) {
-            throw new InvalidArgumentException(\sprintf('"%s()" expects a strictly positive TTL. Got %d.', __METHOD__, $initialTtl));
+            throw new InvalidArgumentException(sprintf('"%s()" expects a strictly positive TTL. Got %d.', __METHOD__, $initialTtl));
         }
         $this->memcached = $memcached;
         $this->initialTtl = $initialTtl;
@@ -54,7 +54,7 @@ class MemcachedStore implements PersistingStoreInterface
     {
         $token = $this->getUniqueToken($key);
         $key->reduceLifetime($this->initialTtl);
-        if (!$this->memcached->add((string) $key, $token, (int) \ceil($this->initialTtl))) {
+        if (!$this->memcached->add((string) $key, $token, (int) ceil($this->initialTtl))) {
             // the lock is already acquired. It could be us. Let's try to put off.
             $this->putOffExpiration($key, $this->initialTtl);
         }
@@ -66,10 +66,10 @@ class MemcachedStore implements PersistingStoreInterface
     public function putOffExpiration(Key $key, float $ttl)
     {
         if ($ttl < 1) {
-            throw new InvalidTtlException(\sprintf('"%s()" expects a TTL greater or equals to 1 second. Got %s.', __METHOD__, $ttl));
+            throw new InvalidTtlException(sprintf('"%s()" expects a TTL greater or equals to 1 second. Got %s.', __METHOD__, $ttl));
         }
         // Interface defines a float value but Store required an integer.
-        $ttl = (int) \ceil($ttl);
+        $ttl = (int) ceil($ttl);
         $token = $this->getUniqueToken($key);
         [$value, $cas] = $this->getValueAndCas($key);
         $key->reduceLifetime($ttl);
@@ -109,21 +109,21 @@ class MemcachedStore implements PersistingStoreInterface
         // Now, we are the owner of the lock for 2 more seconds, we can delete it.
         $this->memcached->delete((string) $key);
     }
-    public function exists(Key $key) : bool
+    public function exists(Key $key): bool
     {
         return $this->memcached->get((string) $key) === $this->getUniqueToken($key);
     }
-    private function getUniqueToken(Key $key) : string
+    private function getUniqueToken(Key $key): string
     {
         if (!$key->hasState(__CLASS__)) {
-            $token = \base64_encode(\random_bytes(32));
+            $token = base64_encode(random_bytes(32));
             $key->setState(__CLASS__, $token);
         }
         return $key->getState(__CLASS__);
     }
-    private function getValueAndCas(Key $key) : array
+    private function getValueAndCas(Key $key): array
     {
-        if ($this->useExtendedReturn ??= \version_compare(\phpversion('memcached'), '2.9.9', '>')) {
+        if ($this->useExtendedReturn ??= version_compare(phpversion('memcached'), '2.9.9', '>')) {
             $extendedReturn = $this->memcached->get((string) $key, null, \Memcached::GET_EXTENDED);
             if (\Memcached::GET_ERROR_RETURN_VALUE === $extendedReturn) {
                 return [$extendedReturn, 0.0];

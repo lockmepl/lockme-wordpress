@@ -36,13 +36,13 @@ abstract class AbstractGrant
      *
      * @return string
      */
-    protected abstract function getName();
+    abstract protected function getName();
     /**
      * Returns a list of all required request parameters.
      *
      * @return array
      */
-    protected abstract function getRequiredRequestParameters();
+    abstract protected function getRequiredRequestParameters();
     /**
      * Returns this grant's name as its string representation. This allows for
      * string interpolation when building URL query parameters.
@@ -65,7 +65,7 @@ abstract class AbstractGrant
     {
         $defaults['grant_type'] = $this->getName();
         $required = $this->getRequiredRequestParameters();
-        $provided = \array_merge($defaults, $options);
+        $provided = array_merge($defaults, $options);
         $this->checkRequiredParameters($required, $provided);
         return $provided;
     }

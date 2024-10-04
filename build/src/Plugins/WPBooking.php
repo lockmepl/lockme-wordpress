@@ -22,18 +22,18 @@ class WPBooking implements PluginInterface
         global $wpb_path;
         $this->plugin = $plugin;
         $this->options = get_option('lockme_wpb');
-        if (\is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             $wpb_path = __DIR__ . '/../../../../wp-booking-calendar/';
             /** @noinspection PhpIncludeInspection */
             include_once $wpb_path . '/admin/class/list.class.php';
-            \register_shutdown_function([$this, 'ShutDown']);
-            $script = \preg_replace("/^.*wp-booking-calendar\\//", '', $_SERVER['SCRIPT_FILENAME']);
+            register_shutdown_function([$this, 'ShutDown']);
+            $script = preg_replace("/^.*wp-booking-calendar\\//", '', $_SERVER['SCRIPT_FILENAME']);
             if ($script === 'admin/ajax/delReservationItem.php') {
                 /** @noinspection PhpIncludeInspection */
                 include_once $wpb_path . 'public/class/reservation.class.php';
                 $this->delId = $_REQUEST['item_id'];
                 $bookingReservationObj = new wp_booking_calendar_public_reservation();
-                $reses = $bookingReservationObj->getReservationsDetails(\md5($this->delId));
+                $reses = $bookingReservationObj->getReservationsDetails(md5($this->delId));
                 $this->delData = $this->AppData($this->delId, $reses[$this->delId]);
             }
             add_action('init', function () {
@@ -52,11 +52,11 @@ class WPBooking implements PluginInterface
             }, \PHP_INT_MAX);
         }
     }
-    private function AppData($id, $res) : array
+    private function AppData($id, $res): array
     {
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['calendar_id']], 'date' => \date('Y-m-d', \strtotime($res['reservation_date'])), 'hour' => \date('H:i:s', \strtotime($res['reservation_time_from'])), 'people' => $res['reservation_seats'], 'pricer' => 'API', 'price' => $res['reservation_price'], 'name' => $res['reservation_name'], 'surname' => $res['reservation_surname'], 'email' => $res['reservation_email'], 'phone' => $res['reservation_phone'], 'comment' => $res['reservation_message'], 'status' => 1, 'extid' => $id]);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['calendar_id']], 'date' => date('Y-m-d', strtotime($res['reservation_date'])), 'hour' => date('H:i:s', strtotime($res['reservation_time_from'])), 'people' => $res['reservation_seats'], 'pricer' => 'API', 'price' => $res['reservation_price'], 'name' => $res['reservation_name'], 'surname' => $res['reservation_surname'], 'email' => $res['reservation_email'], 'phone' => $res['reservation_phone'], 'comment' => $res['reservation_message'], 'status' => 1, 'extid' => $id]);
     }
-    public function Delete($id, $appdata = null) : void
+    public function Delete($id, $appdata = null): void
     {
         if (!$appdata['roomid']) {
             return;
@@ -75,10 +75,10 @@ class WPBooking implements PluginInterface
         } catch (Exception $e) {
         }
     }
-    public function ExportToLockMe() : void
+    public function ExportToLockMe(): void
     {
         global $wpb_path;
-        \set_time_limit(0);
+        set_time_limit(0);
         /** @noinspection PhpIncludeInspection */
         include_once $wpb_path . 'public/class/reservation.class.php';
         $bookingListObj = new wp_booking_calendar_lists();
@@ -87,22 +87,22 @@ class WPBooking implements PluginInterface
         foreach ($calendars as $cid => $calendar) {
             $rows = $bookingListObj->getReservationsList('and s.`slot_date` >= curdate()', '', $cid);
             foreach ($rows as $id => $res) {
-                $ids[] = \md5($id);
+                $ids[] = md5($id);
             }
         }
-        if (\count($ids)) {
+        if (count($ids)) {
             $bookingReservationObj = new wp_booking_calendar_public_reservation();
-            $reses = $bookingReservationObj->getReservationsDetails(\implode(',', $ids));
+            $reses = $bookingReservationObj->getReservationsDetails(implode(',', $ids));
             foreach ($reses as $id => $data) {
                 $this->Update($id, $data);
             }
         }
     }
-    public function CheckDependencies() : bool
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('wp-booking-calendar/wp-booking-calendar.php');
     }
-    public function RegisterSettings() : void
+    public function RegisterSettings(): void
     {
         if (!$this->CheckDependencies()) {
             return;
@@ -126,7 +126,7 @@ class WPBooking implements PluginInterface
             $bookingListObj = new wp_booking_calendar_lists();
             $calendars = $bookingListObj->getCalendarsList('');
             foreach ($calendars as $cid => $calendar) {
-                add_settings_field('calendar_' . $cid, 'Room for ' . $calendar['calendar_title'], function () use($rooms, $cid) {
+                add_settings_field('calendar_' . $cid, 'Room for ' . $calendar['calendar_title'], function () use ($rooms, $cid) {
                     echo '<select name="lockme_wpb[calendar_' . $cid . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
@@ -140,7 +140,7 @@ class WPBooking implements PluginInterface
             }, 'lockme-wpb', 'lockme_wpb_section', []);
         }
     }
-    public function DrawForm() : void
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo "<p>You don't have required plugin</p>";
@@ -157,10 +157,10 @@ class WPBooking implements PluginInterface
         settings_fields('lockme-wpb');
         do_settings_sections('lockme-wpb');
     }
-    public function ShutDown() : void
+    public function ShutDown(): void
     {
         global $bookingReservationObj, $listReservations, $bookingSlotsObj;
-        $script = \preg_replace("/^.*wp-booking-calendar\\//", '', $_SERVER['SCRIPT_FILENAME']);
+        $script = preg_replace("/^.*wp-booking-calendar\\//", '', $_SERVER['SCRIPT_FILENAME']);
         switch ($script) {
             //Public
             case 'public/ajax/doReservation.php':
@@ -195,7 +195,7 @@ class WPBooking implements PluginInterface
                 break;
         }
     }
-    public function GetMessage(array $message) : bool
+    public function GetMessage(array $message): bool
     {
         global $wpdb, $blog_id;
         if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
@@ -248,11 +248,11 @@ class WPBooking implements PluginInterface
      * @param wp_booking_calendar_slot $slot
      * @return array
      */
-    private function Obj2Data($res, $slot) : array
+    private function Obj2Data($res, $slot): array
     {
         return ['calendar_id' => $res->getReservationCalendarId(), 'reservation_date' => $slot->getSlotDate(), 'reservation_time_from' => $slot->getSlotTimeFrom(), 'reservation_seats' => $res->getReservationSeats(), 'reservation_price' => $slot->getSlotPrice(), 'reservation_name' => $res->getReservationName(), 'reservation_surname' => $res->getReservationSurname(), 'reservation_email' => $res->getReservationEmail(), 'reservation_phone' => $res->getReservationPhone(), 'reservation_message' => $res->getReservationMessage(), 'reservation_cancelled' => $res->getReservationCancelled()];
     }
-    private function Add($id, $res) : void
+    private function Add($id, $res): void
     {
         $appdata = $this->AppData($id, $res);
         if ($res['reservation_cancelled']) {
@@ -265,7 +265,7 @@ class WPBooking implements PluginInterface
         } catch (Exception $e) {
         }
     }
-    private function Update($id, $res) : void
+    private function Update($id, $res): void
     {
         $appdata = $this->AppData($id, $res);
         if (!$appdata['roomid']) {
@@ -306,7 +306,7 @@ class WPBooking implements PluginInterface
         }
         throw new RuntimeException('No calendar');
     }
-    public function getPluginName() : string
+    public function getPluginName(): string
     {
         return 'WP Booking Calendar';
     }

@@ -26,40 +26,40 @@ final class Key
     {
         $this->resource = $resource;
     }
-    public function __toString() : string
+    public function __toString(): string
     {
         return $this->resource;
     }
-    public function hasState(string $stateKey) : bool
+    public function hasState(string $stateKey): bool
     {
         return isset($this->state[$stateKey]);
     }
-    public function setState(string $stateKey, mixed $state) : void
+    public function setState(string $stateKey, mixed $state): void
     {
         $this->state[$stateKey] = $state;
     }
-    public function removeState(string $stateKey) : void
+    public function removeState(string $stateKey): void
     {
         unset($this->state[$stateKey]);
     }
-    public function getState(string $stateKey) : mixed
+    public function getState(string $stateKey): mixed
     {
         return $this->state[$stateKey];
     }
-    public function markUnserializable() : void
+    public function markUnserializable(): void
     {
         $this->serializable = \false;
     }
-    public function resetLifetime() : void
+    public function resetLifetime(): void
     {
         $this->expiringTime = null;
     }
     /**
      * @param float $ttl the expiration delay of locks in seconds
      */
-    public function reduceLifetime(float $ttl) : void
+    public function reduceLifetime(float $ttl): void
     {
-        $newTime = \microtime(\true) + $ttl;
+        $newTime = microtime(\true) + $ttl;
         if (null === $this->expiringTime || $this->expiringTime > $newTime) {
             $this->expiringTime = $newTime;
         }
@@ -67,15 +67,15 @@ final class Key
     /**
      * Returns the remaining lifetime in seconds.
      */
-    public function getRemainingLifetime() : ?float
+    public function getRemainingLifetime(): ?float
     {
-        return null === $this->expiringTime ? null : $this->expiringTime - \microtime(\true);
+        return null === $this->expiringTime ? null : $this->expiringTime - microtime(\true);
     }
-    public function isExpired() : bool
+    public function isExpired(): bool
     {
-        return null !== $this->expiringTime && $this->expiringTime <= \microtime(\true);
+        return null !== $this->expiringTime && $this->expiringTime <= microtime(\true);
     }
-    public function __sleep() : array
+    public function __sleep(): array
     {
         if (!$this->serializable) {
             throw new UnserializableKeyException('The key cannot be serialized.');

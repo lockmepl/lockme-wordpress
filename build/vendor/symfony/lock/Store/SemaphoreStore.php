@@ -26,7 +26,7 @@ class SemaphoreStore implements BlockingStoreInterface
      *
      * @internal
      */
-    public static function isSupported() : bool
+    public static function isSupported(): bool
     {
         return \extension_loaded('sysvsem');
     }
@@ -50,17 +50,17 @@ class SemaphoreStore implements BlockingStoreInterface
     {
         $this->lock($key, \true);
     }
-    private function lock(Key $key, bool $blocking) : void
+    private function lock(Key $key, bool $blocking): void
     {
         if ($key->hasState(__CLASS__)) {
             return;
         }
-        $keyId = \unpack('i', \hash('xxh128', $key, \true))[1];
-        $resource = @\sem_get($keyId);
-        $acquired = $resource && @\sem_acquire($resource, !$blocking);
+        $keyId = unpack('i', hash('xxh128', $key, \true))[1];
+        $resource = @sem_get($keyId);
+        $acquired = $resource && @sem_acquire($resource, !$blocking);
         while ($blocking && !$acquired) {
-            $resource = @\sem_get($keyId);
-            $acquired = $resource && @\sem_acquire($resource);
+            $resource = @sem_get($keyId);
+            $acquired = $resource && @sem_acquire($resource);
         }
         if (!$acquired) {
             throw new LockConflictedException();
@@ -78,7 +78,7 @@ class SemaphoreStore implements BlockingStoreInterface
             return;
         }
         $resource = $key->getState(__CLASS__);
-        \sem_remove($resource);
+        sem_remove($resource);
         $key->removeState(__CLASS__);
     }
     /**
@@ -88,7 +88,7 @@ class SemaphoreStore implements BlockingStoreInterface
     {
         // do nothing, the semaphore locks forever.
     }
-    public function exists(Key $key) : bool
+    public function exists(Key $key): bool
     {
         return $key->hasState(__CLASS__);
     }

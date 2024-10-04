@@ -24,7 +24,7 @@ class Bookly implements PluginInterface
     {
         $this->plugin = $plugin;
         $this->options = get_option('lockme_bookly');
-        if (\is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_filter('wp_die_ajax_handler', [$this, 'Ajax'], 15, 1);
             add_action('init', function () {
                 if (is_admin() && wp_doing_ajax()) {
@@ -49,14 +49,14 @@ class Bookly implements PluginInterface
             }, \PHP_INT_MAX);
         }
     }
-    public function AppData($id, $info = null) : array
+    public function AppData($id, $info = null): array
     {
         if ($info === null) {
             $info = Appointment::query('a')->select('SUM( ca.number_of_persons ) AS total_number_of_persons, a.staff_id, a.service_id, a.start_date, a.end_date, a.internal_note')->leftJoin('CustomerAppointment', 'ca', 'ca.appointment_id = a.id')->where('a.id', $id)->fetchRow();
         }
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $info['staff_id']], 'date' => \date('Y-m-d', \strtotime($info['start_date'])), 'hour' => \date('H:i:s', \strtotime($info['start_date'])), 'pricer' => 'API', 'status' => 1, 'extid' => $id]);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $info['staff_id']], 'date' => date('Y-m-d', strtotime($info['start_date'])), 'hour' => date('H:i:s', strtotime($info['start_date'])), 'pricer' => 'API', 'status' => 1, 'extid' => $id]);
     }
-    public function ExportToLockMe() : void
+    public function ExportToLockMe(): void
     {
         $bookings = CustomerAppointment::query('ca')->select('`a`.`id`,
             `a`.`staff_id`,
@@ -66,17 +66,17 @@ class Bookly implements PluginInterface
             `ca`.`extras`,
             COALESCE(`s`.`padding_left`,0) AS `padding_left`,
             COALESCE(`s`.`padding_right`,0) AS `padding_right`,
-            SUM(`ca`.`number_of_persons`) AS `number_of_bookings`')->leftJoin('Appointment', 'a', '`a`.`id` = `ca`.`appointment_id`')->leftJoin('StaffService', 'ss', '`ss`.`staff_id` = `a`.`staff_id` AND `ss`.`service_id` = `a`.`service_id`')->leftJoin('Service', 's', '`s`.`id` = `a`.`service_id`')->whereGte('a.start_date', \date('Y-m-d'))->groupBy('a.id')->fetchArray();
+            SUM(`ca`.`number_of_persons`) AS `number_of_bookings`')->leftJoin('Appointment', 'a', '`a`.`id` = `ca`.`appointment_id`')->leftJoin('StaffService', 'ss', '`ss`.`staff_id` = `a`.`staff_id` AND `ss`.`service_id` = `a`.`service_id`')->leftJoin('Service', 's', '`s`.`id` = `a`.`service_id`')->whereGte('a.start_date', date('Y-m-d'))->groupBy('a.id')->fetchArray();
         foreach ($bookings as $b) {
             $this->AddEditReservation($b['id']);
         }
     }
-    public function AddEditReservation($id) : void
+    public function AddEditReservation($id): void
     {
-        if (!\is_numeric($id)) {
+        if (!is_numeric($id)) {
             return;
         }
-        if (\defined('LOCKME_MESSAGING')) {
+        if (defined('LOCKME_MESSAGING')) {
             return;
         }
         $appdata = $this->AppData($id);
@@ -100,7 +100,7 @@ class Bookly implements PluginInterface
         } catch (Exception $e) {
         }
     }
-    public function DrawForm() : void
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo "<p>You don't have required plugin</p>";
@@ -116,7 +116,7 @@ class Bookly implements PluginInterface
     }
     public function Ajax($msg)
     {
-        $data = \json_decode(\ob_get_contents(), \true);
+        $data = json_decode(ob_get_contents(), \true);
         switch ($_REQUEST['action']) {
             case 'bookly_save_appointment_form':
                 $this->AddEditReservation($data['data']['id']);
@@ -155,7 +155,7 @@ class Bookly implements PluginInterface
         }
         return $msg;
     }
-    public function DeleteBatch() : void
+    public function DeleteBatch(): void
     {
         foreach ($this->ajaxdata as $id => $ca) {
             if ($id && $ca) {
@@ -163,9 +163,9 @@ class Bookly implements PluginInterface
             }
         }
     }
-    public function Delete($id, $appdata = null) : void
+    public function Delete($id, $appdata = null): void
     {
-        if (\defined('LOCKME_MESSAGING')) {
+        if (defined('LOCKME_MESSAGING')) {
             return;
         }
         $api = $this->plugin->GetApi();
@@ -180,7 +180,7 @@ class Bookly implements PluginInterface
         } catch (Exception $e) {
         }
     }
-    public function GetMessage(array $message) : bool
+    public function GetMessage(array $message): bool
     {
         if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return \false;
@@ -188,7 +188,7 @@ class Bookly implements PluginInterface
         $data = $message['data'];
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
-        $timestamp = \strtotime($data['date'] . ' ' . $data['hour']);
+        $timestamp = strtotime($data['date'] . ' ' . $data['hour']);
         $surname = $data['surname'];
         if ($data['source'] === 'web' || $data['source'] === 'widget') {
             $surname .= ' (LockMe)';
@@ -219,20 +219,20 @@ class Bookly implements PluginInterface
                 $customer->setPhone($data['phone']);
                 $customer->save();
                 $appointment = new Appointment();
-                $appointment->loadBy(['service_id' => $service_id, 'staff_id' => $staff_id, 'start_date' => \date('Y-m-d H:i:s', $timestamp)]);
+                $appointment->loadBy(['service_id' => $service_id, 'staff_id' => $staff_id, 'start_date' => date('Y-m-d H:i:s', $timestamp)]);
                 if ($appointment->isLoaded() == \false) {
                     $appointment->setServiceId($service_id);
                     $appointment->setStaffId($staff_id);
-                    $appointment->setStartDate(\date('Y-m-d H:i:s', $timestamp));
-                    $appointment->setEndDate(\date('Y-m-d H:i:s', $timestamp + $service->getDuration()));
+                    $appointment->setStartDate(date('Y-m-d H:i:s', $timestamp));
+                    $appointment->setEndDate(date('Y-m-d H:i:s', $timestamp + $service->getDuration()));
                     $appointment->save();
                 }
                 $customer_appointment = new CustomerAppointment();
                 $customer_appointment->setCustomerId($customer->getId())->setAppointmentId($appointment->getId())->setPaymentId(null)->setNumberOfPersons($this->options['one_person'] ? 1 : $data['people'])->setExtras('[]')->setCustomFields('[]')->setStatus(CustomerAppointment::STATUS_APPROVED)->setTimeZoneOffset($offset)->setCreatedFrom('backend');
                 if (method_exists($customer_appointment, 'setCreated')) {
-                    $customer_appointment->setCreated(\date('Y-m-d H:i:s'))->save();
+                    $customer_appointment->setCreated(date('Y-m-d H:i:s'))->save();
                 } else {
-                    $customer_appointment->setCreatedAt(\date('Y-m-d H:i:s'))->save();
+                    $customer_appointment->setCreatedAt(date('Y-m-d H:i:s'))->save();
                 }
                 $id = $appointment->getId();
                 if (!$id || !$customer_appointment->getId()) {
@@ -249,8 +249,8 @@ class Bookly implements PluginInterface
                 if ($data['extid']) {
                     $appointment = new Appointment();
                     $appointment->load($data['extid']);
-                    $appointment->setStartDate(\date('Y-m-d H:i:s', $timestamp));
-                    $appointment->setEndDate(\date('Y-m-d H:i:s', $timestamp + $service->getDuration()));
+                    $appointment->setStartDate(date('Y-m-d H:i:s', $timestamp));
+                    $appointment->setEndDate(date('Y-m-d H:i:s', $timestamp + $service->getDuration()));
                     $appointment->save();
                     $ca = $appointment->getCustomerAppointments();
                     foreach ($ca as $c) {
@@ -287,7 +287,7 @@ class Bookly implements PluginInterface
         }
         return null;
     }
-    public function RegisterSettings() : void
+    public function RegisterSettings(): void
     {
         if (!$this->CheckDependencies()) {
             return;
@@ -313,7 +313,7 @@ class Bookly implements PluginInterface
             }
             $calendars = Staff::query()->sortBy('position')->fetchArray();
             foreach ($calendars as $calendar) {
-                add_settings_field('calendar_' . $calendar['id'], 'Room for ' . $calendar['full_name'], function () use($rooms, $calendar) {
+                add_settings_field('calendar_' . $calendar['id'], 'Room for ' . $calendar['full_name'], function () use ($rooms, $calendar) {
                     echo '<select name="lockme_bookly[calendar_' . $calendar['id'] . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
@@ -327,11 +327,11 @@ class Bookly implements PluginInterface
             }, 'lockme-bookly', 'lockme_bookly_section', []);
         }
     }
-    public function CheckDependencies() : bool
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('appointment-booking/main.php') || is_plugin_active('bookly-responsive-appointment-booking-tool/main.php');
     }
-    public function getPluginName() : string
+    public function getPluginName(): string
     {
         return 'Bookly';
     }

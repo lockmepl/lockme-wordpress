@@ -29,7 +29,7 @@ trait MacAuthorizationTrait
      * @param  AccessToken $token
      * @return string
      */
-    protected abstract function getTokenId(AccessToken $token);
+    abstract protected function getTokenId(AccessToken $token);
     /**
      * Returns the MAC signature for the current request.
      *
@@ -38,7 +38,7 @@ trait MacAuthorizationTrait
      * @param  string $nonce
      * @return string
      */
-    protected abstract function getMacSignature($id, $ts, $nonce);
+    abstract protected function getMacSignature($id, $ts, $nonce);
     /**
      * Returns a new random string to use as the state parameter in an
      * authorization flow.
@@ -46,7 +46,7 @@ trait MacAuthorizationTrait
      * @param  int $length Length of the random string to be generated.
      * @return string
      */
-    protected abstract function getRandomState($length = 32);
+    abstract protected function getRandomState($length = 32);
     /**
      * Returns the authorization headers for the 'mac' grant.
      *
@@ -63,14 +63,14 @@ trait MacAuthorizationTrait
         if ($token === null) {
             return [];
         }
-        $ts = \time();
+        $ts = time();
         $id = $this->getTokenId($token);
         $nonce = $this->getRandomState(16);
         $mac = $this->getMacSignature($id, $ts, $nonce);
         $parts = [];
-        foreach (\compact('id', 'ts', 'nonce', 'mac') as $key => $value) {
-            $parts[] = \sprintf('%s="%s"', $key, $value);
+        foreach (compact('id', 'ts', 'nonce', 'mac') as $key => $value) {
+            $parts[] = sprintf('%s="%s"', $key, $value);
         }
-        return ['Authorization' => 'MAC ' . \implode(', ', $parts)];
+        return ['Authorization' => 'MAC ' . implode(', ', $parts)];
     }
 }

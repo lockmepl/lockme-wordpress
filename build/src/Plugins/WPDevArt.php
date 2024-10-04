@@ -24,11 +24,11 @@ class WPDevArt implements PluginInterface
         global $wpdb;
         $this->plugin = $plugin;
         $this->options = get_option('lockme_wpdevart');
-        if (\is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
             if ($_GET['page'] === 'wpdevart-reservations' && $_POST['task'] && $_POST['id'] && is_admin()) {
                 $this->resdata = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $wpdb->prefix . 'wpdevart_reservations WHERE `id`=%d', $_POST['id']), ARRAY_A);
             }
-            \register_shutdown_function([$this, 'ShutDown']);
+            register_shutdown_function([$this, 'ShutDown']);
             add_action('init', function () {
                 if ($_GET['wpdevart_export'] ?? null) {
                     $this->ExportToLockMe();
@@ -38,22 +38,22 @@ class WPDevArt implements PluginInterface
             }, \PHP_INT_MAX);
         }
     }
-    public function ExportToLockMe() : void
+    public function ExportToLockMe(): void
     {
         global $wpdb;
-        \set_time_limit(0);
+        set_time_limit(0);
         $sql = "SELECT * FROM {$wpdb->prefix}wpdevart_reservations WHERE `single_day` >= curdate() ORDER BY ID";
         $rows = $wpdb->get_results($sql, ARRAY_A);
         foreach ($rows as $row) {
             $this->AddEditReservation($row);
         }
     }
-    public function AddEditReservation($res) : void
+    public function AddEditReservation($res): void
     {
-        if (!\is_array($res)) {
+        if (!is_array($res)) {
             return;
         }
-        if (\defined('LOCKME_MESSAGING')) {
+        if (defined('LOCKME_MESSAGING')) {
             return;
         }
         $id = $res['id'];
@@ -78,11 +78,11 @@ class WPDevArt implements PluginInterface
         } catch (Exception $e) {
         }
     }
-    private function AppData($res) : array
+    private function AppData($res): array
     {
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['calendar_id']], 'date' => \date('Y-m-d', \strtotime($res['single_day'])), 'hour' => \date('H:i:s', \strtotime($res['start_hour'])), 'pricer' => 'API', 'email' => $res['email'], 'status' => $res['status'] === 'approved' ? 1 : 0, 'extid' => $res['id'], 'price' => $res['price']]);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['calendar_id']], 'date' => date('Y-m-d', strtotime($res['single_day'])), 'hour' => date('H:i:s', strtotime($res['start_hour'])), 'pricer' => 'API', 'email' => $res['email'], 'status' => $res['status'] === 'approved' ? 1 : 0, 'extid' => $res['id'], 'price' => $res['price']]);
     }
-    public function RegisterSettings() : void
+    public function RegisterSettings(): void
     {
         global $wpdb;
         if (!$this->CheckDependencies()) {
@@ -107,7 +107,7 @@ class WPDevArt implements PluginInterface
             $query = 'SELECT * FROM ' . $wpdb->prefix . 'wpdevart_calendars ';
             $calendars = $wpdb->get_results($query);
             foreach ($calendars as $calendar) {
-                add_settings_field('calendar_' . $calendar->id, 'Room for ' . $calendar->title, function () use($rooms, $calendar) {
+                add_settings_field('calendar_' . $calendar->id, 'Room for ' . $calendar->title, function () use ($rooms, $calendar) {
                     echo '<select name="lockme_wpdevart[calendar_' . $calendar->id . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
@@ -121,11 +121,11 @@ class WPDevArt implements PluginInterface
             }, 'lockme-wpdevart', 'lockme_wpdevart_section', []);
         }
     }
-    public function CheckDependencies() : bool
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('booking-calendar-pro/booking_calendar.php') || is_plugin_active('booking-calendar/booking_calendar.php');
     }
-    public function DrawForm() : void
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo "<p>You don't have required plugin</p>";
@@ -139,7 +139,7 @@ class WPDevArt implements PluginInterface
         settings_fields('lockme-wpdevart');
         do_settings_sections('lockme-wpdevart');
     }
-    public function ShutDown() : void
+    public function ShutDown(): void
     {
         if (isset($_GET['page']) && $_GET['page'] === 'wpdevart-reservations' && $_POST['task'] && is_admin()) {
             switch ($_POST['task']) {
@@ -162,9 +162,9 @@ class WPDevArt implements PluginInterface
         //            }
         //        }
     }
-    public function Delete($res) : void
+    public function Delete($res): void
     {
-        if (\defined('LOCKME_MESSAGING')) {
+        if (defined('LOCKME_MESSAGING')) {
             return;
         }
         $id = $res['id'];
@@ -178,7 +178,7 @@ class WPDevArt implements PluginInterface
         } catch (Exception $e) {
         }
     }
-    public function GetMessage(array $message) : bool
+    public function GetMessage(array $message): bool
     {
         global $wpdb;
         if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
@@ -188,7 +188,7 @@ class WPDevArt implements PluginInterface
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
         $date = $data['date'];
-        $hour = \date('H:i', \strtotime($data['hour']));
+        $hour = date('H:i', strtotime($data['hour']));
         $calendar_id = $this->GetCalendar($roomid);
         if (!$calendar_id) {
             throw new RuntimeException('No calendar');
@@ -205,7 +205,7 @@ class WPDevArt implements PluginInterface
         //        }
         switch ($message['action']) {
             case 'add':
-                $result = $wpdb->insert($wpdb->prefix . 'wpdevart_reservations', ['calendar_id' => $calendar_id, 'single_day' => $date, 'start_hour' => $hour, 'count_item' => 1, 'price' => $data['price'], 'total_price' => $data['price'], 'form' => [], 'email' => $data['email'], 'status' => 'approved', 'date_created' => \date('Y-m-d H:i'), 'is_new' => 0]);
+                $result = $wpdb->insert($wpdb->prefix . 'wpdevart_reservations', ['calendar_id' => $calendar_id, 'single_day' => $date, 'start_hour' => $hour, 'count_item' => 1, 'price' => $data['price'], 'total_price' => $data['price'], 'form' => [], 'email' => $data['email'], 'status' => 'approved', 'date_created' => date('Y-m-d H:i'), 'is_new' => 0]);
                 if ($result === \false) {
                     throw new RuntimeException('Error saving to database - ' . $wpdb->last_error);
                 }
@@ -223,7 +223,7 @@ class WPDevArt implements PluginInterface
                 $extra_field = $extra_model->get_extra_rows($ids['extra_id']);
                 $form_option = $form_model->get_form_rows($ids['form_id']);
                 if (isset($theme_option)) {
-                    $theme_option = \json_decode($theme_option->value, \true);
+                    $theme_option = json_decode($theme_option->value, \true);
                 } else {
                     $theme_option = [];
                 }
@@ -243,7 +243,7 @@ class WPDevArt implements PluginInterface
                 if ($data['extid']) {
                     $row_id = $data['extid'];
                     $old_reserv = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $wpdb->prefix . 'wpdevart_reservations WHERE `id`=%d', $row_id), ARRAY_A);
-                    $wpdb->update($wpdb->prefix . 'wpdevart_reservations', ['calendar_id' => $calendar_id, 'single_day' => $date, 'start_hour' => $hour, 'count_item' => 1, 'price' => $data['price'], 'total_price' => $data['price'], 'form' => [], 'email' => $data['email'], 'status' => 'approved', 'date_created' => \date('Y-m-d H:i'), 'is_new' => 0], ['id' => $row_id]);
+                    $wpdb->update($wpdb->prefix . 'wpdevart_reservations', ['calendar_id' => $calendar_id, 'single_day' => $date, 'start_hour' => $hour, 'count_item' => 1, 'price' => $data['price'], 'total_price' => $data['price'], 'form' => [], 'email' => $data['email'], 'status' => 'approved', 'date_created' => date('Y-m-d H:i'), 'is_new' => 0], ['id' => $row_id]);
                     $theme_model = new wpdevart_bc_ModelThemes();
                     $calendar_model = new wpdevart_bc_ModelCalendars();
                     $form_model = new wpdevart_bc_ModelForms();
@@ -256,7 +256,7 @@ class WPDevArt implements PluginInterface
                     $extra_field = $extra_model->get_extra_rows($ids['extra_id']);
                     $form_option = $form_model->get_form_rows($ids['form_id']);
                     if (isset($theme_option)) {
-                        $theme_option = \json_decode($theme_option->value, \true);
+                        $theme_option = json_decode($theme_option->value, \true);
                     } else {
                         $theme_option = [];
                     }
@@ -298,7 +298,7 @@ class WPDevArt implements PluginInterface
         }
         return null;
     }
-    public function getPluginName() : string
+    public function getPluginName(): string
     {
         return 'Booking Calendar Pro WpDevArt';
     }
