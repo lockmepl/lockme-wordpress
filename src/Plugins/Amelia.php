@@ -6,9 +6,22 @@ namespace LockmeIntegration\Plugins;
 
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
+use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
+use AmeliaBooking\Domain\Entity\Booking\Appointment\CustomerBooking;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
+use AmeliaBooking\Domain\ValueObjects\DateTime\DateTimeValue;
+use AmeliaBooking\Domain\ValueObjects\Json;
+use AmeliaBooking\Domain\ValueObjects\Number\Float\Price;
+use AmeliaBooking\Domain\ValueObjects\Number\Integer\IntegerValue;
+use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
+use AmeliaBooking\Domain\ValueObjects\String\Email;
+use AmeliaBooking\Domain\ValueObjects\String\Name;
+use AmeliaBooking\Domain\ValueObjects\String\Phone;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
+use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
+use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
+use DateTime;
 use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
@@ -87,7 +100,7 @@ class Amelia implements PluginInterface
             return;
         }
 
-        if (!in_array($booking['status'], ['approved', 'pending'])) {
+        if (!in_array($booking['status'], [BookingStatus::APPROVED, BookingStatus::PENDING])) {
             $this->Delete($appointment, $booking);
 
             return;
@@ -115,6 +128,8 @@ class Amelia implements PluginInterface
     {
         /** @var AppointmentRepository $appointmentRepository */
         $appointmentRepository = $this->container()->get('domain.booking.appointment.repository');
+        /** @var CustomerBookingRepository $bookingRepository */
+        $bookingRepository = $this->container()->get('domain.booking.customerBooking.repository');
 
         $appointments = new Collection();
 
@@ -128,6 +143,16 @@ class Amelia implements PluginInterface
         );
 
         foreach ($appointments->getItems() as $appointment) {
+            assert($appointment instanceof Appointment);
+
+            foreach ($appointment->getBookings()->getItems() as $booking) {
+                assert($booking instanceof CustomerBooking);
+
+                $booking = $bookingRepository->getById($booking->getId()->getValue());
+
+                $appointment->getBookings()->addItem($booking, $booking->getId()->getValue(), true);
+            }
+
             $this->AddEditAppointment($appointment->toArray());
         }
     }
@@ -248,8 +273,10 @@ class Amelia implements PluginInterface
 
         $data = $message['data'];
         $roomid = (int) $message['roomid'];
-        $lockme_id = $message['reservationid'];
-        $date = strtotime($data['date']);
+        $lockmeId = $message['reservationid'];
+        $dateTime = new DateTime(
+            sprintf('%s %s', $data['date'], $data['hour'])
+        );
         $extId = $data['extid'];
 
         $service = $this->GetService($roomid);
@@ -259,20 +286,105 @@ class Amelia implements PluginInterface
 
         /** @var AppointmentRepository $appointmentRepository */
         $appointmentRepository = $this->container()->get('domain.booking.appointment.repository');
+        /** @var CustomerBookingRepository $bookingRepository */
+        $bookingRepository = $this->container()->get('domain.booking.customerBooking.repository');
+        /** @var UserRepository $userRepository */
+        $userRepository = $this->container()->get('domain.users.repository');
 
         switch ($message['action']) {
             case 'add':
                 break;
             case 'edit':
+                if ($extId) {
+                    $appointment = $appointmentRepository->getByBookingId((int)$extId);
+                    if ($appointment) {
+                        $booking = null;
+                        foreach ($appointment->getBookings()->getItems() as $book) {
+                            // Sorry I'm too lazy to work with this shitty
+                            // collection-like poopiness.
+                            // Just take first and break.
+
+                            $booking = $bookingRepository->getById($book->getId()->getValue());
+
+                            break;
+                        }
+                        if (!$booking instanceof CustomerBooking) {
+
+                            return false;
+                        }
+
+                        $appointment->setBookingStart(
+                            new DateTimeValue($dateTime)
+                        );
+                        $appointment->setBookingEnd(
+                            new DateTimeValue(
+                                $dateTime->modify(
+                                    sprintf(
+                                        '+%d seconds',
+                                        $booking->getDuration()->getValue(),
+                                    )
+                                )
+                            )
+                        );
+                        $appointment->setService($service);
+                        $appointment->setServiceId($service->getId());
+
+                        $appointmentRepository->update($appointment->getId()->getValue(), $appointment);
+
+                        $booking->setPrice(new Price($data['price']));
+                        $bookingRepository->updatePrice($booking->getId()->getValue(), $booking);
+
+                        $booking->setStatus(new BookingStatus($data['status'] ? BookingStatus::APPROVED : BookingStatus::PENDING));
+                        $booking->setPersons(new IntegerValue((int) $data['people']));
+
+                        $bookingRepository->update($booking->getId()->getValue(), $booking);
+
+                        $customer = $booking->getCustomer();
+                        if ($customer) {
+                            $customer->setEmail(new Email($data['email']));
+                            $customer->setFirstName(new Name($data['name']));
+                            $customer->setLastName(new Name($data['surname']));
+                            $customer->setPhone(new Phone($data['phone']));
+
+                            $userRepository->update($customer->getId()->getValue(), $customer);
+
+                            $info = $booking->getInfo();
+                            if ($info) {
+                                $info = json_decode($info->getValue(), true);
+                                $info['firstName'] = $data['name'];
+                                $info['lastName'] = $data['surname'];
+                                $info['email'] = $data['email'];
+                                $info['phone'] = $data['phone'];
+                                $info['locale'] = $data['language'];
+                            } else {
+                                $info = [
+                                    'firstName' => $data['name'],
+                                    'lastName' => $data['surname'],
+                                    'email' => $data['email'],
+                                    'phone' => $data['phone'],
+                                    'locale' => $data['language'],
+                                ];
+                            }
+
+                            $bookingRepository->updateInfoByCustomerId(
+                                $customer->getId()->getValue(),
+                                json_encode($info)
+                            );
+
+                        }
+
+                        return true;
+                    }
+                }
                 break;
             case 'delete':
                 if ($extId) {
                     $appointment = $appointmentRepository->getByBookingId((int) $extId);
                     if ($appointment) {
                         $appointmentRepository->delete($appointment->getId()->getValue());
-                    }
 
-                    return true;
+                        return true;
+                    }
                 }
                 break;
         }
@@ -317,7 +429,7 @@ class Amelia implements PluginInterface
                     'surname' => $booking['customer']['lastName'] ?? '',
                     'email' => $booking['customer']['email'] ?? '',
                     'phone' => $booking['customer']['phone'] ?? '',
-                    'status' => $booking['status'] === 'approved' ? 1 : 0,
+                    'status' => $booking['status'] === BookingStatus::APPROVED ? 1 : 0,
                     'extid' => $booking['id']
                 ]
             );
