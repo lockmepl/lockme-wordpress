@@ -22,6 +22,8 @@ class Amelia implements PluginInterface
             add_action('amelia_after_booking_added', [$this, 'AddEditAppointment']);
             add_action('amelia_after_appointment_added', [$this, 'AddEditAppointment']);
             add_action('amelia_after_booking_rescheduled', [$this, 'AddEditAppointment']);
+            add_action('amelia_after_appointment_updated', [$this, 'AddEditAppointment']);
+            add_action('amelia_after_appointment_status_updated', [$this, 'AddEditAppointment']);
         }
     }
     public function getPluginName() : string
@@ -54,6 +56,10 @@ class Amelia implements PluginInterface
         if (!$appData) {
             return;
         }
+        if (!\in_array($booking['status'], ['approved', 'pending'])) {
+            $this->Delete($appointment, $booking);
+            return;
+        }
         $api = $this->plugin->GetApi();
         $lockme_data = [];
         try {
@@ -68,6 +74,21 @@ class Amelia implements PluginInterface
                 //Update
                 $api->EditReservation((int) $appData['roomid'], "ext/{$appData['extid']}", $appData);
             }
+        } catch (Exception) {
+        }
+    }
+    public function Delete(array $appointment, array $booking) : void
+    {
+        if (\defined('LOCKME_MESSAGING')) {
+            return;
+        }
+        $appData = $this->AppData($appointment, $booking);
+        if (!$appData['roomid']) {
+            return;
+        }
+        $api = $this->plugin->GetApi();
+        try {
+            $api->DeleteReservation((int) $appData['roomid'], "ext/{$appData['extid']}");
         } catch (Exception) {
         }
     }
