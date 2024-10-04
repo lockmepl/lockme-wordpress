@@ -3,12 +3,16 @@
 declare (strict_types=1);
 namespace LockmeDep\LockmeIntegration\Plugins;
 
+use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
+use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Infrastructure\Common\Container;
+use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
 use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
+use WP_Query;
 class Amelia implements PluginInterface
 {
     private ?Container $container = null;
@@ -24,6 +28,13 @@ class Amelia implements PluginInterface
             add_action('amelia_after_booking_rescheduled', [$this, 'AddEditAppointment']);
             add_action('amelia_after_appointment_updated', [$this, 'AddEditAppointment']);
             add_action('amelia_after_appointment_status_updated', [$this, 'AddEditAppointment']);
+            add_action('init', function () {
+                if ($_GET['amelia_export'] ?? null) {
+                    $this->ExportToLockMe();
+                    wp_redirect('?page=lockme_integration&tab=amelia_plugin&amelia_exported=1');
+                    exit;
+                }
+            }, \PHP_INT_MAX);
         }
     }
     public function getPluginName() : string
@@ -75,6 +86,17 @@ class Amelia implements PluginInterface
                 $api->EditReservation((int) $appData['roomid'], "ext/{$appData['extid']}", $appData);
             }
         } catch (Exception) {
+        }
+    }
+    public function ExportToLockMe() : void
+    {
+        /** @var AppointmentRepository $appointmentRepository */
+        $appointmentRepository = $this->container()->get('domain.booking.appointment.repository');
+        $appointments = new Collection();
+        $startDateTime = DateTimeService::getNowDateTimeObjectInUtc();
+        $appointmentRepository->getFutureAppointments($appointments, [], $startDateTime->format('Y-m-d H:i:s'), '');
+        foreach ($appointments->getItems() as $appointment) {
+            $this->AddEditAppointment($appointment->toArray());
         }
     }
     public function Delete(array $appointment, array $booking) : void
