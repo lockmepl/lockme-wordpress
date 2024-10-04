@@ -63,6 +63,7 @@ return [
     //
     // Fore more see https://github.com/humbug/php-scoper#whitelist
     'exclude-namespaces' => [
+        'AmeliaBooking',
         'Bookly',
         'League\OAuth2\Client'
     ],
