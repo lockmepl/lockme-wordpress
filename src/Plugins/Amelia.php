@@ -321,6 +321,7 @@ class Amelia implements PluginInterface
                     'notifyParticipants' => '0',
                     'serviceId' => $service->getId()->getValue(),
                     'providerId' => $provider,
+                    'status' => $data['status'] ? BookingStatus::APPROVED : BookingStatus::PENDING,
                     'bookings' => [
                         [
                             'status' => $data['status'] ? BookingStatus::APPROVED : BookingStatus::PENDING,
@@ -353,7 +354,13 @@ class Amelia implements PluginInterface
                 foreach ($appointment->getBookings()->getItems() as $booking) {
                     $booking->setAppointmentId($appointment->getId());
 
-                    $customerId = $userRepository->add($booking->getCustomer());
+                    $customer = $userRepository->getByEmail($booking->getCustomer()->getEmail()->getValue());
+                    if ($customer) {
+                        $userRepository->update($customer->getId()->getValue(), $booking->getCustomer());
+                        $customerId = $customer->getId()->getValue();
+                    } else {
+                        $customerId = $userRepository->add($booking->getCustomer());
+                    }
                     $booking->setCustomerId(new Id($customerId));
 
                     $bookId = $bookingRepository->add($booking);
@@ -414,6 +421,15 @@ class Amelia implements PluginInterface
 
                         $customer = $booking->getCustomer();
                         if ($customer) {
+                            if ($customer->getEmail()->getValue() != $data['email']) {
+                                $existingCustomer = $userRepository->getByEmail($data['email']);
+                                if ($existingCustomer) {
+                                    $customer = $existingCustomer;
+                                    $booking->setCustomerId($customer->getId());
+                                    $booking->setCustomer($customer);
+                                }
+                            }
+
                             $customer->setEmail(new Email($data['email']));
                             $customer->setFirstName(new Name($data['name']));
                             $customer->setLastName(new Name($data['surname']));

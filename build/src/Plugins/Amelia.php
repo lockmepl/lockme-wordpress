@@ -55,15 +55,15 @@ class Amelia implements PluginInterface
             }, \PHP_INT_MAX);
         }
     }
-    public function getPluginName() : string
+    public function getPluginName(): string
     {
         return 'Amelia';
     }
-    public function CheckDependencies() : bool
+    public function CheckDependencies(): bool
     {
         return is_plugin_active('ameliabooking/ameliabooking.php');
     }
-    public function AddEditAppointment(?array $appointment) : void
+    public function AddEditAppointment(?array $appointment): void
     {
         if (!$appointment) {
             return;
@@ -76,7 +76,7 @@ class Amelia implements PluginInterface
             $this->AddEditBooking($appointment, $booking);
         }
     }
-    public function AddEditBooking(array $appointment, array $booking) : void
+    public function AddEditBooking(array $appointment, array $booking): void
     {
         if (!$booking) {
             return;
@@ -85,7 +85,7 @@ class Amelia implements PluginInterface
         if (!$appData) {
             return;
         }
-        if (!\in_array($booking['status'], [BookingStatus::APPROVED, BookingStatus::PENDING])) {
+        if (!in_array($booking['status'], [BookingStatus::APPROVED, BookingStatus::PENDING])) {
             $this->Delete($appointment, $booking);
             return;
         }
@@ -106,7 +106,7 @@ class Amelia implements PluginInterface
         } catch (Exception) {
         }
     }
-    public function ExportToLockMe() : void
+    public function ExportToLockMe(): void
     {
         /** @var AppointmentRepository $appointmentRepository */
         $appointmentRepository = $this->container()->get('domain.booking.appointment.repository');
@@ -116,18 +116,18 @@ class Amelia implements PluginInterface
         $startDateTime = DateTimeService::getNowDateTimeObjectInUtc();
         $appointmentRepository->getFutureAppointments($appointments, [], $startDateTime->format('Y-m-d H:i:s'), '');
         foreach ($appointments->getItems() as $appointment) {
-            \assert($appointment instanceof Appointment);
+            assert($appointment instanceof Appointment);
             foreach ($appointment->getBookings()->getItems() as $booking) {
-                \assert($booking instanceof CustomerBooking);
+                assert($booking instanceof CustomerBooking);
                 $booking = $bookingRepository->getById($booking->getId()->getValue());
                 $appointment->getBookings()->addItem($booking, $booking->getId()->getValue(), \true);
             }
             $this->AddEditAppointment($appointment->toArray());
         }
     }
-    public function Delete(array $appointment, array $booking) : void
+    public function Delete(array $appointment, array $booking): void
     {
-        if (\defined('LOCKME_MESSAGING')) {
+        if (defined('LOCKME_MESSAGING')) {
             return;
         }
         $appData = $this->AppData($appointment, $booking);
@@ -140,7 +140,7 @@ class Amelia implements PluginInterface
         } catch (Exception) {
         }
     }
-    public function RegisterSettings() : void
+    public function RegisterSettings(): void
     {
         if (!$this->CheckDependencies()) {
             return;
@@ -164,8 +164,8 @@ class Amelia implements PluginInterface
             $serviceRepository = $this->container()->get('domain.bookable.service.repository');
             $services = $serviceRepository->getAllArrayIndexedById();
             foreach ($services->getItems() as $service) {
-                \assert($service instanceof Service);
-                add_settings_field('calendar_' . $service->getId()->getValue(), 'Room for ' . $service->getName()->getValue(), function () use($rooms, $service) {
+                assert($service instanceof Service);
+                add_settings_field('calendar_' . $service->getId()->getValue(), 'Room for ' . $service->getName()->getValue(), function () use ($rooms, $service) {
                     echo '<select name="lockme_amelia[calendar_' . $service->getId()->getValue() . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
@@ -179,7 +179,7 @@ class Amelia implements PluginInterface
             }, 'lockme-amelia', 'lockme_amelia_section');
         }
     }
-    public function DrawForm() : void
+    public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
             echo "<p>You don't have required plugin</p>";
@@ -193,7 +193,7 @@ class Amelia implements PluginInterface
         settings_fields('lockme-amelia');
         do_settings_sections('lockme-amelia');
     }
-    public function GetMessage(array $message) : bool
+    public function GetMessage(array $message): bool
     {
         if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return \false;
@@ -201,7 +201,7 @@ class Amelia implements PluginInterface
         $data = $message['data'];
         $roomid = (int) $message['roomid'];
         $lockmeId = $message['reservationid'];
-        $dateTime = new DateTime(\sprintf('%s %s', $data['date'], $data['hour']));
+        $dateTime = new DateTime(sprintf('%s %s', $data['date'], $data['hour']));
         $extId = $data['extid'];
         $service = $this->GetService($roomid);
         if (!$service) {
@@ -225,8 +225,8 @@ class Amelia implements PluginInterface
                     echo 'No provider :(';
                     return \false;
                 }
-                $provider = \array_keys($providers)[0];
-                $appointment = AppointmentFactory::create(['bookingStart' => $dateTime->format('Y-m-d H:i:s'), 'bookingEnd' => (clone $dateTime)->modify(\sprintf('+%d seconds', $service->getDuration()->getValue()))->format('Y-m-d H:i:s'), 'notifyParticipants' => '0', 'serviceId' => $service->getId()->getValue(), 'providerId' => $provider, 'bookings' => [['status' => $data['status'] ? BookingStatus::APPROVED : BookingStatus::PENDING, 'persons' => (int) $data['people'], 'price' => $data['price'], 'customer' => ['firstName' => $data['name'], 'lastName' => $data['surname'], 'email' => $data['email'], 'phone' => $data['phone'], 'note' => 'LOCKME'], 'info' => \json_encode(['firstName' => $data['name'], 'lastName' => $data['surname'] . ' (LOCKME)', 'email' => $data['email'], 'phone' => $data['phone']]), 'duration' => $service->getDuration()->getValue()]]]);
+                $provider = array_keys($providers)[0];
+                $appointment = AppointmentFactory::create(['bookingStart' => $dateTime->format('Y-m-d H:i:s'), 'bookingEnd' => (clone $dateTime)->modify(sprintf('+%d seconds', $service->getDuration()->getValue()))->format('Y-m-d H:i:s'), 'notifyParticipants' => '0', 'serviceId' => $service->getId()->getValue(), 'providerId' => $provider, 'status' => $data['status'] ? BookingStatus::APPROVED : BookingStatus::PENDING, 'bookings' => [['status' => $data['status'] ? BookingStatus::APPROVED : BookingStatus::PENDING, 'persons' => (int) $data['people'], 'price' => $data['price'], 'customer' => ['firstName' => $data['name'], 'lastName' => $data['surname'], 'email' => $data['email'], 'phone' => $data['phone'], 'note' => 'LOCKME'], 'info' => json_encode(['firstName' => $data['name'], 'lastName' => $data['surname'] . ' (LOCKME)', 'email' => $data['email'], 'phone' => $data['phone']]), 'duration' => $service->getDuration()->getValue()]]]);
                 $id = $appointmentRepository->add($appointment);
                 if (!$id) {
                     echo 'Error saving appolintment.';
@@ -234,7 +234,13 @@ class Amelia implements PluginInterface
                 $appointment->setId(new Id($id));
                 foreach ($appointment->getBookings()->getItems() as $booking) {
                     $booking->setAppointmentId($appointment->getId());
-                    $customerId = $userRepository->add($booking->getCustomer());
+                    $customer = $userRepository->getByEmail($booking->getCustomer()->getEmail()->getValue());
+                    if ($customer) {
+                        $userRepository->update($customer->getId()->getValue(), $booking->getCustomer());
+                        $customerId = $customer->getId()->getValue();
+                    } else {
+                        $customerId = $userRepository->add($booking->getCustomer());
+                    }
                     $booking->setCustomerId(new Id($customerId));
                     $bookId = $bookingRepository->add($booking);
                     $booking->setId(new Id($bookId));
@@ -262,7 +268,7 @@ class Amelia implements PluginInterface
                             return \false;
                         }
                         $appointment->setBookingStart(new DateTimeValue($dateTime));
-                        $appointment->setBookingEnd(new DateTimeValue((clone $dateTime)->modify(\sprintf('+%d seconds', $booking->getDuration()->getValue()))));
+                        $appointment->setBookingEnd(new DateTimeValue((clone $dateTime)->modify(sprintf('+%d seconds', $booking->getDuration()->getValue()))));
                         $appointment->setService($service);
                         $appointment->setServiceId($service->getId());
                         $appointmentRepository->update($appointment->getId()->getValue(), $appointment);
@@ -273,6 +279,14 @@ class Amelia implements PluginInterface
                         $bookingRepository->update($booking->getId()->getValue(), $booking);
                         $customer = $booking->getCustomer();
                         if ($customer) {
+                            if ($customer->getEmail()->getValue() != $data['email']) {
+                                $existingCustomer = $userRepository->getByEmail($data['email']);
+                                if ($existingCustomer) {
+                                    $customer = $existingCustomer;
+                                    $booking->setCustomerId($customer->getId());
+                                    $booking->setCustomer($customer);
+                                }
+                            }
                             $customer->setEmail(new Email($data['email']));
                             $customer->setFirstName(new Name($data['name']));
                             $customer->setLastName(new Name($data['surname']));
@@ -280,7 +294,7 @@ class Amelia implements PluginInterface
                             $userRepository->update($customer->getId()->getValue(), $customer);
                             $info = $booking->getInfo();
                             if ($info) {
-                                $info = \json_decode($info->getValue(), \true);
+                                $info = json_decode($info->getValue(), \true);
                                 $info['firstName'] = $data['name'];
                                 $info['lastName'] = $data['surname'];
                                 $info['email'] = $data['email'];
@@ -289,7 +303,7 @@ class Amelia implements PluginInterface
                             } else {
                                 $info = ['firstName' => $data['name'], 'lastName' => $data['surname'], 'email' => $data['email'], 'phone' => $data['phone'], 'locale' => $data['language']];
                             }
-                            $bookingRepository->updateInfoByCustomerId($customer->getId()->getValue(), \json_encode($info));
+                            $bookingRepository->updateInfoByCustomerId($customer->getId()->getValue(), json_encode($info));
                         }
                         return \true;
                     }
@@ -310,29 +324,29 @@ class Amelia implements PluginInterface
         }
         return \false;
     }
-    private function GetService(int $roomid) : ?Service
+    private function GetService(int $roomid): ?Service
     {
         $serviceRepository = $this->container()->get('domain.bookable.service.repository');
         $services = $serviceRepository->getAllArrayIndexedById();
         foreach ($services->getItems() as $service) {
-            \assert($service instanceof Service);
+            assert($service instanceof Service);
             if ($this->options['calendar_' . $service->getId()->getValue()] == $roomid) {
                 return $service;
             }
         }
         return null;
     }
-    private function AppData(array $appointment, array $booking) : array
+    private function AppData(array $appointment, array $booking): array
     {
         $room = $this->options['calendar_' . $appointment['serviceId']] ?? null;
         if (!$room) {
             return [];
         }
-        $dateTime = \explode(' ', $appointment['bookingStart']);
+        $dateTime = explode(' ', $appointment['bookingStart']);
         return $this->plugin->AnonymizeData(['roomid' => $room, 'date' => $dateTime[0], 'hour' => $dateTime[1], 'people' => $booking['persons'], 'pricer' => 'API', 'price' => $booking['price'], 'name' => $booking['customer']['firstName'] ?? '', 'surname' => $booking['customer']['lastName'] ?? '', 'email' => $booking['customer']['email'] ?? '', 'phone' => $booking['customer']['phone'] ?? '', 'status' => $booking['status'] === BookingStatus::APPROVED ? 1 : 0, 'extid' => $appointment['id']]);
     }
-    private function container() : Container
+    private function container(): Container
     {
-        return $this->container ??= (require AMELIA_PATH . '/src/Infrastructure/ContainerConfig/container.php');
+        return $this->container ??= require AMELIA_PATH . '/src/Infrastructure/ContainerConfig/container.php';
     }
 }
