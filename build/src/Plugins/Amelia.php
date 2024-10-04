@@ -7,10 +7,13 @@ use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\CustomerBooking;
+use AmeliaBooking\Domain\Entity\User\Provider;
+use AmeliaBooking\Domain\Factory\Booking\Appointment\AppointmentFactory;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\ValueObjects\DateTime\DateTimeValue;
 use AmeliaBooking\Domain\ValueObjects\Json;
 use AmeliaBooking\Domain\ValueObjects\Number\Float\Price;
+use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\IntegerValue;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
 use AmeliaBooking\Domain\ValueObjects\String\Email;
@@ -19,6 +22,7 @@ use AmeliaBooking\Domain\ValueObjects\String\Phone;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
+use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use DateTime;
 use DateTimeZone;
@@ -209,12 +213,42 @@ class Amelia implements PluginInterface
         $bookingRepository = $this->container()->get('domain.booking.customerBooking.repository');
         /** @var UserRepository $userRepository */
         $userRepository = $this->container()->get('domain.users.repository');
+        /** @var ProviderRepository $providerRepository */
+        $providerRepository = $this->container()->get('domain.users.providers.repository');
         switch ($message['action']) {
             case 'add':
+                $providers = $providerRepository->getAvailable($dateTime->format('w'), wp_timezone_string());
+                if (empty($providers)) {
+                    $providers = $providerRepository->getAll()->getItems();
+                }
+                if (empty($providers)) {
+                    echo 'No provider :(';
+                    return \false;
+                }
+                $provider = \array_keys($providers)[0];
+                $appointment = AppointmentFactory::create(['bookingStart' => $dateTime->format('Y-m-d H:i:s'), 'bookingEnd' => (clone $dateTime)->modify(\sprintf('+%d seconds', $service->getDuration()->getValue()))->format('Y-m-d H:i:s'), 'notifyParticipants' => '0', 'serviceId' => $service->getId()->getValue(), 'providerId' => $provider, 'bookings' => [['status' => $data['status'] ? BookingStatus::APPROVED : BookingStatus::PENDING, 'persons' => (int) $data['people'], 'price' => $data['price'], 'customer' => ['firstName' => $data['name'], 'lastName' => $data['surname'], 'email' => $data['email'], 'phone' => $data['phone'], 'note' => 'LOCKME'], 'info' => \json_encode(['firstName' => $data['name'], 'lastName' => $data['surname'] . ' (LOCKME)', 'email' => $data['email'], 'phone' => $data['phone']]), 'duration' => $service->getDuration()->getValue()]]]);
+                $id = $appointmentRepository->add($appointment);
+                if (!$id) {
+                    echo 'Error saving appolintment.';
+                }
+                $appointment->setId(new Id($id));
+                foreach ($appointment->getBookings()->getItems() as $booking) {
+                    $booking->setAppointmentId($appointment->getId());
+                    $customerId = $userRepository->add($booking->getCustomer());
+                    $booking->setCustomerId(new Id($customerId));
+                    $bookId = $bookingRepository->add($booking);
+                    $booking->setId(new Id($bookId));
+                }
+                try {
+                    $api = $this->plugin->GetApi();
+                    $api->EditReservation($roomid, (string) $lockmeId, ['extid' => $id]);
+                    return \true;
+                } catch (Exception) {
+                }
                 break;
             case 'edit':
                 if ($extId) {
-                    $appointment = $appointmentRepository->getByBookingId((int) $extId);
+                    $appointment = $appointmentRepository->getById((int) $extId);
                     if ($appointment) {
                         $booking = null;
                         foreach ($appointment->getBookings()->getItems() as $book) {
@@ -263,9 +297,12 @@ class Amelia implements PluginInterface
                 break;
             case 'delete':
                 if ($extId) {
-                    $appointment = $appointmentRepository->getByBookingId((int) $extId);
+                    $appointment = $appointmentRepository->getById((int) $extId);
                     if ($appointment) {
                         $appointmentRepository->delete($appointment->getId()->getValue());
+                        foreach ($appointment->getBookings()->getItems() as $book) {
+                            $bookingRepository->delete($book->getId()->getValue());
+                        }
                         return \true;
                     }
                 }
@@ -292,7 +329,7 @@ class Amelia implements PluginInterface
             return [];
         }
         $dateTime = \explode(' ', $appointment['bookingStart']);
-        return $this->plugin->AnonymizeData(['roomid' => $room, 'date' => $dateTime[0], 'hour' => $dateTime[1], 'people' => $booking['persons'], 'pricer' => 'API', 'price' => $booking['price'], 'name' => $booking['customer']['firstName'] ?? '', 'surname' => $booking['customer']['lastName'] ?? '', 'email' => $booking['customer']['email'] ?? '', 'phone' => $booking['customer']['phone'] ?? '', 'status' => $booking['status'] === BookingStatus::APPROVED ? 1 : 0, 'extid' => $booking['id']]);
+        return $this->plugin->AnonymizeData(['roomid' => $room, 'date' => $dateTime[0], 'hour' => $dateTime[1], 'people' => $booking['persons'], 'pricer' => 'API', 'price' => $booking['price'], 'name' => $booking['customer']['firstName'] ?? '', 'surname' => $booking['customer']['lastName'] ?? '', 'email' => $booking['customer']['email'] ?? '', 'phone' => $booking['customer']['phone'] ?? '', 'status' => $booking['status'] === BookingStatus::APPROVED ? 1 : 0, 'extid' => $appointment['id']]);
     }
     private function container() : Container
     {
