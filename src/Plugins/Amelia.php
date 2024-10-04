@@ -242,7 +242,57 @@ class Amelia implements PluginInterface
 
     public function GetMessage(array $message): bool
     {
-        // TODO: Implement GetMessage() method.
+        if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
+            return false;
+        }
+
+        $data = $message['data'];
+        $roomid = (int) $message['roomid'];
+        $lockme_id = $message['reservationid'];
+        $date = strtotime($data['date']);
+        $extId = $data['extid'];
+
+        $service = $this->GetService($roomid);
+        if (!$service) {
+            return false;
+        }
+
+        /** @var AppointmentRepository $appointmentRepository */
+        $appointmentRepository = $this->container()->get('domain.booking.appointment.repository');
+
+        switch ($message['action']) {
+            case 'add':
+                break;
+            case 'edit':
+                break;
+            case 'delete':
+                if ($extId) {
+                    $appointment = $appointmentRepository->getByBookingId((int) $extId);
+                    if ($appointment) {
+                        $appointmentRepository->delete($appointment->getId()->getValue());
+                    }
+
+                    return true;
+                }
+                break;
+        }
+
+        return false;
+    }
+
+    private function GetService(int $roomid): ?Service
+    {
+        $serviceRepository = $this->container()->get('domain.bookable.service.repository');
+
+        $services = $serviceRepository->getAllArrayIndexedById();
+
+        foreach ($services->getItems() as $service) {
+            assert($service instanceof Service);
+            if ($this->options['calendar_'.$service->getId()->getValue()] == $roomid) {
+                return $service;
+            }
+        }
+        return null;
     }
 
     private function AppData(array $appointment, array $booking): array
