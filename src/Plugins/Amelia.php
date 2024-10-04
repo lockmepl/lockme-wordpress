@@ -354,8 +354,10 @@ class Amelia implements PluginInterface
                 foreach ($appointment->getBookings()->getItems() as $booking) {
                     $booking->setAppointmentId($appointment->getId());
 
-                    $customer = $userRepository->getByEmail($booking->getCustomer()->getEmail()->getValue());
-                    if ($customer) {
+                    if (
+                        $booking->getCustomer()->getEmail()->getValue()
+                        && ($customer = $userRepository->getByEmail($booking->getCustomer()->getEmail()->getValue()))
+                    ) {
                         $userRepository->update($customer->getId()->getValue(), $booking->getCustomer());
                         $customerId = $customer->getId()->getValue();
                     } else {
@@ -421,7 +423,7 @@ class Amelia implements PluginInterface
 
                         $customer = $booking->getCustomer();
                         if ($customer) {
-                            if ($customer->getEmail()->getValue() != $data['email']) {
+                            if ($data['email'] && $customer->getEmail()->getValue() !== $data['email']) {
                                 $existingCustomer = $userRepository->getByEmail($data['email']);
                                 if ($existingCustomer) {
                                     $customer = $existingCustomer;
