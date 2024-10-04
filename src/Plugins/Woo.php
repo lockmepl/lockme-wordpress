@@ -158,7 +158,7 @@ class Woo implements PluginInterface
     public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
-            echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
+            echo "<p>You don't have required plugin</p>";
             return;
         }
 //     $booking = new WC_Booking(2918);
@@ -166,7 +166,7 @@ class Woo implements PluginInterface
 
         if ($_GET['woo_exported'] ?? null) {
             echo '<div class="updated">';
-            echo '  <p>Eksport został wykonany.</p>';
+            echo '  <p>Bookings export completed.</p>';
             echo '</div>';
         }
         settings_fields('lockme-woo');

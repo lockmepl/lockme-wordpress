@@ -8,6 +8,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use LockmeDep\Lockme\SDK\Lockme;
 use LockmeDep\LockmeIntegration\Libs\WrappedProvider;
+use LockmeDep\LockmeIntegration\Plugins\Amelia;
 use LockmeDep\LockmeIntegration\Plugins\Appointments;
 use LockmeDep\LockmeIntegration\Plugins\Booked;
 use LockmeDep\LockmeIntegration\Plugins\Bookly;
@@ -26,7 +27,7 @@ class Plugin
     public $options;
     public $tab;
     private $url_key;
-    private $plugins = ['appointments' => Appointments::class, 'booked' => Booked::class, 'bookly' => Bookly::class, 'cpabc' => Cpabc::class, 'dopbsp' => Dopbsp::class, 'easyapp' => Easyapp::class, 'ezscm' => Ezscm::class, 'woo' => Woo::class, 'wpdevart' => WPDevArt::class, 'wp_booking' => WPBooking::class];
+    private $plugins = ['amelia' => Amelia::class, 'appointments' => Appointments::class, 'booked' => Booked::class, 'bookly' => Bookly::class, 'cpabc' => Cpabc::class, 'dopbsp' => Dopbsp::class, 'easyapp' => Easyapp::class, 'ezscm' => Ezscm::class, 'woo' => Woo::class, 'wpdevart' => WPDevArt::class, 'wp_booking' => WPBooking::class];
     /**
      * @var PluginInterface[]
      */
@@ -256,7 +257,7 @@ class Plugin
     }
     public function activate() : void
     {
-        wp_set_options_autoload(['lockme_settings', 'lockme_url_key', 'lockme_oauth2_token', 'lockme_db_ver', 'lockme_app', 'lockme_booked', 'lockme_bookly', 'lockme_cpabc', 'lockme_dopbsp', 'lockme_easyapp', 'lockme_ezscm', 'lockme_woo', 'lockme_wpb', 'lockme_wpdevart'], \false);
+        wp_set_options_autoload(['lockme_settings', 'lockme_url_key', 'lockme_oauth2_token', 'lockme_db_ver', 'lockme_amelia', 'lockme_app', 'lockme_booked', 'lockme_bookly', 'lockme_cpabc', 'lockme_dopbsp', 'lockme_easyapp', 'lockme_ezscm', 'lockme_woo', 'lockme_wpb', 'lockme_wpdevart'], \false);
         $this->createDatabase();
     }
     public function createDatabase() : void

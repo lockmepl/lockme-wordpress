@@ -143,7 +143,7 @@ class WPBooking implements PluginInterface
     public function DrawForm() : void
     {
         if (!$this->CheckDependencies()) {
-            echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
+            echo "<p>You don't have required plugin</p>";
             return;
         }
         //     $data = $wpdb->get_row("SELECT * FROM ".$DOPBSP->tables->reservations." WHERE `id` = 60", ARRAY_A);
@@ -151,7 +151,7 @@ class WPBooking implements PluginInterface
         //     var_dump($this->Add($data));
         if ($_GET['wpb_exported'] ?? null) {
             echo '<div class="updated">';
-            echo '  <p>Eksport został wykonany.</p>';
+            echo '  <p>Bookings export completed.</p>';
             echo '</div>';
         }
         settings_fields('lockme-wpb');

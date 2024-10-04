@@ -123,6 +123,7 @@ return array(
     'LockmeDep\\LockmeIntegration\\Libs\\WrappedProvider' => $baseDir . '/src/Libs/WrappedProvider.php',
     'LockmeDep\\LockmeIntegration\\Plugin' => $baseDir . '/src/Plugin.php',
     'LockmeDep\\LockmeIntegration\\PluginInterface' => $baseDir . '/src/PluginInterface.php',
+    'LockmeDep\\LockmeIntegration\\Plugins\\Amelia' => $baseDir . '/src/Plugins/Amelia.php',
     'LockmeDep\\LockmeIntegration\\Plugins\\Appointments' => $baseDir . '/src/Plugins/Appointments.php',
     'LockmeDep\\LockmeIntegration\\Plugins\\Booked' => $baseDir . '/src/Plugins/Booked.php',
     'LockmeDep\\LockmeIntegration\\Plugins\\Bookly' => $baseDir . '/src/Plugins/Bookly.php',

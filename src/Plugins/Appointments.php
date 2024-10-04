@@ -121,7 +121,7 @@ class Appointments implements PluginInterface
     public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
-            echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
+            echo "<p>You don't have required plugin</p>";
             return;
         }
 //     $sql = "SELECT * FROM {$wpdb->prefix}app_appointments WHERE `start` > now() ORDER BY ID";
@@ -129,7 +129,7 @@ class Appointments implements PluginInterface
 
         if ($_GET['app_exported']) {
             echo '<div class="updated">';
-            echo '  <p>Eksport został wykonany.</p>';
+            echo '  <p>Bookings export completed.</p>';
             echo '</div>';
         }
         settings_fields('lockme-app');

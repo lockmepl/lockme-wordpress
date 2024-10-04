@@ -319,14 +319,14 @@ class Dopbsp implements PluginInterface
     public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
-            echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
+            echo "<p>You don't have required plugin</p>";
             return;
         }
 //     var_dump($DOPBSP->classes->backend_calendar_schedule->setApproved(1740));
 
         if ($_GET['dopbsp_exported'] ?? null) {
             echo '<div class="updated">';
-            echo '  <p>Eksport został wykonany.</p>';
+            echo '  <p>Bookings export completed.</p>';
             echo '</div>';
         } elseif ($_GET['dopbsp_fixed'] ?? null) {
             echo '<div class="updated">';

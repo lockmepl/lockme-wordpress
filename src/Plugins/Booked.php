@@ -112,7 +112,7 @@ class Booked implements PluginInterface
     public function DrawForm(): void
     {
         if (!$this->CheckDependencies()) {
-            echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
+            echo "<p>You don't have required plugin</p>";
             return;
         }
         // $api = $lockme->GetApi();
@@ -125,7 +125,7 @@ class Booked implements PluginInterface
 
         if ($_GET['booked_exported'] ?? null) {
             echo '<div class="updated">';
-            echo '  <p>Eksport został wykonany.</p>';
+            echo '  <p>Bookings export completed.</p>';
             echo '</div>';
         }
         settings_fields('lockme-booked');
@@ -370,7 +370,7 @@ class Booked implements PluginInterface
 
     public function getPluginName(): string
     {
-        return 'Booked lub QuickCal';
+        return 'Booked/QuickCal';
     }
 
     public function RegisterSettings(): void

@@ -7,6 +7,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Lockme\SDK\Lockme;
 use LockmeIntegration\Libs\WrappedProvider;
+use LockmeIntegration\Plugins\Amelia;
 use LockmeIntegration\Plugins\Appointments;
 use LockmeIntegration\Plugins\Booked;
 use LockmeIntegration\Plugins\Bookly;
@@ -29,6 +30,7 @@ class Plugin
     public $tab;
     private $url_key;
     private $plugins = [
+        'amelia' => Amelia::class,
         'appointments'=> Appointments::class,
         'booked'=> Booked::class,
         'bookly' => Bookly::class,
@@ -390,6 +392,7 @@ class Plugin
             'lockme_url_key',
             'lockme_oauth2_token',
             'lockme_db_ver',
+            'lockme_amelia',
             'lockme_app',
             'lockme_booked',
             'lockme_bookly',

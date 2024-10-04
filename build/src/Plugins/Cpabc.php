@@ -73,7 +73,7 @@ class Cpabc implements PluginInterface
     public function DrawForm() : void
     {
         if (!$this->CheckDependencies()) {
-            echo '<p>Nie posiadasz wymaganej wtyczki.</p>';
+            echo "<p>You don't have required plugin</p>";
             return;
         }
         //Format: m/d/Y H:i
@@ -83,7 +83,7 @@ class Cpabc implements PluginInterface
         //     $this->Delete(3010);
         if ($_GET['cpabc_exported'] ?? null) {
             echo '<div class="updated">';
-            echo '  <p>Eksport został wykonany.</p>';
+            echo '  <p>Bookings export completed.</p>';
             echo '</div>';
         }
         settings_fields('lockme-cpabc');
