@@ -5,7 +5,7 @@ Tags: lustmored
 Requires PHP: 8.1
 Requires at least: 6.4
 Tested up to: 6.6
-Stable tag: 2.5.0
+Stable tag: 2.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,7 @@ Currently, publicly supported calendar systems are:
 * Appointments by WPMU DEV - version 2.4.0 and newer
 * Appointment Booking Calendar - version 7.2.34 and newer
 * ez Schedule Manager - version 2.2 (once again - please don't)
+* Amelia - version 7.8 or newer (consider alternatives if possible)
 
 Other booking systems to be available after porting to API 2.0 and testing. Systems marked as "please don't" are considered extremely unfriendly to our integration purposes and probably will break upon updating. If you still have choice please consider using other booking systems.
 
@@ -62,6 +63,10 @@ Show answer - no. Long answer - please contact us at kontakt@lockme.pl, and we'l
 1. Main settings page for connection with Lockme API
 
 == Changelog ==
+
+= 2.6 =
+
+* Add support for Amelia Booking
 
 = 2.5 =
 
