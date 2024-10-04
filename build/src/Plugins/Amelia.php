@@ -21,6 +21,7 @@ use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepos
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use DateTime;
+use DateTimeZone;
 use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
@@ -227,7 +228,7 @@ class Amelia implements PluginInterface
                             return \false;
                         }
                         $appointment->setBookingStart(new DateTimeValue($dateTime));
-                        $appointment->setBookingEnd(new DateTimeValue($dateTime->modify(\sprintf('+%d seconds', $booking->getDuration()->getValue()))));
+                        $appointment->setBookingEnd(new DateTimeValue((clone $dateTime)->modify(\sprintf('+%d seconds', $booking->getDuration()->getValue()))));
                         $appointment->setService($service);
                         $appointment->setServiceId($service->getId());
                         $appointmentRepository->update($appointment->getId()->getValue(), $appointment);

@@ -22,6 +22,7 @@ use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepos
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use DateTime;
+use DateTimeZone;
 use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
@@ -275,7 +276,7 @@ class Amelia implements PluginInterface
         $roomid = (int) $message['roomid'];
         $lockmeId = $message['reservationid'];
         $dateTime = new DateTime(
-            sprintf('%s %s', $data['date'], $data['hour'])
+            sprintf('%s %s', $data['date'], $data['hour']),
         );
         $extId = $data['extid'];
 
@@ -318,7 +319,7 @@ class Amelia implements PluginInterface
                         );
                         $appointment->setBookingEnd(
                             new DateTimeValue(
-                                $dateTime->modify(
+                                (clone $dateTime)->modify(
                                     sprintf(
                                         '+%d seconds',
                                         $booking->getDuration()->getValue(),
