@@ -59,16 +59,6 @@ class Plugin
             add_action('admin_init', array(&$this, 'admin_register_settings'));
         }
     }
-    private function withSession(Closure $callback): mixed
-    {
-        if (session_status() === \PHP_SESSION_ACTIVE) {
-            return $callback();
-        }
-        session_start();
-        $return = $callback();
-        session_write_close();
-        return $return;
-    }
     public function api_call(): void
     {
         // Check for OAuth2 state
@@ -77,10 +67,12 @@ class Plugin
         if ($code && $state) {
             try {
                 $api = $this->GetApi();
-                $token = $this->withSession(fn() => $api->getTokenForCode($code, $state));
+                $sessionState = get_option('lockme_oauth2_state');
+                $token = $api->getTokenForCode($code, $state, $sessionState);
                 if ($token instanceof AccessToken) {
                     update_option('lockme_oauth2_token', $token, \false);
                 }
+                delete_option('lockme_oauth2_state');
                 wp_redirect('options-general.php?page=lockme_integration&tab=api_options');
                 exit;
             } catch (Exception $e) {
@@ -221,7 +213,10 @@ class Plugin
                         echo '<p>Response from Lockme:<br><textarea readonly>' . $e->getResponseBody() . '</textarea></p>';
                     }
                 }
-                $authorizationUrl = $this->withSession(fn() => $api->getAuthorizationUrl(['rooms_manage']));
+                delete_option('lockme_oauth2_state');
+                $params = [];
+                $authorizationUrl = $api->getAuthorizationUrl(['rooms_manage'], $params);
+                add_option('lockme_oauth2_state', $params['oauth2_lockme_state'], \false, \false);
                 echo '<p><a href="' . $authorizationUrl . '">Click here</a> to connect the plugin with Lockme.</p>';
                 echo '<p>Custom Oauth2 Access Token (use <b>only if you know what are you doing</b>):</p>';
                 echo '<p><textarea name="oauth_token"></textarea></p>';
