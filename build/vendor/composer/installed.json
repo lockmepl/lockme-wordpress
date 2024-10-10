@@ -409,17 +409,17 @@
         },
         {
             "name": "lustmored\/lockme-sdk",
-            "version": "2.3.2",
-            "version_normalized": "2.3.2.0",
+            "version": "2.3.3",
+            "version_normalized": "2.3.3.0",
             "source": {
                 "type": "git",
                 "url": "https:\/\/github.com\/lockmepl\/lockme-sdk.git",
-                "reference": "f3a4d261ed34e740bafbcc05c41be834d1e2bd9a"
+                "reference": "7aea3642b82a78a4fff95acded0eb2194d2d3047"
             },
             "dist": {
                 "type": "zip",
-                "url": "https:\/\/api.github.com\/repos\/lockmepl\/lockme-sdk\/zipball\/f3a4d261ed34e740bafbcc05c41be834d1e2bd9a",
-                "reference": "f3a4d261ed34e740bafbcc05c41be834d1e2bd9a",
+                "url": "https:\/\/api.github.com\/repos\/lockmepl\/lockme-sdk\/zipball\/7aea3642b82a78a4fff95acded0eb2194d2d3047",
+                "reference": "7aea3642b82a78a4fff95acded0eb2194d2d3047",
                 "shasum": ""
             },
             "require": {
@@ -428,7 +428,7 @@
                 "php": ">=8.1.0",
                 "symfony\/lock": "^6.0|^7.0"
             },
-            "time": "2024-10-08T13:24:01+00:00",
+            "time": "2024-10-10T10:43:07+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -449,7 +449,7 @@
             "description": "LockMe SDK",
             "support": {
                 "issues": "https:\/\/github.com\/lockmepl\/lockme-sdk\/issues",
-                "source": "https:\/\/github.com\/lockmepl\/lockme-sdk\/tree\/2.3.2"
+                "source": "https:\/\/github.com\/lockmepl\/lockme-sdk\/tree\/2.3.3"
             },
             "install-path": "..\/lustmored\/lockme-sdk"
         },
@@ -830,12 +830,12 @@
             "source": {
                 "type": "git",
                 "url": "https:\/\/github.com\/Roave\/SecurityAdvisories.git",
-                "reference": "4e4266afbab94026ccfe17786c1fe6b3a7fce79b"
+                "reference": "6fc16d8c05a872bf86eb0a1684d89b9bcb93d636"
             },
             "dist": {
                 "type": "zip",
-                "url": "https:\/\/api.github.com\/repos\/Roave\/SecurityAdvisories\/zipball\/4e4266afbab94026ccfe17786c1fe6b3a7fce79b",
-                "reference": "4e4266afbab94026ccfe17786c1fe6b3a7fce79b",
+                "url": "https:\/\/api.github.com\/repos\/Roave\/SecurityAdvisories\/zipball\/6fc16d8c05a872bf86eb0a1684d89b9bcb93d636",
+                "reference": "6fc16d8c05a872bf86eb0a1684d89b9bcb93d636",
                 "shasum": ""
             },
             "conflict": {
@@ -974,9 +974,9 @@
                 "dolibarr\/dolibarr": "<19.0.2",
                 "dompdf\/dompdf": "<2.0.4",
                 "doublethreedigital\/guest-entries": "<3.1.2",
-                "drupal\/core": ">=6,<6.38|>=7,<7.96|>=8,<10.3.6|>=11,<11.0.5",
-                "drupal\/core-recommended": ">=8,<10.3.6|>=11,<11.0.5",
-                "drupal\/drupal": ">=5,<5.11|>=6,<6.38|>=7,<7.80|>=8,<10.3.6|>=11,<11.0.5",
+                "drupal\/core": ">=6,<6.38|>=7,<7.96|>=8,<10.2.9|>=10.3,<10.3.6|>=11,<11.0.5",
+                "drupal\/core-recommended": ">=8,<10.2.9|>=10.3,<10.3.6|>=11,<11.0.5",
+                "drupal\/drupal": ">=5,<5.11|>=6,<6.38|>=7,<7.80|>=8,<10.2.9|>=10.3,<10.3.6|>=11,<11.0.5",
                 "duncanmcclean\/guest-entries": "<3.1.2",
                 "dweeves\/magmi": "<=0.7.24",
                 "ec-cube\/ec-cube": "<2.4.4|>=2.11,<=2.17.1|>=3,<=3.0.18.0-patch4|>=4,<=4.1.2",
@@ -1168,7 +1168,7 @@
                 "lightsaml\/lightsaml": "<1.3.5",
                 "limesurvey\/limesurvey": "<6.5.12",
                 "livehelperchat\/livehelperchat": "<=3.91",
-                "livewire\/livewire": ">2.2.4,<2.2.6|>=3.3.5,<3.4.9",
+                "livewire\/livewire": "<2.12.7|>=3.0.0.0-beta1,<3.5.2",
                 "lms\/routes": "<2.1.1",
                 "localizationteam\/l10nmgr": "<7.4|>=8,<8.7|>=9,<9.2",
                 "luyadev\/yii-helpers": "<1.2.1",
@@ -1501,7 +1501,7 @@
                 "twbs\/bootstrap": "<=3.4.1|>=4,<=4.6.2",
                 "twig\/twig": "<1.44.8|>=2,<2.16.1|>=3,<3.11.1|>=3.12,<3.14",
                 "typo3\/cms": "<9.5.29|>=10,<10.4.35|>=11,<11.5.23|>=12,<12.2",
-                "typo3\/cms-backend": "<4.1.14|>=4.2,<4.2.15|>=4.3,<4.3.7|>=4.4,<4.4.4|>=7,<=7.6.50|>=8,<=8.7.39|>=9,<=9.5.24|>=10,<=10.4.13|>=11,<=11.1",
+                "typo3\/cms-backend": "<4.1.14|>=4.2,<4.2.15|>=4.3,<4.3.7|>=4.4,<4.4.4|>=7,<=7.6.50|>=8,<=8.7.39|>=9,<=9.5.24|>=10,<10.4.46|>=11,<11.5.40|>=12,<12.4.21|>=13,<13.3.1",
                 "typo3\/cms-core": "<=8.7.56|>=9,<=9.5.47|>=10,<=10.4.44|>=11,<=11.5.36|>=12,<=12.4.14|>=13,<=13.1",
                 "typo3\/cms-extbase": "<6.2.24|>=7,<7.6.8|==8.1.1",
                 "typo3\/cms-fluid": "<4.3.4|>=4.4,<4.4.1",
@@ -1618,7 +1618,7 @@
                 "zfr\/zfr-oauth2-server-module": "<0.1.2",
                 "zoujingli\/thinkadmin": "<=6.1.53"
             },
-            "time": "2024-10-07T20:05:20+00:00",
+            "time": "2024-10-10T00:18:21+00:00",
             "default-branch": true,
             "type": "metapackage",
             "notification-url": "https:\/\/packagist.org\/downloads\/",
