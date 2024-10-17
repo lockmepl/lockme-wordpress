@@ -179,28 +179,29 @@ class Booked implements PluginInterface
         $date_format = get_option('date_format');
 
         $cf_data = [
-            'Żródło' => sprintf('LockMe (%s)', $data['source']),
-            'Telefon' => $data['phone'],
-            'Ilość osób' => $data['people'],
-            'Cena' => $data['price'],
-            'Dodatkowe uwagi' => $data['comment'],
+            'Source' => sprintf('LockMe (%s)', $data['source']),
+            'Phone' => $data['phone'],
+            'People' => $data['people'],
+            'Price' => $data['price'],
+            'Comment' => $data['comment'],
+            'Language' => $data['language'],
         ];
         switch ($data['source']) {
             case 'web':
-                $cf_data['Status'] = $data['status'] ? 'Opłacone' : 'Rezerwacja (max. 20 minut)';
+                $cf_data['Status'] = $data['status'] ? 'Paid' : 'Block (max. 20 minutes)';
                 break;
             case 'panel':
-                $cf_data['Status'] = 'Rezerwacja z panelu Lockme - status sprawdź w panelu Lockme';
+                $cf_data['Status'] = 'Booking from Lockme cockpit - check status in cockpit';
                 break;
             case 'api':
-                $cf_data['Status'] = 'Rezerwacja z API';
+                $cf_data['Status'] = 'Booking from API';
                 break;
             case 'widget':
-                $cf_data['Status'] = 'Rezerwacja z widgeta';
+                $cf_data['Status'] = 'Booking from widget';
                 break;
         }
         if (isset($data['invoice']) && !empty($data['invoice'])) {
-            $cf_data['Faktura'] = $data['invoice'];
+            $cf_data['Invoice'] = $data['invoice'];
         }
 
         $cf_meta_value = '';
