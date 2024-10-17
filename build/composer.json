@@ -9,7 +9,7 @@
         "sort-packages": true
     },
     "require": {
-        "php": ">=8.0",
+        "php": ">=8.1",
         "ext-json": "*",
         "ext-mbstring": "*",
         "lustmored\/lockme-sdk": "^2.3.1",
