@@ -446,16 +446,16 @@
         },
         {
             "name": "lustmored/oauth2-lockme",
-            "version": "1.2.3",
+            "version": "1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lockmepl/oauth2-lockme.git",
-                "reference": "8d984c4595b8835bec0401be8e7ab1461a3c7196"
+                "reference": "83c122f3396829d999f0ed06364a99daba03e1d7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lockmepl/oauth2-lockme/zipball/8d984c4595b8835bec0401be8e7ab1461a3c7196",
-                "reference": "8d984c4595b8835bec0401be8e7ab1461a3c7196",
+                "url": "https://api.github.com/repos/lockmepl/oauth2-lockme/zipball/83c122f3396829d999f0ed06364a99daba03e1d7",
+                "reference": "83c122f3396829d999f0ed06364a99daba03e1d7",
                 "shasum": ""
             },
             "require": {
@@ -481,9 +481,9 @@
             "description": "LockMe OAuth2 provider",
             "support": {
                 "issues": "https://github.com/lockmepl/oauth2-lockme/issues",
-                "source": "https://github.com/lockmepl/oauth2-lockme/tree/1.2.3"
+                "source": "https://github.com/lockmepl/oauth2-lockme/tree/1.3.0"
             },
-            "time": "2023-09-12T11:51:19+00:00"
+            "time": "2024-10-16T12:07:40+00:00"
         },
         {
             "name": "paragonie/random_compat",

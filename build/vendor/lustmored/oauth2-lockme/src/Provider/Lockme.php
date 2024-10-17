@@ -22,7 +22,7 @@ class Lockme extends AbstractProvider
      * API version
      * @var string
      */
-    public $version = 'v2.1';
+    public $version = 'v2.2';
     public function __construct($options)
     {
         $collaborators = [];
