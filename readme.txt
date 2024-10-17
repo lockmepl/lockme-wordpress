@@ -5,7 +5,7 @@ Tags: lustmored
 Requires PHP: 8.1
 Requires at least: 6.4
 Tested up to: 6.6
-Stable tag: 2.7.0
+Stable tag: 2.8.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,19 +64,23 @@ Show answer - no. Long answer - please contact us at kontakt@lockme.pl, and we'l
 
 == Changelog ==
 
+= 2.8 =
+
+* Added ID prefix option for situations where ID conflict might occur between systems or installations.
+
 = 2.7 =
 
-* This plugin no longer uses and initializes session for token generation
+* This plugin no longer uses and initializes session for token generation.
 
 = 2.6 =
 
-* Add support for Amelia Booking
+* Add support for Amelia Booking.
 
 = 2.5 =
 
-* Drop support for PHP 8.0 and WordPress lower than 6.4
-* Mark lockme related options as not autoloaded
-* Only use session when needed and close it immediately after for performance regression problems
+* Drop support for PHP 8.0 and WordPress lower than 6.4.
+* Mark lockme related options as not autoloaded.
+* Only use session when needed and close it immediately after for performance regression problems.
 
 = 2.4 =
 
@@ -84,27 +88,27 @@ Show answer - no. Long answer - please contact us at kontakt@lockme.pl, and we'l
 
 = 2.3 =
 
-* Add logging all API communication errors to the database
+* Add logging all API communication errors to the database.
 
 = 2.2 =
 
-* Add information about invoice data (only Booking System PRO for now)
+* Add information about invoice data (only Booking System PRO for now).
 
 = 2.1 =
 
-* Move everything into own namespace to mitigate conflicts
+* Move everything into own namespace to mitigate conflicts.
 
 = 2.0 =
-* Require PHP 7.2 and Lockme SDK 2.0
-* Solve race condition on refreshing tokens
-* Adapt to another ABI change in Bookly
+* Require PHP 7.2 and Lockme SDK 2.0.
+* Solve race condition on refreshing tokens.
+* Adapt to another ABI change in Bookly.
 
 = 1.3 =
-* Added option to use plugin against any specified domain per Lockme team internal needs
+* Added option to use plugin against any specified domain per Lockme team internal needs.
 
 = 1.2 =
-* Added RODO mode that will prevent plugin from sending ANY customer information to Lockme (only sent data is date, hour, room, booking ID and its status)
-* Refactored plaugins list to show only installed and supported plaugins
+* Added RODO mode that will prevent plugin from sending ANY customer information to Lockme (only sent data is date, hour, room, booking ID and its status).
+* Refactored plaugins list to show only installed and supported plugins.
 * Added option to manually upload access token. Using it is highly discouraged if you don't know what are you doing.
 
 = 1.0 =
