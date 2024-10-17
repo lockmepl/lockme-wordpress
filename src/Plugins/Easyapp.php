@@ -263,7 +263,9 @@ class Easyapp implements PluginInterface
                 ], true);
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, ['extid' => $id->id]);
+                    $api->EditReservation($roomid, $lockme_id,
+                        $this->plugin->AnonymizeData(['extid' => $id->id])
+                    );
                     return true;
                 } catch (Exception $e) {
                 }

@@ -338,7 +338,9 @@ class WPBooking implements PluginInterface
                 }
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, ['extid' => $id]);
+                    $api->EditReservation($roomid, $lockme_id,
+                        $this->plugin->AnonymizeData(['extid' => $id])
+                    );
                     return true;
                 } catch (Exception $e) {
                 }

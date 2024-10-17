@@ -371,7 +371,9 @@ class Amelia implements PluginInterface
 
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, (string) $lockmeId, ['extid' => $id]);
+                    $api->EditReservation($roomid, (string) $lockmeId,
+                        $this->plugin->AnonymizeData(['extid' => $id])
+                    );
                     return true;
                 } catch (Exception) {
                 }

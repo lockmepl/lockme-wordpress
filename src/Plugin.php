@@ -128,6 +128,16 @@ class Plugin
             $api = $this->GetApi();
             $message = $api->GetMessage((int) $messageid);
 
+            if (
+                $message['data']['extid']
+                && str_starts_with($message['data']['extid'], $this->options['id_prefix'])
+            ) {
+                $message['data']['extid'] = substr(
+                    $message['data']['extid'],
+                    strlen($this->options['id_prefix'])
+                );
+            }
+
             foreach ($this->available_plugins as $k=>$plugin) {
                 if ($plugin->GetMessage($message)) {
                     $api->MarkMessageRead((int) $messageid);
@@ -217,6 +227,17 @@ class Plugin
             'RODO mode (anonymize data)',
             function () {
                 echo '<input type="checkbox" name="lockme_settings[rodo_mode]" value="1"  '.checked(1, $this->options['rodo_mode'] ?? false, false).' /> <small>If you enable this function, only information about the date and time of the visit will be sent as part of the data exchange via API between your website and Lockme. All customer personal data will remain only on your website. Note! If you edit such a reservation from the lockme panel, there is a risk that it will delete the data in your reservation system. Remember to manage such reservations only through your system.</small>';
+            },
+            'lockme-admin',
+            'lockme_settings_section',
+            array()
+        );
+
+        add_settings_field(
+            'id_prefix',
+            'Bookings ID prefix',
+            function () {
+                echo '<input name="lockme_settings[id_prefix]" type="text" value="'.($this->options['id_prefix'] ?? '').'" /> <small>Set this if you may have conflicts on external ID (like when you reset database, change booking plugin or website or have more than one connected integration). IMPORTANT: changing this value on working system <strong>will break your integration</strong>.</small>';
             },
             'lockme-admin',
             'lockme_settings_section',
@@ -370,6 +391,9 @@ class Plugin
                 },
                 ARRAY_FILTER_USE_KEY
             );
+        }
+        if ($data['extid'] && $this->options['id_prefix']) {
+            $data['extid'] = $this->options['id_prefix'].$data['extid'];
         }
         return $data;
     }

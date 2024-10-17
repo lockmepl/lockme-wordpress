@@ -198,7 +198,9 @@ class Appointments implements PluginInterface
 
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, ['extid' => $row_id]);
+                    $api->EditReservation($roomid, $lockme_id,
+                        $this->plugin->AnonymizeData(['extid' => $row_id])
+                    );
                     return true;
                 } catch (Exception $e) {
                 }

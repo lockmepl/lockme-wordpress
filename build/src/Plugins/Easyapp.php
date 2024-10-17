@@ -174,7 +174,7 @@ class Easyapp implements PluginInterface
                 $id = $this->models->replace('ea_appointments', ['location' => $location, 'service' => $service, 'worker' => $worker, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'date' => $data['date'], 'start' => $data['hour'], 'end_date' => $data['date'], 'end' => date('H:i:s', $end_time), 'price' => $data['price'], 'description' => 'LOCKME!', 'status' => $data['status'] ? 'confirmed' : 'pending'], \true);
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, ['extid' => $id->id]);
+                    $api->EditReservation($roomid, $lockme_id, $this->plugin->AnonymizeData(['extid' => $id->id]));
                     return \true;
                 } catch (Exception $e) {
                 }
