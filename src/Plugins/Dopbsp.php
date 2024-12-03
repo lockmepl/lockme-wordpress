@@ -237,6 +237,7 @@ class Dopbsp implements PluginInterface
             return;
         }
 
+
         register_setting('lockme-dopbsp', 'lockme_dopbsp');
 
         add_settings_section(
@@ -322,7 +323,6 @@ class Dopbsp implements PluginInterface
             echo "<p>You don't have required plugin</p>";
             return;
         }
-//     var_dump($DOPBSP->classes->backend_calendar_schedule->setApproved(1740));
 
         if ($_GET['dopbsp_exported'] ?? null) {
             echo '<div class="updated">';
@@ -474,12 +474,12 @@ class Dopbsp implements PluginInterface
 
         switch ($message['action']) {
             case 'add':
-                $day_data = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$DOPBSP->tables->days.' WHERE calendar_id=%d AND day="%s"',
-                    $calendar_id, $data['date']));
-                $day = json_decode($day_data->data, false);
-                $history = [
-                    $hour => $day->hours->$hour
-                ];
+                $day_history = $DOPBSP->classes->backend_calendar_schedule->daysHoursHistory(
+                    $data['date'],
+                    $hour,
+                    '',
+                    $calendar_id
+                );
                 $result = $wpdb->insert($DOPBSP->tables->reservations,
                     [
                         'calendar_id' => $calendar_id,
@@ -503,7 +503,7 @@ class Dopbsp implements PluginInterface
                         'fees_price' => 0,
                         'deposit' => '{}',
                         'deposit_price' => 0,
-                        'days_hours_history' => json_encode($history),
+                        'days_hours_history' => json_encode($day_history),
                         'form' => json_encode($form),
                         'email' => $data['email'] ?: '',
                         'status' => $data['status'] ? 'approved' : 'pending',
@@ -542,22 +542,18 @@ class Dopbsp implements PluginInterface
                         ($data['from_date'] != $data['date'] || $data['from_hour'] != $data['hour'])) {
                         $DOPBSP->classes->backend_calendar_schedule->setCanceled($res->id);
 
-                        $day_data = $wpdb->get_row(
-                            $wpdb->prepare(
-                                'SELECT * FROM '.$DOPBSP->tables->days.' WHERE calendar_id=%d AND day="%s"',
-                                $calendar_id, $data['date']
-                            )
+                        $day_history = $DOPBSP->classes->backend_calendar_schedule->daysHoursHistory(
+                            $data['date'],
+                            $hour,
+                            '',
+                            $calendar_id
                         );
-                        $day = json_decode($day_data->data, false);
-                        $history = [
-                            $hour => $day->hours->$hour
-                        ];
                         $result = $wpdb->update(
                             $DOPBSP->tables->reservations,
                             [
                                 'check_in' => $data['date'],
                                 'start_hour' => $hour,
-                                'days_hours_history' => json_encode($history)
+                                'days_hours_history' => json_encode($day_history)
                             ],
                             [
                                 'id' => $res->id

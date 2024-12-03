@@ -225,7 +225,6 @@ class Dopbsp implements PluginInterface
             echo "<p>You don't have required plugin</p>";
             return;
         }
-        //     var_dump($DOPBSP->classes->backend_calendar_schedule->setApproved(1740));
         if ($_GET['dopbsp_exported'] ?? null) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
@@ -297,10 +296,8 @@ class Dopbsp implements PluginInterface
         }
         switch ($message['action']) {
             case 'add':
-                $day_data = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $DOPBSP->tables->days . ' WHERE calendar_id=%d AND day="%s"', $calendar_id, $data['date']));
-                $day = json_decode($day_data->data, \false);
-                $history = [$hour => $day->hours->{$hour}];
-                $result = $wpdb->insert($DOPBSP->tables->reservations, ['calendar_id' => $calendar_id, 'language' => 'pl', 'currency' => 'zł', 'currency_code' => 'PLN', 'check_in' => $data['date'], 'check_out' => '', 'start_hour' => $hour, 'end_hour' => '', 'no_items' => 1, 'price' => $data['price'], 'price_total' => $data['price'], 'extras' => '', 'extras_price' => 0, 'discount' => '{}', 'discount_price' => 0, 'coupon' => '{}', 'coupon_price' => 0, 'fees' => '{}', 'fees_price' => 0, 'deposit' => '{}', 'deposit_price' => 0, 'days_hours_history' => json_encode($history), 'form' => json_encode($form), 'email' => $data['email'] ?: '', 'status' => $data['status'] ? 'approved' : 'pending', 'payment_method' => 'none', 'token' => '', 'transaction_id' => '']);
+                $day_history = $DOPBSP->classes->backend_calendar_schedule->daysHoursHistory($data['date'], $hour, '', $calendar_id);
+                $result = $wpdb->insert($DOPBSP->tables->reservations, ['calendar_id' => $calendar_id, 'language' => 'pl', 'currency' => 'zł', 'currency_code' => 'PLN', 'check_in' => $data['date'], 'check_out' => '', 'start_hour' => $hour, 'end_hour' => '', 'no_items' => 1, 'price' => $data['price'], 'price_total' => $data['price'], 'extras' => '', 'extras_price' => 0, 'discount' => '{}', 'discount_price' => 0, 'coupon' => '{}', 'coupon_price' => 0, 'fees' => '{}', 'fees_price' => 0, 'deposit' => '{}', 'deposit_price' => 0, 'days_hours_history' => json_encode($day_history), 'form' => json_encode($form), 'email' => $data['email'] ?: '', 'status' => $data['status'] ? 'approved' : 'pending', 'payment_method' => 'none', 'token' => '', 'transaction_id' => '']);
                 if ($result === \false) {
                     throw new RuntimeException('Error saving to database - ' . $wpdb->last_error);
                 }
@@ -321,10 +318,8 @@ class Dopbsp implements PluginInterface
                     }
                     if ($data['from_date'] && $data['from_hour'] && ($data['from_date'] != $data['date'] || $data['from_hour'] != $data['hour'])) {
                         $DOPBSP->classes->backend_calendar_schedule->setCanceled($res->id);
-                        $day_data = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $DOPBSP->tables->days . ' WHERE calendar_id=%d AND day="%s"', $calendar_id, $data['date']));
-                        $day = json_decode($day_data->data, \false);
-                        $history = [$hour => $day->hours->{$hour}];
-                        $result = $wpdb->update($DOPBSP->tables->reservations, ['check_in' => $data['date'], 'start_hour' => $hour, 'days_hours_history' => json_encode($history)], ['id' => $res->id]);
+                        $day_history = $DOPBSP->classes->backend_calendar_schedule->daysHoursHistory($data['date'], $hour, '', $calendar_id);
+                        $result = $wpdb->update($DOPBSP->tables->reservations, ['check_in' => $data['date'], 'start_hour' => $hour, 'days_hours_history' => json_encode($day_history)], ['id' => $res->id]);
                         if ($result === \false) {
                             throw new RuntimeException('Error saving to database 1 ');
                         }
