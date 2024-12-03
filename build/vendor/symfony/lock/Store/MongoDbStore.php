@@ -16,7 +16,7 @@ use LockmeDep\MongoDB\Collection;
 use LockmeDep\MongoDB\Database;
 use MongoDB\Driver\BulkWrite;
 use MongoDB\Driver\Command;
-use MongoDB\Driver\Exception\WriteException;
+use MongoDB\Driver\Exception\BulkWriteException;
 use MongoDB\Driver\Manager;
 use MongoDB\Driver\Query;
 use LockmeDep\MongoDB\Exception\DriverRuntimeException;
@@ -201,7 +201,7 @@ class MongoDbStore implements PersistingStoreInterface
         $key->reduceLifetime($this->initialTtl);
         try {
             $this->upsert($key, $this->initialTtl);
-        } catch (WriteException $e) {
+        } catch (BulkWriteException $e) {
             if ($this->isDuplicateKeyException($e)) {
                 throw new LockConflictedException('Lock was acquired by someone else.', 0, $e);
             }
@@ -223,7 +223,7 @@ class MongoDbStore implements PersistingStoreInterface
         $key->reduceLifetime($ttl);
         try {
             $this->upsert($key, $ttl);
-        } catch (WriteException $e) {
+        } catch (BulkWriteException $e) {
             if ($this->isDuplicateKeyException($e)) {
                 throw new LockConflictedException('Failed to put off the expiration of the lock.', 0, $e);
             }
@@ -258,7 +258,7 @@ class MongoDbStore implements PersistingStoreInterface
         $write->update(['_id' => (string) $key, '$or' => [['token' => $token], ['expires_at' => ['$lte' => $this->createMongoDateTime($now)]]]], ['$set' => ['_id' => (string) $key, 'token' => $token, 'expires_at' => $this->createMongoDateTime($now + $ttl)]], ['upsert' => \true]);
         $this->getManager()->executeBulkWrite($this->namespace, $write);
     }
-    private function isDuplicateKeyException(WriteException $e): bool
+    private function isDuplicateKeyException(BulkWriteException $e): bool
     {
         $code = $e->getCode();
         $writeErrors = $e->getWriteResult()->getWriteErrors();
@@ -277,7 +277,7 @@ class MongoDbStore implements PersistingStoreInterface
      */
     private function createMongoDateTime(float $seconds): UTCDateTime
     {
-        return new UTCDateTime($seconds * 1000);
+        return new UTCDateTime((int) ($seconds * 1000));
     }
     /**
      * Retrieves a unique token for the given key namespaced to this store.

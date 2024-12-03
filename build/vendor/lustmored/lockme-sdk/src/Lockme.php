@@ -59,7 +59,9 @@ class Lockme
      */
     public function getAuthorizationUrl(array $scopes = [], ?array &$session = null): string
     {
-        $session ??= $_SESSION;
+        if (null === $session) {
+            $session =& $_SESSION;
+        }
         $authorizationUrl = $this->provider->getAuthorizationUrl(['scope' => implode(' ', $scopes)]);
         $session['oauth2_lockme_state'] = $this->provider->getState();
         return $authorizationUrl;
