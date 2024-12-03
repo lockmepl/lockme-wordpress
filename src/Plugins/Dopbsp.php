@@ -402,6 +402,9 @@ class Dopbsp implements PluginInterface
         $hour = date('H:i', strtotime($data['hour']));
 
         $calendar_id = $this->GetCalendar($roomid);
+        if (!$calendar_id) {
+            return false;
+        }
 
         $form = [
             [
@@ -474,6 +477,8 @@ class Dopbsp implements PluginInterface
 
         switch ($message['action']) {
             case 'add':
+                $this->ensureDayExists($calendar_id, $data['date']);
+
                 $day_history = $DOPBSP->classes->backend_calendar_schedule->daysHoursHistory(
                     $data['date'],
                     $hour,
@@ -541,6 +546,8 @@ class Dopbsp implements PluginInterface
                     if ($data['from_date'] && $data['from_hour'] &&
                         ($data['from_date'] != $data['date'] || $data['from_hour'] != $data['hour'])) {
                         $DOPBSP->classes->backend_calendar_schedule->setCanceled($res->id);
+
+                        $this->ensureDayExists($calendar_id, $data['date']);
 
                         $day_history = $DOPBSP->classes->backend_calendar_schedule->daysHoursHistory(
                             $data['date'],
@@ -614,6 +621,59 @@ class Dopbsp implements PluginInterface
                 break;
         }
         return false;
+    }
+
+    private function ensureDayExists(int $calendar_id, string $date): void
+    {
+        global $wpdb, $DOPBSP;
+
+        [$year, $month, $d] = explode('-', $date);
+
+        $day_data = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$DOPBSP->tables->days.' WHERE calendar_id=%d AND day="%s"', $calendar_id, $date));
+
+        if ($day_data) {
+            return;
+        }
+
+        $settings_calendar = $DOPBSP->classes->backend_settings->values(
+            $calendar_id,
+            'calendar'
+        );
+        $calendar = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$DOPBSP->tables->calendars.' WHERE id=%d', $calendar_id));
+        $default_availability = json_decode($calendar->default_availability);
+
+        $default_availability = $calendar->default_availability != ''
+            ? $calendar->default_availability
+            : '{"available": 1,"bind": 0,"price": 0,"promo": 0,"info":  "","info_body": "","info_info": "","notes": "","hours":{},"hours_definitions":[{"value":"00:00"}],"status": "available"}'
+        ;
+
+        $default_availability = json_decode($default_availability);
+
+        $price_min  = 1000000000;
+        $price_max  = 0;
+        $day_data = $default_availability;
+        foreach ($day_data->hours as $key_hour => $hour) {
+            $day_data->hours = (array)$day_data->hours;
+            $price = $day_data->hours[$key_hour]->promo == '' ? ($day_data->hours[$key_hour]->price == '' ? 0 : (float)$day_data->hours[$key_hour]->price) : (float)$day_data->hours[$key_hour]->promo;
+
+            if ($day_data->hours[$key_hour]->price != '0') {
+                $price_min = min($price, $price_min);
+                $price_max = max($price, $price_max);
+            }
+        };
+
+        $wpdb->insert(
+            $DOPBSP->tables->days,
+            [
+                'unique_key' => $calendar_id.'_'.$date,
+                'calendar_id' => $calendar_id,
+                'day' => $date,
+                'year' => $year,
+                'data' => json_encode($day_data),
+                'price_min' => $price_min,
+                'price_max' => $price_max,
+            ]
+        );
     }
 
     /**
