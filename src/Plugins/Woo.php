@@ -203,7 +203,7 @@ class Woo implements PluginInterface
 
         $lockme_data = null;
         try {
-            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$postid}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
 
@@ -211,7 +211,7 @@ class Woo implements PluginInterface
             if (!$lockme_data) { //Add new
                 $api->AddReservation($appdata);
             } else { //Update
-                $api->EditReservation((int) $appdata['roomid'], "ext/{$postid}", $appdata);
+                $api->EditReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}", $appdata);
             }
         } catch (Exception $e) {
         }
@@ -244,7 +244,7 @@ class Woo implements PluginInterface
         $api = $this->plugin->GetApi();
 
         try {
-            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$booking->get_id()}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
         return null;

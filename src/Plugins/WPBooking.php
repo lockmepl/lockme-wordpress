@@ -93,7 +93,7 @@ class WPBooking implements PluginInterface
         $lockme_data = [];
 
         try {
-            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
 
@@ -102,7 +102,7 @@ class WPBooking implements PluginInterface
         }
 
         try {
-            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$id}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
     }
@@ -463,7 +463,7 @@ class WPBooking implements PluginInterface
         $lockme_data = [];
 
         try {
-            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
 
@@ -474,7 +474,7 @@ class WPBooking implements PluginInterface
         }
 
         try {
-            $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
+            $api->EditReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}", $appdata);
         } catch (Exception $e) {
         }
     }

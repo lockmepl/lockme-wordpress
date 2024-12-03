@@ -64,7 +64,7 @@ class WPDevArt implements PluginInterface
         $api = $this->plugin->GetApi();
         $lockme_data = [];
         try {
-            $lockme_data = $api->Reservation((int) $resdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $resdata['roomid'], "ext/{$resdata['extid']}");
         } catch (Exception $e) {
         }
         try {
@@ -73,7 +73,7 @@ class WPDevArt implements PluginInterface
                 $api->AddReservation($resdata);
             } else {
                 //Update
-                $api->EditReservation((int) $resdata['roomid'], "ext/{$id}", $resdata);
+                $api->EditReservation((int) $resdata['roomid'], "ext/{$resdata['extid']}", $resdata);
             }
         } catch (Exception $e) {
         }
@@ -174,7 +174,7 @@ class WPDevArt implements PluginInterface
         }
         $api = $this->plugin->GetApi();
         try {
-            $api->DeleteReservation((int) $resdata['roomid'], "ext/{$id}");
+            $api->DeleteReservation((int) $resdata['roomid'], "ext/{$resdata['extid']}");
         } catch (Exception $e) {
         }
     }

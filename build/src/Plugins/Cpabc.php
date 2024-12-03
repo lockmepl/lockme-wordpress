@@ -121,7 +121,7 @@ class Cpabc implements PluginInterface
         $api = $this->plugin->GetApi();
         $lockme_data = null;
         try {
-            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
         try {
@@ -130,7 +130,7 @@ class Cpabc implements PluginInterface
                 $api->AddReservation($appdata);
             } else {
                 //Update
-                $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
+                $api->EditReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}", $appdata);
             }
         } catch (Exception $e) {
         }
@@ -152,7 +152,7 @@ class Cpabc implements PluginInterface
             return \false;
         }
         try {
-            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$id}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
         return \true;

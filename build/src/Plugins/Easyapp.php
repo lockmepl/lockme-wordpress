@@ -141,7 +141,7 @@ class Easyapp implements PluginInterface
                             break;
                         case 'DELETE':
                             try {
-                                $api->DeleteReservation((int) $this->resdata['roomid'], "ext/{$_GET['id']}");
+                                $api->DeleteReservation((int) $this->resdata['roomid'], "ext/{$this->resdata['extid']}");
                             } catch (Exception $e) {
                             }
                             break;
@@ -216,7 +216,7 @@ class Easyapp implements PluginInterface
         $api = $this->plugin->GetApi();
         $lockme_data = [];
         try {
-            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
         if (!$lockme_data) {
@@ -228,7 +228,7 @@ class Easyapp implements PluginInterface
             return;
         }
         try {
-            $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
+            $api->EditReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}", $appdata);
         } catch (Exception $e) {
         }
     }
@@ -245,14 +245,14 @@ class Easyapp implements PluginInterface
         $api = $this->plugin->GetApi();
         $lockme_data = [];
         try {
-            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$resid}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
         if (!$lockme_data) {
             return;
         }
         try {
-            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$resid}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
     }

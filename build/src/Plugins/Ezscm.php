@@ -120,7 +120,7 @@ class Ezscm implements PluginInterface
         $api = $this->plugin->GetApi();
         $lockme_data = null;
         try {
-            $lockme_data = $api->Reservation((int) $data['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $data['roomid'], "ext/{$data['extid']}");
         } catch (Exception $e) {
         }
         if (!$lockme_data) {
@@ -128,7 +128,7 @@ class Ezscm implements PluginInterface
             return;
         }
         try {
-            $api->EditReservation((int) $data['roomid'], "ext/{$id}", $data);
+            $api->EditReservation((int) $data['roomid'], "ext/{$data['extid']}", $data);
         } catch (Exception $e) {
         }
     }
@@ -141,14 +141,14 @@ class Ezscm implements PluginInterface
         $api = $this->plugin->GetApi();
         $lockme_data = null;
         try {
-            $lockme_data = $api->Reservation((int) $data['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $data['roomid'], "ext/{$data['extid']}");
         } catch (Exception $e) {
         }
         if (!$lockme_data) {
             return;
         }
         try {
-            $api->DeleteReservation((int) $data['roomid'], "ext/{$id}");
+            $api->DeleteReservation((int) $data['roomid'], "ext/{$data['extid']}");
         } catch (Exception $e) {
         }
     }

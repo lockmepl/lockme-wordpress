@@ -335,7 +335,7 @@ class Appointments implements PluginInterface
         $lockme_data = [];
 
         try {
-            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$app_id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
 
@@ -343,7 +343,7 @@ class Appointments implements PluginInterface
             if (!$lockme_data) { //Add new
                 $api->AddReservation($appdata);
             } else { //Update
-                $api->EditReservation((int) $appdata['roomid'], "ext/{$app_id}", $appdata);
+                $api->EditReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}", $appdata);
             }
         } catch (Exception $e) {
         }
@@ -359,7 +359,7 @@ class Appointments implements PluginInterface
         }
 
         try {
-            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$app_id}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
     }

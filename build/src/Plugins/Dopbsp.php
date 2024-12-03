@@ -19,6 +19,9 @@ class Dopbsp implements PluginInterface
             add_action('dopbsp_action_book_after', [$this, 'AddReservation'], 5);
             add_action('woocommerce_payment_complete', [$this, 'AddWooReservation'], 20, 1);
             add_action('woocommerce_thankyou', [$this, 'AddWooReservation'], 20, 1);
+            add_action('wp_ajax_dopbsp_reservation_reject', fn() => $this->Delete(), -10);
+            add_action('wp_ajax_dopbsp_reservation_cancel', fn() => $this->Delete(), -10);
+            add_action('wp_ajax_dopbsp_reservation_delete', fn() => $this->Delete(), -10);
             register_shutdown_function([$this, 'ShutDown']);
             add_action('init', function () {
                 if ($_GET['dopbsp_export'] ?? null) {
@@ -66,7 +69,7 @@ class Dopbsp implements PluginInterface
         $api = $this->plugin->GetApi();
         $lockme_data = null;
         try {
-            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
         if (!$lockme_data) {
@@ -78,7 +81,7 @@ class Dopbsp implements PluginInterface
             return;
         }
         try {
-            $api->EditReservation((int) $appdata['roomid'], "ext/{$id}", $appdata);
+            $api->EditReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}", $appdata);
         } catch (Exception $e) {
         }
         return null;
@@ -98,9 +101,10 @@ class Dopbsp implements PluginInterface
         } catch (Exception $e) {
         }
     }
-    private function Delete($id): void
+    private function Delete($id = null): void
     {
         global $DOPBSP, $wpdb;
+        $id ??= $_POST['reservation_id'];
         $data = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $DOPBSP->tables->reservations . ' WHERE `id` = %d', $id), ARRAY_A);
         if (!$data) {
             return;
@@ -112,14 +116,14 @@ class Dopbsp implements PluginInterface
         $api = $this->plugin->GetApi();
         $lockme_data = [];
         try {
-            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$id}");
+            $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
         if (!$lockme_data) {
             return;
         }
         try {
-            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$id}");
+            $api->DeleteReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
         } catch (Exception $e) {
         }
     }
@@ -254,12 +258,6 @@ class Dopbsp implements PluginInterface
                 case 'dopbsp_reservations_add_book':
                     $this->AddReservation();
                     break;
-                case 'dopbsp_reservation_reject':
-                case 'dopbsp_reservation_delete':
-                case 'dopbsp_reservation_cancel':
-                    $id = $_POST['reservation_id'];
-                    $this->Delete($id);
-                    break;
                 case 'dopbsp_reservation_approve':
                     $id = $_POST['reservation_id'];
                     $this->AddEditReservation($id);
@@ -363,9 +361,7 @@ class Dopbsp implements PluginInterface
         if ($day_data) {
             return;
         }
-        $settings_calendar = $DOPBSP->classes->backend_settings->values($calendar_id, 'calendar');
         $calendar = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $DOPBSP->tables->calendars . ' WHERE id=%d', $calendar_id));
-        $default_availability = json_decode($calendar->default_availability);
         $default_availability = $calendar->default_availability != '' ? $calendar->default_availability : '{"available": 1,"bind": 0,"price": 0,"promo": 0,"info":  "","info_body": "","info_info": "","notes": "","hours":{},"hours_definitions":[{"value":"00:00"}],"status": "available"}';
         $default_availability = json_decode($default_availability);
         $price_min = 1000000000;
