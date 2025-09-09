@@ -138,10 +138,14 @@ class Plugin
                 );
             }
 
-            foreach ($this->available_plugins as $k=>$plugin) {
-                if ($plugin->GetMessage($message)) {
-                    $api->MarkMessageRead((int) $messageid);
-                    break;
+            if ($message['action'] === 'test') {
+                $api->MarkMessageRead((int) $messageid);
+            } else {
+                foreach ($this->available_plugins as $plugin) {
+                    if ($plugin->GetMessage($message)) {
+                        $api->MarkMessageRead((int)$messageid);
+                        break;
+                    }
                 }
             }
 

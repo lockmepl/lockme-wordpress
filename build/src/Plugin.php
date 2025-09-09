@@ -105,10 +105,14 @@ class Plugin
             if ($message['data']['extid'] && str_starts_with($message['data']['extid'], $this->options['id_prefix'])) {
                 $message['data']['extid'] = substr($message['data']['extid'], strlen($this->options['id_prefix']));
             }
-            foreach ($this->available_plugins as $k => $plugin) {
-                if ($plugin->GetMessage($message)) {
-                    $api->MarkMessageRead((int) $messageid);
-                    break;
+            if ($message['action'] === 'test') {
+                $api->MarkMessageRead((int) $messageid);
+            } else {
+                foreach ($this->available_plugins as $plugin) {
+                    if ($plugin->GetMessage($message)) {
+                        $api->MarkMessageRead((int) $messageid);
+                        break;
+                    }
                 }
             }
             echo 'OK';
