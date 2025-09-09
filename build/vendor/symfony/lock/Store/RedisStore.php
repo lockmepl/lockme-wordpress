@@ -34,7 +34,7 @@ class RedisStore implements SharedLockStoreInterface
     public function __construct(private \Redis|Relay|\RedisArray|\RedisCluster|\LockmeDep\Predis\ClientInterface $redis, private float $initialTtl = 300.0)
     {
         if ($initialTtl <= 0) {
-            throw new InvalidTtlException(sprintf('"%s()" expects a strictly positive TTL. Got %d.', __METHOD__, $initialTtl));
+            throw new InvalidTtlException(\sprintf('"%s()" expects a strictly positive TTL. Got %d.', __METHOD__, $initialTtl));
         }
     }
     /**
