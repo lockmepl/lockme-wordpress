@@ -172,6 +172,7 @@ class Plugin
                     'api_domain' => $this->options['api_domain'] ?: 'https://api.lock.me'
                 ]),
                 'tmp_dir' => get_temp_dir(),
+                'version' => 'v2.4',
             ]);
             try{
                 $lm->loadAccessToken(
