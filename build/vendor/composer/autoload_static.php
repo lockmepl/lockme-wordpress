@@ -14,7 +14,7 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
     );
 
     public static $prefixLengthsPsr4 = array (
-        'L' => 
+        'L' =>
         array (
             'LockmeDep\\Symfony\\Component\\Lock\\' => 33,
             'LockmeDep\\Psr\\Log\\' => 18,
@@ -31,48 +31,48 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
     );
 
     public static $prefixDirsPsr4 = array (
-        'LockmeDep\\Symfony\\Component\\Lock\\' => 
+        'LockmeDep\\Symfony\\Component\\Lock\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/lock',
         ),
-        'LockmeDep\\Psr\\Log\\' => 
+        'LockmeDep\\Psr\\Log\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/log/src',
         ),
-        'LockmeDep\\Psr\\Http\\Message\\' => 
+        'LockmeDep\\Psr\\Http\\Message\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/http-factory/src',
             1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
-        'LockmeDep\\Psr\\Http\\Client\\' => 
+        'LockmeDep\\Psr\\Http\\Client\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/http-client/src',
         ),
-        'LockmeDep\\Lockme\\SDK\\' => 
+        'LockmeDep\\Lockme\\SDK\\' =>
         array (
             0 => __DIR__ . '/..' . '/lustmored/lockme-sdk/src',
         ),
-        'LockmeDep\\Lockme\\OAuth2\\Client\\' => 
+        'LockmeDep\\Lockme\\OAuth2\\Client\\' =>
         array (
             0 => __DIR__ . '/..' . '/lustmored/oauth2-lockme/src',
         ),
-        'LockmeDep\\LockmeIntegration\\' => 
+        'LockmeDep\\LockmeIntegration\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
-        'LockmeDep\\GuzzleHttp\\Psr7\\' => 
+        'LockmeDep\\GuzzleHttp\\Psr7\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
         ),
-        'LockmeDep\\GuzzleHttp\\Promise\\' => 
+        'LockmeDep\\GuzzleHttp\\Promise\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/promises/src',
         ),
-        'LockmeDep\\GuzzleHttp\\' => 
+        'LockmeDep\\GuzzleHttp\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
         ),
-        'League\\OAuth2\\Client\\' => 
+        'League\\OAuth2\\Client\\' =>
         array (
             0 => __DIR__ . '/..' . '/league/oauth2-client/src',
         ),
