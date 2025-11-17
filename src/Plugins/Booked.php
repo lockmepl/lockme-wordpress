@@ -283,8 +283,13 @@ class Booked implements PluginInterface
     private function AppData($res): array
     {
         $cal = wp_get_object_terms($res->ID, 'booked_custom_calendars');
-        if (!$cal || is_wp_error($cal)) {
+        if (is_wp_error($cal)) {
             return [];
+        }
+
+        $calId = 'default';
+        if ($cal) {
+            $calId = $cal[0]->term_id;
         }
 
         $timeslot = explode('-', get_post_meta($res->ID, '_appointment_timeslot', true));
@@ -307,7 +312,7 @@ class Booked implements PluginInterface
         return
             $this->plugin->AnonymizeData(
                 [
-                    'roomid' => $this->options['calendar_'.($cal[0]->term_id ?? 'default')],
+                    'roomid' => $this->options['calendar_'.$calId],
                     'date' => date('Y-m-d', get_post_meta($res->ID, '_appointment_timestamp', true)),
                     'hour' => date('H:i:s', strtotime("$time[0]:$time[1]:00")),
                     'name' => $name,

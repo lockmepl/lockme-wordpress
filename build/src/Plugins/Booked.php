@@ -7,12 +7,11 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
-use LockmeDep\WP_Error;
 use WP_Query;
 class Booked implements PluginInterface
 {
-    private $options;
-    private $plugin;
+    private ?array $options;
+    private Plugin $plugin;
     public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
@@ -59,7 +58,7 @@ class Booked implements PluginInterface
         $lockme_data = [];
         try {
             $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
-        } catch (Exception $e) {
+        } catch (Exception) {
         }
         try {
             if (!$lockme_data) {
@@ -69,7 +68,7 @@ class Booked implements PluginInterface
                 //Update
                 $api->EditReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}", $appdata);
             }
-        } catch (Exception $e) {
+        } catch (Exception) {
         }
         return null;
     }
@@ -123,7 +122,7 @@ class Booked implements PluginInterface
         $api = $this->plugin->GetApi();
         try {
             $api->DeleteReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
-        } catch (Exception $e) {
+        } catch (Exception) {
         }
     }
     public function GetMessage(array $message): bool
@@ -158,7 +157,7 @@ class Booked implements PluginInterface
                 $cf_data['Status'] = 'Booking from widget';
                 break;
         }
-        if (isset($data['invoice']) && !empty($data['invoice'])) {
+        if (!empty($data['invoice'])) {
             $cf_data['Invoice'] = $data['invoice'];
         }
         $cf_meta_value = '';
@@ -194,7 +193,7 @@ class Booked implements PluginInterface
                     $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, $lockme_id, $this->plugin->AnonymizeData(['extid' => $row_id]));
                     return \true;
-                } catch (Exception $e) {
+                } catch (Exception) {
                 }
                 break;
             case 'edit':
@@ -231,8 +230,12 @@ class Booked implements PluginInterface
     private function AppData($res): array
     {
         $cal = wp_get_object_terms($res->ID, 'booked_custom_calendars');
-        if (!$cal || is_wp_error($cal)) {
+        if (is_wp_error($cal)) {
             return [];
+        }
+        $calId = 'default';
+        if ($cal) {
+            $calId = $cal[0]->term_id;
         }
         $timeslot = explode('-', get_post_meta($res->ID, '_appointment_timeslot', \true));
         $time = str_split($timeslot[0], 2);
@@ -247,9 +250,9 @@ class Booked implements PluginInterface
         }
         $name = get_post_meta($res->ID, '_appointment_guest_name', \true) ?: $name;
         $email = get_post_meta($res->ID, '_appointment_guest_email', \true) ?: $email;
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . ($cal[0]->term_id ?? 'default')], 'date' => date('Y-m-d', get_post_meta($res->ID, '_appointment_timestamp', \true)), 'hour' => date('H:i:s', strtotime("{$time[0]}:{$time[1]}:00")), 'name' => $name, 'pricer' => 'API', 'email' => $email, 'phone' => $phone, 'status' => in_array($res->post_status, ['publish', 'future']) ? 1 : 0, 'extid' => $res->ID]);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $calId], 'date' => date('Y-m-d', get_post_meta($res->ID, '_appointment_timestamp', \true)), 'hour' => date('H:i:s', strtotime("{$time[0]}:{$time[1]}:00")), 'name' => $name, 'pricer' => 'API', 'email' => $email, 'phone' => $phone, 'status' => in_array($res->post_status, ['publish', 'future']) ? 1 : 0, 'extid' => $res->ID]);
     }
-    private function GetCalendar($roomid)
+    private function GetCalendar($roomid): ?int
     {
         $calendars = get_terms('booked_custom_calendars', 'orderby=slug&hide_empty=0');
         foreach ($calendars as $calendar) {
@@ -259,7 +262,7 @@ class Booked implements PluginInterface
         }
         return null;
     }
-    private function GetSlot($calendar_id, $date, $hour)
+    private function GetSlot($calendar_id, $date, $hour): int|string|null
     {
         $booked_defaults = get_option('booked_defaults_' . $calendar_id);
         if (!$booked_defaults) {
@@ -276,11 +279,11 @@ class Booked implements PluginInterface
         } elseif (function_exists('booked_apply_custom_timeslots_filter')) {
             $booked_defaults = booked_apply_custom_timeslots_filter($booked_defaults, $calendar_id);
         }
-        if (isset($booked_defaults[$formatted_date]) && !empty($booked_defaults[$formatted_date])) {
+        if (!empty($booked_defaults[$formatted_date])) {
             $todays_defaults = is_array($booked_defaults[$formatted_date]) ? $booked_defaults[$formatted_date] : json_decode($booked_defaults[$formatted_date], \true);
-        } elseif (isset($booked_defaults[$formatted_date]) && empty($booked_defaults[$formatted_date])) {
+        } elseif (isset($booked_defaults[$formatted_date])) {
             $todays_defaults = \false;
-        } elseif (isset($booked_defaults[$day_name]) && !empty($booked_defaults[$day_name])) {
+        } elseif (!empty($booked_defaults[$day_name])) {
             $todays_defaults = $booked_defaults[$day_name];
         } else {
             $todays_defaults = \false;
@@ -308,14 +311,14 @@ class Booked implements PluginInterface
         }, 'lockme-booked');
         add_settings_field('booked_use', 'Enable integration', function () {
             echo '<input name="lockme_booked[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'] ?? null, \false) . ' />';
-        }, 'lockme-booked', 'lockme_booked_section', []);
+        }, 'lockme-booked', 'lockme_booked_section');
         if (($this->options['use'] ?? null) && $this->plugin->tab === 'booked_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
                 try {
                     $rooms = $api->RoomList();
-                } catch (IdentityProviderException $e) {
+                } catch (IdentityProviderException) {
                 }
             }
             add_settings_field('calendar_default', 'Room for default calendar', function () use ($rooms) {
@@ -325,7 +328,7 @@ class Booked implements PluginInterface
                     echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_default'], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
                 }
                 echo '</select>';
-            }, 'lockme-booked', 'lockme_booked_section', []);
+            }, 'lockme-booked', 'lockme_booked_section');
             $calendars = get_terms('booked_custom_calendars', 'orderby=slug&hide_empty=0');
             foreach ($calendars as $calendar) {
                 add_settings_field('calendar_' . $calendar->term_id, 'Room for ' . $calendar->name, function () use ($rooms, $calendar) {
@@ -335,11 +338,11 @@ class Booked implements PluginInterface
                         echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_' . $calendar->term_id], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
                     }
                     echo '</select>';
-                }, 'lockme-booked', 'lockme_booked_section', []);
+                }, 'lockme-booked', 'lockme_booked_section');
             }
             add_settings_field('export_booked', 'Send data to LockMe', static function () {
                 echo '<a href="?page=lockme_integration&tab=booked_plugin&booked_export=1">Click here</a> to send all reservations to the LockMe calendar. This operation should only be required once, during the initial integration.';
-            }, 'lockme-booked', 'lockme_booked_section', []);
+            }, 'lockme-booked', 'lockme_booked_section');
         }
     }
     public function CheckDependencies(): bool
