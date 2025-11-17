@@ -7,13 +7,12 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
-use WP_Error;
 use WP_Query;
 
 class Booked implements PluginInterface
 {
-    private $options;
-    private $plugin;
+    private ?array $options;
+    private Plugin $plugin;
 
     public function __construct(Plugin $plugin)
     {
@@ -70,7 +69,7 @@ class Booked implements PluginInterface
 
         try {
             $lockme_data = $api->Reservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
-        } catch (Exception $e) {
+        } catch (Exception) {
         }
 
         try {
@@ -79,7 +78,7 @@ class Booked implements PluginInterface
             } else { //Update
                 $api->EditReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}", $appdata);
             }
-        } catch (Exception $e) {
+        } catch (Exception) {
         }
         return null;
     }
@@ -154,7 +153,7 @@ class Booked implements PluginInterface
 
         try {
             $api->DeleteReservation((int) $appdata['roomid'], "ext/{$appdata['extid']}");
-        } catch (Exception $e) {
+        } catch (Exception) {
         }
     }
 
@@ -200,7 +199,7 @@ class Booked implements PluginInterface
                 $cf_data['Status'] = 'Booking from widget';
                 break;
         }
-        if (isset($data['invoice']) && !empty($data['invoice'])) {
+        if (!empty($data['invoice'])) {
             $cf_data['Invoice'] = $data['invoice'];
         }
 
@@ -245,7 +244,7 @@ class Booked implements PluginInterface
                         $this->plugin->AnonymizeData(['extid' => $row_id])
                     );
                     return true;
-                } catch (Exception $e) {
+                } catch (Exception) {
                 }
                 break;
             case 'edit':
@@ -310,7 +309,7 @@ class Booked implements PluginInterface
                 [
                     'roomid' => $this->options['calendar_'.($cal[0]->term_id ?? 'default')],
                     'date' => date('Y-m-d', get_post_meta($res->ID, '_appointment_timestamp', true)),
-                    'hour' => date('H:i:s', strtotime("{$time[0]}:{$time[1]}:00")),
+                    'hour' => date('H:i:s', strtotime("$time[0]:$time[1]:00")),
                     'name' => $name,
                     'pricer' => 'API',
                     'email' => $email,
@@ -321,7 +320,7 @@ class Booked implements PluginInterface
             );
     }
 
-    private function GetCalendar($roomid)
+    private function GetCalendar($roomid): ?int
     {
         $calendars = get_terms('booked_custom_calendars', 'orderby=slug&hide_empty=0');
         foreach ($calendars as $calendar) {
@@ -332,7 +331,7 @@ class Booked implements PluginInterface
         return null;
     }
 
-    private function GetSlot($calendar_id, $date, $hour)
+    private function GetSlot($calendar_id, $date, $hour): int|string|null
     {
         $booked_defaults = get_option('booked_defaults_'.$calendar_id);
         if (!$booked_defaults) {
@@ -352,12 +351,12 @@ class Booked implements PluginInterface
             $booked_defaults = booked_apply_custom_timeslots_filter($booked_defaults, $calendar_id);
         }
 
-        if (isset($booked_defaults[$formatted_date]) && !empty($booked_defaults[$formatted_date])) {
+        if (!empty($booked_defaults[$formatted_date])) {
             $todays_defaults = (is_array($booked_defaults[$formatted_date]) ? $booked_defaults[$formatted_date] : json_decode($booked_defaults[$formatted_date],
                 true));
-        } elseif (isset($booked_defaults[$formatted_date]) && empty($booked_defaults[$formatted_date])) {
+        } elseif (isset($booked_defaults[$formatted_date])) {
             $todays_defaults = false;
-        } elseif (isset($booked_defaults[$day_name]) && !empty($booked_defaults[$day_name])) {
+        } elseif (!empty($booked_defaults[$day_name])) {
             $todays_defaults = $booked_defaults[$day_name];
         } else {
             $todays_defaults = false;
@@ -365,7 +364,7 @@ class Booked implements PluginInterface
 
         $hour = date('Hi', strtotime($hour));
         foreach ($todays_defaults as $h => $cnt) {
-            if (preg_match("/^{$hour}/", $h)) {
+            if (preg_match("/^$hour/", $h)) {
                 return $h;
             }
         }
@@ -403,8 +402,7 @@ class Booked implements PluginInterface
                         false).' />';
             },
             'lockme-booked',
-            'lockme_booked_section',
-            []
+            'lockme_booked_section'
         );
 
         if (($this->options['use'] ?? null) && $this->plugin->tab === 'booked_plugin') {
@@ -413,7 +411,7 @@ class Booked implements PluginInterface
             if ($api) {
                 try {
                     $rooms = $api->RoomList();
-                } catch (IdentityProviderException $e) {
+                } catch (IdentityProviderException) {
                 }
             }
 
@@ -431,8 +429,7 @@ class Booked implements PluginInterface
                     echo '</select>';
                 },
                 'lockme-booked',
-                'lockme_booked_section',
-                []
+                'lockme_booked_section'
             );
 
             $calendars = get_terms('booked_custom_calendars', 'orderby=slug&hide_empty=0');
@@ -451,8 +448,7 @@ class Booked implements PluginInterface
                         echo '</select>';
                     },
                     'lockme-booked',
-                    'lockme_booked_section',
-                    []
+                    'lockme_booked_section'
                 );
             }
             add_settings_field(
@@ -462,8 +458,7 @@ class Booked implements PluginInterface
                     echo '<a href="?page=lockme_integration&tab=booked_plugin&booked_export=1">Click here</a> to send all reservations to the LockMe calendar. This operation should only be required once, during the initial integration.';
                 },
                 'lockme-booked',
-                'lockme_booked_section',
-                []
+                'lockme_booked_section'
             );
         }
     }
