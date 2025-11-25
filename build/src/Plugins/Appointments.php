@@ -9,13 +9,13 @@ use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
 class Appointments implements PluginInterface
 {
-    private $options;
-    private $plugin;
+    private array $options;
+    private Plugin $plugin;
     public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
-        $this->options = get_option('lockme_app');
-        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        $this->options = get_option('lockme_app') ?: [];
+        if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_action('wpmudev_appointments_insert_appointment', [$this, 'AddReservation'], 10, 1);
             add_action('app-appointment-inline_edit-after_save', [$this, 'AddEditReservation'], 10, 2);
             add_action('app-appointments-appointment_cancelled', [$this, 'RemoveReservation'], 10, 1);

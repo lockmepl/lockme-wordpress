@@ -10,13 +10,13 @@ use RuntimeException;
 use WP_Query;
 class Booked implements PluginInterface
 {
-    private ?array $options;
+    private array $options;
     private Plugin $plugin;
     public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
-        $this->options = get_option('lockme_booked');
-        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        $this->options = get_option('lockme_booked') ?: [];
+        if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_action('booked_new_appointment_created', [$this, 'AddEditReservation'], 5);
             add_action('transition_post_status', [$this, 'AddEditReservation'], 10, 3);
             add_action('before_delete_post', [$this, 'Delete']);

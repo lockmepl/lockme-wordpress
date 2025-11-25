@@ -16,15 +16,15 @@ use wpdevart_bc_ModelForms;
 use wpdevart_bc_ModelThemes;
 class WPDevArt implements PluginInterface
 {
-    private $options;
+    private array $options;
     private $resdata;
-    private $plugin;
+    private Plugin $plugin;
     public function __construct(Plugin $plugin)
     {
         global $wpdb;
         $this->plugin = $plugin;
-        $this->options = get_option('lockme_wpdevart');
-        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        $this->options = get_option('lockme_wpdevart') ?: [];
+        if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
             if ($_GET['page'] === 'wpdevart-reservations' && $_POST['task'] && $_POST['id'] && is_admin()) {
                 $this->resdata = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $wpdb->prefix . 'wpdevart_reservations WHERE `id`=%d', $_POST['id']), ARRAY_A);
             }

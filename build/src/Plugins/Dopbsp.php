@@ -9,13 +9,13 @@ use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
 class Dopbsp implements PluginInterface
 {
-    private $options;
-    private $plugin;
+    private array $options;
+    private Plugin $plugin;
     public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
-        $this->options = get_option('lockme_dopbsp');
-        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        $this->options = get_option('lockme_dopbsp') ?: [];
+        if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_action('dopbsp_action_book_after', [$this, 'AddReservation'], 5);
             add_action('woocommerce_payment_complete', [$this, 'AddWooReservation'], 20, 1);
             add_action('woocommerce_thankyou', [$this, 'AddWooReservation'], 20, 1);

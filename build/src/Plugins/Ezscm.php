@@ -9,17 +9,17 @@ use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
 class Ezscm implements PluginInterface
 {
-    private $options;
-    private $tables;
-    private $plugin;
-    private $resdata;
+    private array $options;
+    private array $tables;
+    private Plugin $plugin;
+    private array $resdata = [];
     public function __construct(Plugin $plugin)
     {
         global $wpdb;
         $this->plugin = $plugin;
-        $this->options = get_option('lockme_ezscm');
+        $this->options = get_option('lockme_ezscm') ?: [];
         $this->tables = array('entries' => "{$wpdb->prefix}ezscm_entries", 'schedules' => "{$wpdb->prefix}ezscm_schedules", 'settings' => "{$wpdb->prefix}ezscm_settings", 'settings_schedule' => "{$wpdb->prefix}ezscm_settings_schedule");
-        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
             if ($_POST['action'] === 'ezscm_frontend' || $_POST['action'] === 'ezscm_backend') {
                 parse_str($_REQUEST['data'], $data);
                 $action = $data['action'];

@@ -13,16 +13,16 @@ use wp_booking_calendar_reservation;
 use wp_booking_calendar_slot;
 class WPBooking implements PluginInterface
 {
-    private $options;
+    private array $options;
     private $delId;
     private $delData;
-    private $plugin;
+    private Plugin $plugin;
     public function __construct(Plugin $plugin)
     {
         global $wpb_path;
         $this->plugin = $plugin;
-        $this->options = get_option('lockme_wpb');
-        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        $this->options = get_option('lockme_wpb') ?: [];
+        if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
             $wpb_path = __DIR__ . '/../../../../wp-booking-calendar/';
             /** @noinspection PhpIncludeInspection */
             include_once $wpb_path . '/admin/class/list.class.php';
