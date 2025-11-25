@@ -12,15 +12,15 @@ use WP_Query;
 
 class Woo implements PluginInterface
 {
-    private $options;
-    private $plugin;
+    private array $options;
+    private Plugin $plugin;
 
     public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
-        $this->options = get_option('lockme_woo');
+        $this->options = get_option('lockme_woo') ?: [];
 
-        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_action('woocommerce_new_booking', [$this, 'AddEditReservation'], 5, 1);
             foreach (['unpaid', 'pending-confirmation', 'confirmed', 'paid', 'complete', 'in-cart'] as $action) {
                 add_action('woocommerce_booking_'.$action, [$this, 'AddEditReservation'], 5, 1);

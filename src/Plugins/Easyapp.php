@@ -14,18 +14,18 @@ use RuntimeException;
 
 class Easyapp implements PluginInterface
 {
-    private $options;
-    private $models;
-    private $resdata;
-    private $plugin;
+    private array $options;
+    private EADBModels $models;
+    private array $resdata =[];
+    private Plugin $plugin;
 
     public function __construct(Plugin $plugin)
     {
         global $wpdb;
         $this->plugin = $plugin;
-        $this->options = get_option('lockme_easyapp');
+        $this->options = get_option('lockme_easyapp') ?: [];
 
-        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
             $this->models = new EADBModels($wpdb, new EATableColumns, []);
 
             if (isset($_GET['action'], $_GET['id']) && $_GET['action'] === 'ea_appointment' && $_GET['id']) {

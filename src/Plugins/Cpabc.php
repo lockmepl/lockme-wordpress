@@ -9,15 +9,15 @@ use LockmeIntegration\PluginInterface;
 use RuntimeException;
 
 class Cpabc implements PluginInterface {
-    private $options;
-    private $plugin;
+    private array $options;
+    private Plugin $plugin;
 
     public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
-        $this->options = get_option('lockme_cpabc');
+        $this->options = get_option('lockme_cpabc') ?: [];
 
-        if(is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()){
+        if(($this->options['use'] ?? null) && $this->CheckDependencies()){
             register_shutdown_function([$this, 'ShutDown']);
 
             add_action('init', function(){

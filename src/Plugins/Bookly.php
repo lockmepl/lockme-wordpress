@@ -18,16 +18,16 @@ use function method_exists;
 
 class Bookly implements PluginInterface
 {
-    public $ajaxdata;
-    private $options;
-    private $plugin;
+    public array $ajaxdata = [];
+    private array $options;
+    private Plugin $plugin;
 
     public function __construct(Plugin $plugin)
     {
         $this->plugin = $plugin;
-        $this->options = get_option('lockme_bookly');
+        $this->options = get_option('lockme_bookly') ?: [];
 
-        if (is_array($this->options) && ($this->options['use'] ?? null) && $this->CheckDependencies()) {
+        if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_filter('wp_die_ajax_handler', [$this, 'Ajax'], 15, 1);
 
             add_action('init', function () {
