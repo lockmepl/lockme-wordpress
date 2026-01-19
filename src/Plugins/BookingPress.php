@@ -75,7 +75,7 @@ class BookingPress implements PluginInterface
             []
         );
 
-        if (($this->options['use'] ?? null) && $this->plugin->tab === 'booking_press') {
+        if (($this->options['use'] ?? null) && $this->plugin->tab === 'booking_press_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
@@ -85,7 +85,7 @@ class BookingPress implements PluginInterface
                 }
             }
 
-            $services = $wpdb->get_results("SELECT bookingpress_service_id, bookingpress_service_name FROM {$wpdb->prefix}bookingpress_services WHERE bookingpress_service_status = 1");
+            $services = $wpdb->get_results("SELECT bookingpress_service_id, bookingpress_service_name FROM {$wpdb->prefix}bookingpress_services");
 
             foreach ($services as $service) {
                 add_settings_field(

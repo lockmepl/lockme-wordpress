@@ -49,7 +49,7 @@ class BookingPress implements PluginInterface
         add_settings_field('bookingpress_use', 'Enable integration', function () {
             echo '<input name="lockme_bookingpress[use]" type="checkbox" value="1"  ' . checked(1, $this->options['use'] ?? null, \false) . ' />';
         }, 'lockme-bookingpress', 'lockme_bookingpress_section', []);
-        if (($this->options['use'] ?? null) && $this->plugin->tab === 'booking_press') {
+        if (($this->options['use'] ?? null) && $this->plugin->tab === 'booking_press_plugin') {
             $api = $this->plugin->GetApi();
             $rooms = [];
             if ($api) {
@@ -58,7 +58,7 @@ class BookingPress implements PluginInterface
                 } catch (IdentityProviderException $e) {
                 }
             }
-            $services = $wpdb->get_results("SELECT bookingpress_service_id, bookingpress_service_name FROM {$wpdb->prefix}bookingpress_services WHERE bookingpress_service_status = 1");
+            $services = $wpdb->get_results("SELECT bookingpress_service_id, bookingpress_service_name FROM {$wpdb->prefix}bookingpress_services");
             foreach ($services as $service) {
                 add_settings_field('service_' . $service->bookingpress_service_id, 'Room for ' . $service->bookingpress_service_name, function () use ($rooms, $service) {
                     echo '<select name="lockme_bookingpress[service_' . $service->bookingpress_service_id . ']">';
