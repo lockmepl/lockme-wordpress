@@ -137,7 +137,7 @@ class BookingPress implements PluginInterface
                     'bookingpress_appointment_timezone' => 'Europe/Warsaw',
                     'bookingpress_created_at' => current_time('mysql'),
                     'bookingpress_service_name' => $service_data['bookingpress_service_name'],
-                    'bookingpress_service_price' => $service_data['bookingpress_service_price'],
+                    'bookingpress_service_price' => $data['price'],
                     'bookingpress_service_currency' => $currency,
                     'bookingpress_service_duration_val' => $service_duration_val,
                     'bookingpress_service_duration_unit' => $service_duration_unit,
@@ -157,7 +157,7 @@ class BookingPress implements PluginInterface
                 if ($data['extid']) {
                     // Find or create customer for current email
                     $customer_id = $this->GetOrCreateCustomer($email, $data, $surname);
-                    $wpdb->update("{$wpdb->prefix}bookingpress_appointment_bookings", ['bookingpress_customer_id' => $customer_id, 'bookingpress_appointment_date' => $data['date'], 'bookingpress_appointment_time' => $data['hour'], 'bookingpress_appointment_end_time' => date('H:i:s', $timestamp + $duration_seconds), 'bookingpress_customer_name' => $data['name'] . ' ' . $surname, 'bookingpress_customer_email' => $email, 'bookingpress_customer_phone' => $data['phone'] ?? '', 'bookingpress_service_name' => $service_data['bookingpress_service_name'], 'bookingpress_service_price' => $service_data['bookingpress_service_price'], 'bookingpress_service_currency' => $currency, 'bookingpress_service_duration_val' => $service_duration_val, 'bookingpress_service_duration_unit' => $service_duration_unit], ['bookingpress_appointment_booking_id' => $data['extid']]);
+                    $wpdb->update("{$wpdb->prefix}bookingpress_appointment_bookings", ['bookingpress_customer_id' => $customer_id, 'bookingpress_appointment_date' => $data['date'], 'bookingpress_appointment_time' => $data['hour'], 'bookingpress_appointment_end_time' => date('H:i:s', $timestamp + $duration_seconds), 'bookingpress_customer_name' => $data['name'] . ' ' . $surname, 'bookingpress_customer_email' => $email, 'bookingpress_customer_phone' => $data['phone'] ?? '', 'bookingpress_service_name' => $service_data['bookingpress_service_name'], 'bookingpress_service_price' => $data['price'], 'bookingpress_service_currency' => $currency, 'bookingpress_service_duration_val' => $service_duration_val, 'bookingpress_service_duration_unit' => $service_duration_unit], ['bookingpress_appointment_booking_id' => $data['extid']]);
                     return \true;
                 }
                 break;
