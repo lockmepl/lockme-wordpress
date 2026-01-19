@@ -16,15 +16,13 @@ use LockmeDep\Symfony\Component\Lock\Exception\UnserializableKeyException;
  *
  * @author Jérémy Derussé <jeremy@derusse.com>
  */
-final class Key
+final class Key implements \Stringable
 {
-    private string $resource;
     private ?float $expiringTime = null;
     private array $state = [];
     private bool $serializable = \true;
-    public function __construct(string $resource)
+    public function __construct(private string $resource)
     {
-        $this->resource = $resource;
     }
     public function __toString(): string
     {
@@ -74,6 +72,12 @@ final class Key
     public function isExpired(): bool
     {
         return null !== $this->expiringTime && $this->expiringTime <= microtime(\true);
+    }
+    public function __unserialize(array $data): void
+    {
+        $this->resource = $data['resource'] ?? $data["\x00" . self::class . "\x00resource"];
+        $this->expiringTime = $data['expiringTime'] ?? $data["\x00" . self::class . "\x00expiringTime"] ?? null;
+        $this->state = $data['state'] ?? $data["\x00" . self::class . "\x00state"] ?? [];
     }
     public function __serialize(): array
     {

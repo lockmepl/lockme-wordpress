@@ -23,10 +23,7 @@ class InMemoryStore implements SharedLockStoreInterface
 {
     private array $locks = [];
     private array $readLocks = [];
-    /**
-     * @return void
-     */
-    public function save(Key $key)
+    public function save(Key $key): void
     {
         $hashKey = (string) $key;
         $token = $this->getUniqueToken($key);
@@ -48,10 +45,7 @@ class InMemoryStore implements SharedLockStoreInterface
         }
         $this->locks[$hashKey] = $token;
     }
-    /**
-     * @return void
-     */
-    public function saveRead(Key $key)
+    public function saveRead(Key $key): void
     {
         $hashKey = (string) $key;
         $token = $this->getUniqueToken($key);
@@ -69,17 +63,11 @@ class InMemoryStore implements SharedLockStoreInterface
         }
         $this->readLocks[$hashKey][$token] = \true;
     }
-    /**
-     * @return void
-     */
-    public function putOffExpiration(Key $key, float $ttl)
+    public function putOffExpiration(Key $key, float $ttl): void
     {
         // do nothing, memory locks forever.
     }
-    /**
-     * @return void
-     */
-    public function delete(Key $key)
+    public function delete(Key $key): void
     {
         $hashKey = (string) $key;
         $token = $this->getUniqueToken($key);

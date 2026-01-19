@@ -36,17 +36,11 @@ class SemaphoreStore implements BlockingStoreInterface
             throw new InvalidArgumentException('Semaphore extension (sysvsem) is required.');
         }
     }
-    /**
-     * @return void
-     */
-    public function save(Key $key)
+    public function save(Key $key): void
     {
         $this->lock($key, \false);
     }
-    /**
-     * @return void
-     */
-    public function waitAndSave(Key $key)
+    public function waitAndSave(Key $key): void
     {
         $this->lock($key, \true);
     }
@@ -68,10 +62,7 @@ class SemaphoreStore implements BlockingStoreInterface
         $key->setState(__CLASS__, $resource);
         $key->markUnserializable();
     }
-    /**
-     * @return void
-     */
-    public function delete(Key $key)
+    public function delete(Key $key): void
     {
         // The lock is maybe not acquired.
         if (!$key->hasState(__CLASS__)) {
@@ -81,10 +72,7 @@ class SemaphoreStore implements BlockingStoreInterface
         sem_remove($resource);
         $key->removeState(__CLASS__);
     }
-    /**
-     * @return void
-     */
-    public function putOffExpiration(Key $key, float $ttl)
+    public function putOffExpiration(Key $key, float $ttl): void
     {
         // do nothing, the semaphore locks forever.
     }

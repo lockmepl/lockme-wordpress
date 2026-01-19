@@ -24,10 +24,8 @@ use LockmeDep\Symfony\Component\Lock\PersistingStoreInterface;
 class ZookeeperStore implements PersistingStoreInterface
 {
     use ExpiringStoreTrait;
-    private \Zookeeper $zookeeper;
-    public function __construct(\Zookeeper $zookeeper)
+    public function __construct(private \Zookeeper $zookeeper)
     {
-        $this->zookeeper = $zookeeper;
     }
     public static function createConnection(
         #[\SensitiveParameter]
@@ -49,10 +47,7 @@ class ZookeeperStore implements PersistingStoreInterface
         }
         return new \Zookeeper(implode(',', $hosts));
     }
-    /**
-     * @return void
-     */
-    public function save(Key $key)
+    public function save(Key $key): void
     {
         if ($this->exists($key)) {
             return;
@@ -63,10 +58,7 @@ class ZookeeperStore implements PersistingStoreInterface
         $key->markUnserializable();
         $this->checkNotExpired($key);
     }
-    /**
-     * @return void
-     */
-    public function delete(Key $key)
+    public function delete(Key $key): void
     {
         if (!$this->exists($key)) {
             return;
@@ -89,10 +81,7 @@ class ZookeeperStore implements PersistingStoreInterface
             return \false;
         }
     }
-    /**
-     * @return void
-     */
-    public function putOffExpiration(Key $key, float $ttl)
+    public function putOffExpiration(Key $key, float $ttl): void
     {
         // do nothing, zookeeper locks forever.
     }

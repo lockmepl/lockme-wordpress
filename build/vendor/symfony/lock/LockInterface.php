@@ -33,12 +33,10 @@ interface LockInterface
      *
      * @param float|null $ttl Maximum expected lock duration in seconds
      *
-     * @return void
-     *
      * @throws LockConflictedException If the lock is acquired by someone else
      * @throws LockAcquiringException  If the lock cannot be refreshed
      */
-    public function refresh(?float $ttl = null);
+    public function refresh(?float $ttl = null): void;
     /**
      * Returns whether or not the lock is acquired.
      */
@@ -46,11 +44,9 @@ interface LockInterface
     /**
      * Release the lock.
      *
-     * @return void
-     *
      * @throws LockReleasingException If the lock cannot be released
      */
-    public function release();
+    public function release(): void;
     public function isExpired(): bool;
     /**
      * Returns the remaining lifetime in seconds.

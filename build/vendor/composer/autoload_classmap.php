@@ -183,6 +183,7 @@ return array(
     'LockmeDep\\Symfony\\Component\\Lock\\LockInterface' => $vendorDir . '/symfony/lock/LockInterface.php',
     'LockmeDep\\Symfony\\Component\\Lock\\NoLock' => $vendorDir . '/symfony/lock/NoLock.php',
     'LockmeDep\\Symfony\\Component\\Lock\\PersistingStoreInterface' => $vendorDir . '/symfony/lock/PersistingStoreInterface.php',
+    'LockmeDep\\Symfony\\Component\\Lock\\Serializer\\LockKeyNormalizer' => $vendorDir . '/symfony/lock/Serializer/LockKeyNormalizer.php',
     'LockmeDep\\Symfony\\Component\\Lock\\SharedLockInterface' => $vendorDir . '/symfony/lock/SharedLockInterface.php',
     'LockmeDep\\Symfony\\Component\\Lock\\SharedLockStoreInterface' => $vendorDir . '/symfony/lock/SharedLockStoreInterface.php',
     'LockmeDep\\Symfony\\Component\\Lock\\Store\\CombinedStore' => $vendorDir . '/symfony/lock/Store/CombinedStore.php',
@@ -194,6 +195,7 @@ return array(
     'LockmeDep\\Symfony\\Component\\Lock\\Store\\InMemoryStore' => $vendorDir . '/symfony/lock/Store/InMemoryStore.php',
     'LockmeDep\\Symfony\\Component\\Lock\\Store\\MemcachedStore' => $vendorDir . '/symfony/lock/Store/MemcachedStore.php',
     'LockmeDep\\Symfony\\Component\\Lock\\Store\\MongoDbStore' => $vendorDir . '/symfony/lock/Store/MongoDbStore.php',
+    'LockmeDep\\Symfony\\Component\\Lock\\Store\\NullStore' => $vendorDir . '/symfony/lock/Store/NullStore.php',
     'LockmeDep\\Symfony\\Component\\Lock\\Store\\PdoStore' => $vendorDir . '/symfony/lock/Store/PdoStore.php',
     'LockmeDep\\Symfony\\Component\\Lock\\Store\\PostgreSqlStore' => $vendorDir . '/symfony/lock/Store/PostgreSqlStore.php',
     'LockmeDep\\Symfony\\Component\\Lock\\Store\\RedisStore' => $vendorDir . '/symfony/lock/Store/RedisStore.php',
@@ -203,4 +205,5 @@ return array(
     'LockmeDep\\Symfony\\Component\\Lock\\Strategy\\ConsensusStrategy' => $vendorDir . '/symfony/lock/Strategy/ConsensusStrategy.php',
     'LockmeDep\\Symfony\\Component\\Lock\\Strategy\\StrategyInterface' => $vendorDir . '/symfony/lock/Strategy/StrategyInterface.php',
     'LockmeDep\\Symfony\\Component\\Lock\\Strategy\\UnanimousStrategy' => $vendorDir . '/symfony/lock/Strategy/UnanimousStrategy.php',
+    'LockmeDep\\Symfony\\Component\\Lock\\Test\\AbstractStoreTestCase' => $vendorDir . '/symfony/lock/Test/AbstractStoreTestCase.php',
 );

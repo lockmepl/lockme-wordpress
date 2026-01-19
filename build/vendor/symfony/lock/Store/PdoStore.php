@@ -82,10 +82,7 @@ class PdoStore implements PersistingStoreInterface
         $this->password = $options['db_password'] ?? $this->password;
         $this->connectionOptions = $options['db_connection_options'] ?? $this->connectionOptions;
     }
-    /**
-     * @return void
-     */
-    public function save(Key $key)
+    public function save(Key $key): void
     {
         $key->reduceLifetime($this->initialTtl);
         $sql = "INSERT INTO {$this->table} ({$this->idCol}, {$this->tokenCol}, {$this->expirationCol}) VALUES (:id, :token, {$this->getCurrentTimestampStatement()} + {$this->initialTtl})";
@@ -118,10 +115,7 @@ class PdoStore implements PersistingStoreInterface
         $this->randomlyPrune();
         $this->checkNotExpired($key);
     }
-    /**
-     * @return void
-     */
-    public function putOffExpiration(Key $key, float $ttl)
+    public function putOffExpiration(Key $key, float $ttl): void
     {
         if ($ttl < 1) {
             throw new InvalidTtlException(\sprintf('"%s()" expects a TTL greater or equals to 1 second. Got "%s".', __METHOD__, $ttl));
@@ -140,10 +134,7 @@ class PdoStore implements PersistingStoreInterface
         }
         $this->checkNotExpired($key);
     }
-    /**
-     * @return void
-     */
-    public function delete(Key $key)
+    public function delete(Key $key): void
     {
         $sql = "DELETE FROM {$this->table} WHERE {$this->idCol} = :id AND {$this->tokenCol} = :token";
         $stmt = $this->getConnection()->prepare($sql);

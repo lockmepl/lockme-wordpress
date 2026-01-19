@@ -7,8 +7,8 @@ namespace Composer\Autoload;
 class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
 {
     public static $files = array (
-        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '5255c38a0faeba867671b61dfda6d864' => __DIR__ . '/..' . '/paragonie/random_compat/lib/random.php',
     );
@@ -256,6 +256,7 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
         'LockmeDep\\Symfony\\Component\\Lock\\LockInterface' => __DIR__ . '/..' . '/symfony/lock/LockInterface.php',
         'LockmeDep\\Symfony\\Component\\Lock\\NoLock' => __DIR__ . '/..' . '/symfony/lock/NoLock.php',
         'LockmeDep\\Symfony\\Component\\Lock\\PersistingStoreInterface' => __DIR__ . '/..' . '/symfony/lock/PersistingStoreInterface.php',
+        'LockmeDep\\Symfony\\Component\\Lock\\Serializer\\LockKeyNormalizer' => __DIR__ . '/..' . '/symfony/lock/Serializer/LockKeyNormalizer.php',
         'LockmeDep\\Symfony\\Component\\Lock\\SharedLockInterface' => __DIR__ . '/..' . '/symfony/lock/SharedLockInterface.php',
         'LockmeDep\\Symfony\\Component\\Lock\\SharedLockStoreInterface' => __DIR__ . '/..' . '/symfony/lock/SharedLockStoreInterface.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Store\\CombinedStore' => __DIR__ . '/..' . '/symfony/lock/Store/CombinedStore.php',
@@ -267,6 +268,7 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
         'LockmeDep\\Symfony\\Component\\Lock\\Store\\InMemoryStore' => __DIR__ . '/..' . '/symfony/lock/Store/InMemoryStore.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Store\\MemcachedStore' => __DIR__ . '/..' . '/symfony/lock/Store/MemcachedStore.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Store\\MongoDbStore' => __DIR__ . '/..' . '/symfony/lock/Store/MongoDbStore.php',
+        'LockmeDep\\Symfony\\Component\\Lock\\Store\\NullStore' => __DIR__ . '/..' . '/symfony/lock/Store/NullStore.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Store\\PdoStore' => __DIR__ . '/..' . '/symfony/lock/Store/PdoStore.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Store\\PostgreSqlStore' => __DIR__ . '/..' . '/symfony/lock/Store/PostgreSqlStore.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Store\\RedisStore' => __DIR__ . '/..' . '/symfony/lock/Store/RedisStore.php',
@@ -276,6 +278,7 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
         'LockmeDep\\Symfony\\Component\\Lock\\Strategy\\ConsensusStrategy' => __DIR__ . '/..' . '/symfony/lock/Strategy/ConsensusStrategy.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Strategy\\StrategyInterface' => __DIR__ . '/..' . '/symfony/lock/Strategy/StrategyInterface.php',
         'LockmeDep\\Symfony\\Component\\Lock\\Strategy\\UnanimousStrategy' => __DIR__ . '/..' . '/symfony/lock/Strategy/UnanimousStrategy.php',
+        'LockmeDep\\Symfony\\Component\\Lock\\Test\\AbstractStoreTestCase' => __DIR__ . '/..' . '/symfony/lock/Test/AbstractStoreTestCase.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
