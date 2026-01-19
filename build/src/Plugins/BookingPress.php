@@ -120,6 +120,9 @@ class BookingPress implements PluginInterface
         $currency = $BookingPress->bookingpress_get_settings('payment_default_currency', 'payment_setting');
         switch ($message['action']) {
             case 'add':
+                $invoice_id = $wpdb->get_var($wpdb->prepare("SELECT setting_value FROM {$wpdb->prefix}bookingpress_settings WHERE setting_name = %s AND setting_type = %s", 'bookingpress_last_invoice_id', 'invoice_setting'));
+                $invoice_id++;
+                $BookingPress->bookingpress_update_settings('bookingpress_last_invoice_id', 'invoice_setting', $invoice_id);
                 // Handle customer
                 $customer_id = $this->GetOrCreateCustomer($email, $data, $surname);
                 // Handle appointment
@@ -141,6 +144,7 @@ class BookingPress implements PluginInterface
                     'bookingpress_service_currency' => $currency,
                     'bookingpress_service_duration_val' => $service_duration_val,
                     'bookingpress_service_duration_unit' => $service_duration_unit,
+                    'bookingpress_booking_id' => $invoice_id,
                 ]);
                 $id = $wpdb->insert_id;
                 if (!$id) {
