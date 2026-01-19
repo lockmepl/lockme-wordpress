@@ -318,7 +318,7 @@ class Bookly implements PluginInterface
 
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id,
+                    $api->EditReservation($roomid, (string) $lockme_id,
                         $this->plugin->AnonymizeData(['extid' => $id])
                     );
                     return true;

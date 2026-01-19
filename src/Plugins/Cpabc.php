@@ -341,7 +341,7 @@ class Cpabc implements PluginInterface {
 
                 try{
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, array('extid' =>$id));
+                    $api->EditReservation($roomid, (string) $lockme_id, array('extid' =>$id));
                     return true;
                 }catch(Exception $e){
                 }

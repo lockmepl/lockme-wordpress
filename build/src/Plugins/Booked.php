@@ -191,7 +191,7 @@ class Booked implements PluginInterface
                 }
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, $this->plugin->AnonymizeData(['extid' => $row_id]));
+                    $api->EditReservation($roomid, (string) $lockme_id, $this->plugin->AnonymizeData(['extid' => $row_id]));
                     return \true;
                 } catch (Exception) {
                 }

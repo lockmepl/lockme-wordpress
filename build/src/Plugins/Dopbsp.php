@@ -307,7 +307,7 @@ class Dopbsp implements PluginInterface
                 $DOPBSP->classes->backend_calendar_schedule->setApproved($id);
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, $this->plugin->AnonymizeData(['extid' => $id]));
+                    $api->EditReservation($roomid, (string) $lockme_id, $this->plugin->AnonymizeData(['extid' => $id]));
                     return \true;
                 } catch (Exception $e) {
                 }

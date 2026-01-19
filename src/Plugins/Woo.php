@@ -283,7 +283,7 @@ class Woo implements PluginInterface
                 if ($booking) {
                     try {
                         $api = $this->plugin->GetApi();
-                        $api->EditReservation($roomid, $lockme_id,
+                        $api->EditReservation($roomid, (string) $lockme_id,
                             $this->plugin->AnonymizeData(['extid' => $booking->get_id()])
                         );
                         return true;

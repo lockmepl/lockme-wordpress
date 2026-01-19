@@ -208,9 +208,7 @@ class BookingPress implements PluginInterface
 
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id,
-                        $this->plugin->AnonymizeData(['extid' => $id])
-                    );
+                    $api->EditReservation($roomid, (string) $lockme_id, ['extid' => $id]);
                     return true;
                 } catch (Exception $e) {
                 }

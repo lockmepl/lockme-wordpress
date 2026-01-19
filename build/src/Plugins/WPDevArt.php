@@ -234,7 +234,7 @@ class WPDevArt implements PluginInterface
                 $method->invoke($wpdevart_booking, $id, \true, 'insert', []);
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, $this->plugin->AnonymizeData(['extid' => $id]));
+                    $api->EditReservation($roomid, (string) $lockme_id, $this->plugin->AnonymizeData(['extid' => $id]));
                     return \true;
                 } catch (Exception $e) {
                 }

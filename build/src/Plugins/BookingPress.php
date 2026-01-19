@@ -22,7 +22,7 @@ class BookingPress implements PluginInterface
             add_action('init', function () {
                 if ($_GET['bookingpress_export'] ?? null) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=booking_press&bookingpress_exported=1');
+                    wp_redirect('?page=lockme_integration&tab=booking_press_plugin&bookingpress_exported=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -143,7 +143,7 @@ class BookingPress implements PluginInterface
                 }
                 try {
                     $api = $this->plugin->GetApi();
-                    $api->EditReservation($roomid, $lockme_id, $this->plugin->AnonymizeData(['extid' => $id]));
+                    $api->EditReservation($roomid, (string) $lockme_id, ['extid' => $id]);
                     return \true;
                 } catch (Exception $e) {
                 }
