@@ -16,6 +16,7 @@ class BookingPress implements PluginInterface
         $this->plugin = $plugin;
         $this->options = get_option('lockme_bookingpress') ?: [];
         if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
+            add_action('bookingpress_after_insert_appointment', [$this, 'AddEditReservation'], 10, 1);
             add_action('bookingpress_after_book_appointment', [$this, 'AddEditReservation'], 10, 1);
             add_action('bookingpress_after_update_appointment', [$this, 'AddEditReservation'], 10, 1);
             add_action('bookingpress_after_change_appointment_status', [$this, 'AddEditReservation'], 10, 1);
