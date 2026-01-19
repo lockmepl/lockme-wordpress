@@ -5,7 +5,7 @@ Tags: lustmored
 Requires PHP: 8.1
 Requires at least: 6.4
 Tested up to: 6.9
-Stable tag: 2.9.3
+Stable tag: 2.9.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,7 @@ Currently, publicly supported calendar systems are:
 * Appointment Booking Calendar - version 7.2.34 and newer
 * ez Schedule Manager - version 2.2 (once again - please don't)
 * Amelia - version 7.8 or newer (consider alternatives if possible)
+* BookingPress - version 1.1.49 and newer (discouraged)
 
 Other booking systems to be available after porting to API 2.0 and testing. Systems marked as "please don't" are considered extremely unfriendly to our integration purposes and probably will break upon updating. If you still have a choice, please consider using other booking systems.
 
