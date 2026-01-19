@@ -18,6 +18,7 @@ class BookingPress implements PluginInterface
         if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
             add_action('bookingpress_after_book_appointment', [$this, 'AddEditReservation'], 10, 1);
             add_action('bookingpress_after_update_appointment', [$this, 'AddEditReservation'], 10, 1);
+            add_action('bookingpress_after_change_appointment_status', [$this, 'AddEditReservation'], 10, 1);
             add_action('bookingpress_before_delete_appointment', [$this, 'DeleteReservation'], 10, 1);
             add_action('init', function () {
                 if ($_GET['bookingpress_export'] ?? null) {
@@ -195,13 +196,25 @@ class BookingPress implements PluginInterface
         }
         return null;
     }
-    public function AddEditReservation($appointment_id): void
+    public function AddEditReservation($appointment_id, $status = null): void
     {
         if (defined('LOCKME_MESSAGING')) {
             return;
         }
-        $appdata = $this->AppData($appointment_id);
+        global $wpdb;
+        $info = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}bookingpress_appointment_bookings WHERE bookingpress_appointment_booking_id = %d", $appointment_id), ARRAY_A);
+        if (!$info) {
+            return;
+        }
+        $appdata = $this->AppData($appointment_id, $info);
         if (!$appdata['roomid']) {
+            return;
+        }
+        // Handle status-based synchronization
+        // 1: Approved, 2: Pending, 3: Cancelled, 4: Rejected
+        $current_status = $info['bookingpress_appointment_status'] ?? '1';
+        if (in_array($current_status, ['3', '4'])) {
+            $this->DeleteReservation($appointment_id);
             return;
         }
         $api = $this->plugin->GetApi();
@@ -261,7 +274,7 @@ class BookingPress implements PluginInterface
         global $wpdb;
         $bookings = $wpdb->get_results("SELECT bookingpress_appointment_booking_id FROM {$wpdb->prefix}bookingpress_appointment_bookings WHERE bookingpress_appointment_date >= CURDATE()");
         foreach ($bookings as $b) {
-            $this->AddEditReservation($b->bookingpress_appointment_booking_id, null);
+            $this->AddEditReservation($b->bookingpress_appointment_booking_id);
         }
     }
 }
