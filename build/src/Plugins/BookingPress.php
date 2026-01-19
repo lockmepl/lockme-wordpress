@@ -61,10 +61,11 @@ class BookingPress implements PluginInterface
             $services = $wpdb->get_results("SELECT bookingpress_service_id, bookingpress_service_name FROM {$wpdb->prefix}bookingpress_services");
             foreach ($services as $service) {
                 add_settings_field('service_' . $service->bookingpress_service_id, 'Room for ' . $service->bookingpress_service_name, function () use ($rooms, $service) {
+                    $options = $this->options;
                     echo '<select name="lockme_bookingpress[service_' . $service->bookingpress_service_id . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
-                        echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['service_' . $service->bookingpress_service_id], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
+                        echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == ($options['service_' . $service->bookingpress_service_id] ?? null), \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</option>';
                     }
                     echo '</select>';
                 }, 'lockme-bookingpress', 'lockme_bookingpress_section', []);
@@ -103,24 +104,14 @@ class BookingPress implements PluginInterface
             $surname .= ' (LockMe)';
         }
         $email = !empty($data['email']) ? $data['email'] : 'lockme@example.com';
-        $service_id = null;
-        foreach ($this->options as $key => $val) {
-            if (str_starts_with($key, 'service_') && (int) $val === (int) $roomid) {
-                $service_id = (int) str_replace('service_', '', $key);
-                break;
-            }
-        }
+        $service_id = $this->GetService($roomid);
         if (!$service_id) {
             return \false;
         }
         switch ($message['action']) {
             case 'add':
                 // Handle customer
-                $customer_id = (int) $wpdb->get_var($wpdb->prepare("SELECT bookingpress_customer_id FROM {$wpdb->prefix}bookingpress_customers WHERE bookingpress_customer_email = %s", $email));
-                if (!$customer_id) {
-                    $wpdb->insert("{$wpdb->prefix}bookingpress_customers", ['bookingpress_customer_firstname' => $data['name'], 'bookingpress_customer_lastname' => $surname, 'bookingpress_customer_email' => $email, 'bookingpress_customer_phone' => $data['phone'] ?? '', 'bookingpress_customer_created_at' => current_time('mysql')]);
-                    $customer_id = $wpdb->insert_id;
-                }
+                $customer_id = $this->GetOrCreateCustomer($email, $data, $surname);
                 // Handle appointment
                 $wpdb->insert("{$wpdb->prefix}bookingpress_appointment_bookings", [
                     'bookingpress_customer_id' => $customer_id,
@@ -151,11 +142,7 @@ class BookingPress implements PluginInterface
             case 'edit':
                 if ($data['extid']) {
                     // Find or create customer for current email
-                    $customer_id = (int) $wpdb->get_var($wpdb->prepare("SELECT bookingpress_customer_id FROM {$wpdb->prefix}bookingpress_customers WHERE bookingpress_customer_email = %s", $email));
-                    if (!$customer_id) {
-                        $wpdb->insert("{$wpdb->prefix}bookingpress_customers", ['bookingpress_customer_firstname' => $data['name'], 'bookingpress_customer_lastname' => $surname, 'bookingpress_customer_email' => $email, 'bookingpress_customer_phone' => $data['phone'] ?? '', 'bookingpress_customer_created_at' => current_time('mysql')]);
-                        $customer_id = $wpdb->insert_id;
-                    }
+                    $customer_id = $this->GetOrCreateCustomer($email, $data, $surname);
                     $wpdb->update("{$wpdb->prefix}bookingpress_appointment_bookings", ['bookingpress_customer_id' => $customer_id, 'bookingpress_appointment_date' => $data['date'], 'bookingpress_appointment_time' => $data['hour'], 'bookingpress_appointment_end_time' => date('H:i:s', $timestamp + 3600), 'bookingpress_customer_name' => $data['name'] . ' ' . $surname, 'bookingpress_customer_email' => $email, 'bookingpress_customer_phone' => $data['phone'] ?? ''], ['bookingpress_appointment_booking_id' => $data['extid']]);
                     return \true;
                 }
@@ -168,6 +155,28 @@ class BookingPress implements PluginInterface
                 break;
         }
         return \false;
+    }
+    private function GetOrCreateCustomer(string $email, array $data, string $surname): int
+    {
+        global $wpdb;
+        $customer_id = (int) $wpdb->get_var($wpdb->prepare("SELECT bookingpress_customer_id FROM {$wpdb->prefix}bookingpress_customers WHERE bookingpress_user_email = %s", $email));
+        if (!$customer_id) {
+            $wpdb->insert("{$wpdb->prefix}bookingpress_customers", ['bookingpress_user_firstname' => $data['name'], 'bookingpress_user_lastname' => $surname, 'bookingpress_customer_full_name' => $data['name'] . ' ' . $surname, 'bookingpress_user_name' => $data['name'] . ' ' . $surname, 'bookingpress_user_email' => $email, 'bookingpress_user_login' => $email, 'bookingpress_user_phone' => $data['phone'] ?? '', 'bookingpress_created_at' => current_time('mysql')]);
+            $customer_id = $wpdb->insert_id;
+        }
+        return $customer_id;
+    }
+    private function GetService($roomid): ?int
+    {
+        global $wpdb;
+        $services = $wpdb->get_results("SELECT bookingpress_service_id FROM {$wpdb->prefix}bookingpress_services", ARRAY_A);
+        var_dump($services, $roomid, $this->options);
+        foreach ($services as $service) {
+            if (($this->options['service_' . $service['bookingpress_service_id']] ?? null) == $roomid) {
+                return (int) $service['bookingpress_service_id'];
+            }
+        }
+        return null;
     }
     public function AddEditReservation($appointment_id): void
     {
@@ -214,7 +223,8 @@ class BookingPress implements PluginInterface
         if ($info === null) {
             $info = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}bookingpress_appointment_bookings WHERE bookingpress_appointment_booking_id = %d", $id), ARRAY_A);
         }
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['service_' . $info['bookingpress_service_id']] ?? null, 'date' => $info['bookingpress_appointment_date'], 'hour' => $info['bookingpress_appointment_time'], 'pricer' => 'API', 'status' => 1, 'extid' => $id, 'email' => $info['bookingpress_customer_email'] ?? '', 'name' => $info['bookingpress_customer_name'] ?? '', 'phone' => $info['bookingpress_customer_phone'] ?? '']);
+        $service_id = $info['bookingpress_service_id'];
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['service_' . $service_id] ?? null, 'date' => $info['bookingpress_appointment_date'], 'hour' => $info['bookingpress_appointment_time'], 'pricer' => 'API', 'status' => 1, 'extid' => $id, 'email' => $info['bookingpress_customer_email'] ?? '', 'name' => $info['bookingpress_customer_name'] ?? '', 'phone' => $info['bookingpress_customer_phone'] ?? '']);
     }
     public function ExportToLockMe(): void
     {
