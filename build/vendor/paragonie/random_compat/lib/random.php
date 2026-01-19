@@ -69,7 +69,7 @@ if (!\is_callable('random_bytes')) {
         // See random_bytes_libsodium.php
         if (\PHP_VERSION_ID >= 50300 && \is_callable('\Sodium\randombytes_buf')) {
             require_once $RandomCompatDIR . \DIRECTORY_SEPARATOR . 'random_bytes_libsodium.php';
-        } elseif (\method_exists('Sodium', 'randombytes_buf')) {
+        } elseif (\method_exists('LockmeDep\Sodium', 'randombytes_buf')) {
             require_once $RandomCompatDIR . \DIRECTORY_SEPARATOR . 'random_bytes_libsodium_legacy.php';
         }
     }

@@ -39,7 +39,6 @@ if (!function_exists('RandomCompat_intval')) { function RandomCompat_intval() { 
 if (!function_exists('RandomCompat_strlen')) { function RandomCompat_strlen() { return \LockmeDep\RandomCompat_strlen(...func_get_args()); } }
 if (!function_exists('RandomCompat_substr')) { function RandomCompat_substr() { return \LockmeDep\RandomCompat_substr(...func_get_args()); } }
 if (!function_exists('getallheaders')) { function getallheaders() { return \LockmeDep\getallheaders(...func_get_args()); } }
-if (!function_exists('http_get_last_response_headers')) { function http_get_last_response_headers() { return \LockmeDep\http_get_last_response_headers(...func_get_args()); } }
 if (!function_exists('random_bytes')) { function random_bytes() { return \LockmeDep\random_bytes(...func_get_args()); } }
 if (!function_exists('random_int')) { function random_int() { return \LockmeDep\random_int(...func_get_args()); } }
 if (!function_exists('trigger_deprecation')) { function trigger_deprecation() { return \LockmeDep\trigger_deprecation(...func_get_args()); } }

@@ -251,9 +251,9 @@ class StreamHandler
         return $this->createResource(function () use ($uri, $contextResource, $context, $options, $request) {
             $resource = @\fopen((string) $uri, 'r', \false, $contextResource);
             // See https://wiki.php.net/rfc/deprecations_php_8_5#deprecate_the_http_response_header_predefined_variable
-            if (function_exists('LockmeDep\http_get_last_response_headers')) {
+            if (function_exists('http_get_last_response_headers')) {
                 /** @var array|null */
-                $http_response_header = \LockmeDep\http_get_last_response_headers();
+                $http_response_header = \http_get_last_response_headers();
             }
             $this->lastHeaders = $http_response_header ?? [];
             if (\false === $resource) {

@@ -29,7 +29,10 @@ class ZookeeperStore implements PersistingStoreInterface
     {
         $this->zookeeper = $zookeeper;
     }
-    public static function createConnection(#[\SensitiveParameter] string $dsn): \Zookeeper
+    public static function createConnection(
+        #[\SensitiveParameter]
+        string $dsn
+    ): \Zookeeper
     {
         if (!str_starts_with($dsn, 'zookeeper:')) {
             throw new InvalidArgumentException('Unsupported DSN for Zookeeper.');

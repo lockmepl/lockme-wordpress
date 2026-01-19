@@ -22,7 +22,10 @@ use LockmeDep\Symfony\Component\Lock\PersistingStoreInterface;
  */
 class StoreFactory
 {
-    public static function createStore(#[\SensitiveParameter] object|string $connection): PersistingStoreInterface
+    public static function createStore(
+        #[\SensitiveParameter]
+        object|string $connection
+    ): PersistingStoreInterface
     {
         switch (\true) {
             case $connection instanceof \Redis:
