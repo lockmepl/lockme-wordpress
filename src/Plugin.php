@@ -10,6 +10,7 @@ use LockmeIntegration\Libs\WrappedProvider;
 use LockmeIntegration\Plugins\Amelia;
 use LockmeIntegration\Plugins\Appointments;
 use LockmeIntegration\Plugins\Booked;
+use LockmeIntegration\Plugins\BookingPress;
 use LockmeIntegration\Plugins\Bookly;
 use LockmeIntegration\Plugins\Cpabc;
 use LockmeIntegration\Plugins\Dopbsp;
@@ -33,6 +34,7 @@ class Plugin
         'amelia' => Amelia::class,
         'appointments'=> Appointments::class,
         'booked'=> Booked::class,
+        'booking_press' => BookingPress::class,
         'bookly' => Bookly::class,
         'cpabc' => Cpabc::class,
         'dopbsp'=> Dopbsp::class,

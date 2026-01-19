@@ -11,6 +11,7 @@ use LockmeDep\LockmeIntegration\Libs\WrappedProvider;
 use LockmeDep\LockmeIntegration\Plugins\Amelia;
 use LockmeDep\LockmeIntegration\Plugins\Appointments;
 use LockmeDep\LockmeIntegration\Plugins\Booked;
+use LockmeDep\LockmeIntegration\Plugins\BookingPress;
 use LockmeDep\LockmeIntegration\Plugins\Bookly;
 use LockmeDep\LockmeIntegration\Plugins\Cpabc;
 use LockmeDep\LockmeIntegration\Plugins\Dopbsp;
@@ -27,7 +28,7 @@ class Plugin
     public $options;
     public $tab;
     private $url_key;
-    private $plugins = ['amelia' => Amelia::class, 'appointments' => Appointments::class, 'booked' => Booked::class, 'bookly' => Bookly::class, 'cpabc' => Cpabc::class, 'dopbsp' => Dopbsp::class, 'easyapp' => Easyapp::class, 'ezscm' => Ezscm::class, 'woo' => Woo::class, 'wpdevart' => WPDevArt::class, 'wp_booking' => WPBooking::class];
+    private $plugins = ['amelia' => Amelia::class, 'appointments' => Appointments::class, 'booked' => Booked::class, 'booking_press' => BookingPress::class, 'bookly' => Bookly::class, 'cpabc' => Cpabc::class, 'dopbsp' => Dopbsp::class, 'easyapp' => Easyapp::class, 'ezscm' => Ezscm::class, 'woo' => Woo::class, 'wpdevart' => WPDevArt::class, 'wp_booking' => WPBooking::class];
     /**
      * @var PluginInterface[]
      */

@@ -200,6 +200,7 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
         'LockmeDep\\LockmeIntegration\\Plugins\\Amelia' => __DIR__ . '/../..' . '/src/Plugins/Amelia.php',
         'LockmeDep\\LockmeIntegration\\Plugins\\Appointments' => __DIR__ . '/../..' . '/src/Plugins/Appointments.php',
         'LockmeDep\\LockmeIntegration\\Plugins\\Booked' => __DIR__ . '/../..' . '/src/Plugins/Booked.php',
+        'LockmeDep\\LockmeIntegration\\Plugins\\BookingPress' => __DIR__ . '/../..' . '/src/Plugins/BookingPress.php',
         'LockmeDep\\LockmeIntegration\\Plugins\\Bookly' => __DIR__ . '/../..' . '/src/Plugins/Bookly.php',
         'LockmeDep\\LockmeIntegration\\Plugins\\Cpabc' => __DIR__ . '/../..' . '/src/Plugins/Cpabc.php',
         'LockmeDep\\LockmeIntegration\\Plugins\\Dopbsp' => __DIR__ . '/../..' . '/src/Plugins/Dopbsp.php',

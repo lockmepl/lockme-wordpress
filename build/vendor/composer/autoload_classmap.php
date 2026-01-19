@@ -127,6 +127,7 @@ return array(
     'LockmeDep\\LockmeIntegration\\Plugins\\Amelia' => $baseDir . '/src/Plugins/Amelia.php',
     'LockmeDep\\LockmeIntegration\\Plugins\\Appointments' => $baseDir . '/src/Plugins/Appointments.php',
     'LockmeDep\\LockmeIntegration\\Plugins\\Booked' => $baseDir . '/src/Plugins/Booked.php',
+    'LockmeDep\\LockmeIntegration\\Plugins\\BookingPress' => $baseDir . '/src/Plugins/BookingPress.php',
     'LockmeDep\\LockmeIntegration\\Plugins\\Bookly' => $baseDir . '/src/Plugins/Bookly.php',
     'LockmeDep\\LockmeIntegration\\Plugins\\Cpabc' => $baseDir . '/src/Plugins/Cpabc.php',
     'LockmeDep\\LockmeIntegration\\Plugins\\Dopbsp' => $baseDir . '/src/Plugins/Dopbsp.php',
