@@ -139,7 +139,7 @@ class BookingPress implements PluginInterface
 
     public function GetMessage(array $message): bool
     {
-        global $wpdb;
+        global $wpdb, $BookingPress;
 
         if (!($this->options['use'] ?? null) || !$this->CheckDependencies()) {
             return false;
@@ -156,11 +156,25 @@ class BookingPress implements PluginInterface
 
         $email = !empty($data['email']) ? $data['email'] : 'lockme@example.com';
 
-        $service_id = $this->GetService($roomid);
+        $service_data = $this->GetService($roomid);
 
-        if (!$service_id) {
+        if (!$service_data) {
             return false;
         }
+
+        $service_id = (int) $service_data['bookingpress_service_id'];
+
+        $service_duration_val = $service_data['bookingpress_service_duration_val'];
+        $service_duration_unit = $service_data['bookingpress_service_duration_unit'];
+
+        $duration_seconds = (int)$service_duration_val * 60;
+        if ($service_duration_unit === 'h') {
+            $duration_seconds *= 60;
+        } elseif ($service_duration_unit === 'd') {
+            $duration_seconds *= 60 * 24;
+        }
+
+        $currency = $BookingPress->bookingpress_get_settings('payment_default_currency', 'payment_setting');
 
         switch ($message['action']) {
             case 'add':
@@ -173,13 +187,18 @@ class BookingPress implements PluginInterface
                     'bookingpress_service_id' => $service_id,
                     'bookingpress_appointment_date' => $data['date'],
                     'bookingpress_appointment_time' => $data['hour'],
-                    'bookingpress_appointment_end_time' => date('H:i:s', $timestamp + 3600), // Default 1h
+                    'bookingpress_appointment_end_time' => date('H:i:s', $timestamp + $duration_seconds),
                     'bookingpress_appointment_status' => '1', // 1 usually means approved/confirmed
                     'bookingpress_customer_name' => $data['name'] . ' ' . $surname,
                     'bookingpress_customer_email' => $email,
                     'bookingpress_customer_phone' => $data['phone'] ?? '',
                     'bookingpress_appointment_timezone' => 'Europe/Warsaw',
                     'bookingpress_created_at' => current_time('mysql'),
+                    'bookingpress_service_name' => $service_data['bookingpress_service_name'],
+                    'bookingpress_service_price' => $service_data['bookingpress_service_price'],
+                    'bookingpress_service_currency' => $currency,
+                    'bookingpress_service_duration_val' => $service_duration_val,
+                    'bookingpress_service_duration_unit' => $service_duration_unit,
                 ]);
 
                 $id = $wpdb->insert_id;
@@ -204,10 +223,15 @@ class BookingPress implements PluginInterface
                         'bookingpress_customer_id' => $customer_id,
                         'bookingpress_appointment_date' => $data['date'],
                         'bookingpress_appointment_time' => $data['hour'],
-                        'bookingpress_appointment_end_time' => date('H:i:s', $timestamp + 3600),
+                        'bookingpress_appointment_end_time' => date('H:i:s', $timestamp + $duration_seconds),
                         'bookingpress_customer_name' => $data['name'] . ' ' . $surname,
                         'bookingpress_customer_email' => $email,
                         'bookingpress_customer_phone' => $data['phone'] ?? '',
+                        'bookingpress_service_name' => $service_data['bookingpress_service_name'],
+                        'bookingpress_service_price' => $service_data['bookingpress_service_price'],
+                        'bookingpress_service_currency' => $currency,
+                        'bookingpress_service_duration_val' => $service_duration_val,
+                        'bookingpress_service_duration_unit' => $service_duration_unit,
                     ], ['bookingpress_appointment_booking_id' => $data['extid']]);
                     return true;
                 }
@@ -252,13 +276,13 @@ class BookingPress implements PluginInterface
         return $customer_id;
     }
 
-    private function GetService($roomid): ?int
+    private function GetService($roomid): ?array
     {
         global $wpdb;
-        $services = $wpdb->get_results("SELECT bookingpress_service_id FROM {$wpdb->prefix}bookingpress_services", ARRAY_A);
+        $services = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}bookingpress_services", ARRAY_A);
         foreach ($services as $service) {
             if (($this->options['service_'.$service['bookingpress_service_id']] ?? null) == $roomid) {
-                return (int) $service['bookingpress_service_id'];
+                return $service;
             }
         }
         return null;
@@ -325,6 +349,7 @@ class BookingPress implements PluginInterface
             'roomid' => $this->options['service_'.$service_id] ?? null,
             'date' => $info['bookingpress_appointment_date'],
             'hour' => $info['bookingpress_appointment_time'],
+            'duration' => $this->CalculateDuration($info),
             'pricer' => 'API',
             'status' => 1,
             'extid' => $id,
@@ -332,6 +357,22 @@ class BookingPress implements PluginInterface
             'name' => $info['bookingpress_customer_name'] ?? '',
             'phone' => $info['bookingpress_customer_phone'] ?? '',
         ]);
+    }
+
+    private function CalculateDuration(array $info): int
+    {
+        if (empty($info['bookingpress_appointment_time']) || empty($info['bookingpress_appointment_end_time'])) {
+            return 60;
+        }
+
+        $start = strtotime($info['bookingpress_appointment_time']);
+        $end = strtotime($info['bookingpress_appointment_end_time']);
+
+        if ($end < $start) { // Handle overnight if any
+            $end += 86400;
+        }
+
+        return (int) ceil(($end - $start) / 60);
     }
 
     public function ExportToLockMe(): void
