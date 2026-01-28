@@ -4,11 +4,12 @@ declare(strict_types=1);
 namespace LockmeIntegration\Libs;
 
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Token\AccessToken;
 use Lockme\OAuth2\Client\Provider\Lockme;
 
 class WrappedProvider extends Lockme
 {
-    public function executeRequest($method, $url, $token, $body = null)
+    public function executeRequest(string $method, string $url, AccessToken|string|null $token, mixed $body = null): mixed
     {
         global $wpdb;
 
