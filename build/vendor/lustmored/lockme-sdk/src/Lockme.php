@@ -26,7 +26,7 @@ class Lockme
      */
     private AbstractProvider $provider;
     private LockFactory $lockFactory;
-    private AccessToken $accessToken;
+    private ?AccessToken $accessToken = null;
     /**
      * Object constructor
      * @param array $options  Options for Lockme Provider
