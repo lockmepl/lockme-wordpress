@@ -196,7 +196,13 @@ class Plugin
 
     public function admin_register_settings(): void
     {
-        register_setting('lockme-admin', 'lockme_settings');
+        register_setting('lockme-admin', 'lockme_settings', ['sanitize_callback' => function($settings) {
+            $settings['client_id'] = sanitize_text_field($settings['client_id'] ?? '');
+            $settings['client_secret'] = sanitize_text_field($settings['client_secret'] ?? '');
+            $settings['id_prefix'] = sanitize_text_field($settings['id_prefix'] ?? '');
+            $settings['api_domain'] = esc_url_raw($settings['api_domain'] ?? '');
+            return $settings;
+        }]);
 
         add_settings_section(
             'lockme_settings_section',
