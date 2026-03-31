@@ -88,6 +88,8 @@ class Booked implements PluginInterface
 
     public function ExportToLockMe(): void
     {
+        // Booked stores appointment timestamps in postmeta; filtering by this key is required for export.
+        // phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_query
         $args = [
             'post_type' => 'booked_appointments',
             'orderby' => 'meta_value',
@@ -101,6 +103,7 @@ class Booked implements PluginInterface
             ],
             'posts_per_page' => -1
         ];
+        // phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_query
         $loop = new WP_Query($args);
         while ($loop->have_posts()) {
             $loop->the_post();

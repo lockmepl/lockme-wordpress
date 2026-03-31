@@ -47,6 +47,8 @@ class Woo implements PluginInterface
 
     public function ExportToLockMe(): void
     {
+        // Woo Bookings stores booking start in postmeta; filtering by this key is required for export.
+        // phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
         $args = [
             'post_type' => 'wc_booking',
             'meta_key' => '_booking_start',
@@ -55,6 +57,7 @@ class Woo implements PluginInterface
             'posts_per_page' => -1,
             'post_status' => 'any'
         ];
+        // phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_key,WordPress.DB.SlowDBQuery.slow_db_query_meta_value
         $loop = new WP_Query($args);
         while ($loop->have_posts()) {
             $loop->the_post();
