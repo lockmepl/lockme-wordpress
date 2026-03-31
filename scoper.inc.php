@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 use Isolated\Symfony\Component\Finder\Finder;
 
-if (!defined('ABSPATH') && PHP_SAPI !== 'cli') {
+if (PHP_SAPI === 'cli' && !defined('ABSPATH')) {
+    define('ABSPATH', __DIR__.'/');
+}
+
+if (!defined('ABSPATH')) {
     exit;
 }
 
