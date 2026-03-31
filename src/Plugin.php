@@ -211,7 +211,7 @@ class Plugin
             'client_id',
             'App ID',
             function () {
-                echo '<input name="lockme_settings[client_id]"  type="text" value="'.$this->options['client_id'].'" />';
+                echo '<input name="lockme_settings[client_id]"  type="text" value="'.esc_attr($this->options['client_id']).'" />';
             },
             'lockme-admin',
             'lockme_settings_section',
@@ -222,7 +222,7 @@ class Plugin
             'client_secret',
             'App secret',
             function () {
-                echo '<input name="lockme_settings[client_secret]" type="text" value="'.$this->options['client_secret'].'" />';
+                echo '<input name="lockme_settings[client_secret]" type="text" value="'.esc_attr($this->options['client_secret']).'" />';
             },
             'lockme-admin',
             'lockme_settings_section',
@@ -244,7 +244,7 @@ class Plugin
             'id_prefix',
             'Bookings ID prefix',
             function () {
-                echo '<input name="lockme_settings[id_prefix]" type="text" value="'.($this->options['id_prefix'] ?? '').'" /> <small>Set this if you may have conflicts on external ID (like when you reset database, change booking plugin or website or have more than one connected integration). IMPORTANT: changing this value on working system <strong>will break your integration</strong>.</small>';
+                echo '<input name="lockme_settings[id_prefix]" type="text" value="'.esc_attr($this->options['id_prefix'] ?? '').'" /> <small>Set this if you may have conflicts on external ID (like when you reset database, change booking plugin or website or have more than one connected integration). IMPORTANT: changing this value on working system <strong>will break your integration</strong>.</small>';
             },
             'lockme-admin',
             'lockme_settings_section',
@@ -255,7 +255,7 @@ class Plugin
             'api_domain',
             'API domain',
             function () {
-                echo '<input name="lockme_settings[api_domain]" type="text" value="'.$this->options['api_domain'].'" placeholder="https://api.lock.me" />';
+                echo '<input name="lockme_settings[api_domain]" type="text" value="'.esc_attr($this->options['api_domain']).'" placeholder="https://api.lock.me" />';
             },
             'lockme-admin',
             'lockme_settings_section',

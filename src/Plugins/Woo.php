@@ -101,7 +101,7 @@ class Woo implements PluginInterface
                 'slot_length',
                 'Dłogośc slota (w min)',
                 function () {
-                    echo '<input name="lockme_woo[slot_length]" type="text" value="'.$this->options['slot_length'].'" />';
+                    echo '<input name="lockme_woo[slot_length]" type="text" value="'.esc_attr($this->options['slot_length'] ?? '') .'" />';
                 },
                 'lockme-woo',
                 'lockme_woo_section',
