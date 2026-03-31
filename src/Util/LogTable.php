@@ -5,7 +5,7 @@ namespace LockmeIntegration\Util;
 
 defined('ABSPATH') or die('No script kiddies please!');
 
-if (!class_exists('\WP_List_Table')) {
+if (!class_exists(\WP_List_Table::class, false)) {
     require_once ABSPATH.'wp-admin/includes/class-wp-list-table.php';
 }
 
@@ -55,15 +55,16 @@ class LogTable extends \WP_List_Table
         $items = 10;
         $page = ($this->get_pagenum() - 1) * $items;
 
-        $query = $wpdb->prepare(
-            'SELECT * FROM %i ORDER BY id DESC LIMIT %d OFFSET %d',
-            $wpdb_table,
-            $items,
-            $page
-        );
-
         // query output_type will be an associative array with ARRAY_A.
-        $this->items = $wpdb->get_results( $query, ARRAY_A  );
+        $this->items = $wpdb->get_results(
+            $wpdb->prepare(
+                'SELECT * FROM %i ORDER BY id DESC LIMIT %d OFFSET %d',
+                $wpdb_table,
+                $items,
+                $page
+            ),
+            ARRAY_A
+        );
 
         $total = $wpdb->get_var(
             $wpdb->prepare(

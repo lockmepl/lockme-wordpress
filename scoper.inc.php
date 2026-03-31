@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 use Isolated\Symfony\Component\Finder\Finder;
 
+if (!defined('ABSPATH') && PHP_SAPI !== 'cli') {
+    exit;
+}
+
 return [
     // The prefix configuration. If a non null value will be used, a random prefix will be generated.
     'prefix' => 'LockmeDep',
@@ -79,6 +83,7 @@ return [
     'expose-global-classes' => true,
 
     'exclude-classes' => [
+        'WP_List_Table',
         'WP_Query',
         'EADBModels',
         'EATableColumns',
