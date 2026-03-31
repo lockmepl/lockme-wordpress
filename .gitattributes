@@ -1,1 +1,2 @@
-. svn-properties=svh:ignore=scoper.*
+. svn-properties=svn:ignore=scoper.*
+.git*
