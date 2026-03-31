@@ -7,6 +7,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
+defined('ABSPATH') or die('No script kiddies please!');
 class Dopbsp implements PluginInterface
 {
     private array $options;
@@ -88,7 +89,7 @@ class Dopbsp implements PluginInterface
     }
     private function AppData($res): array
     {
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['calendar_id']], 'date' => date('Y-m-d', strtotime($res['check_in'])), 'hour' => date('H:i:s', strtotime($res['start_hour'])), 'people' => 0, 'pricer' => 'API', 'price' => $res['price'], 'email' => $res['email'], 'status' => $res['status'] === 'approved', 'extid' => $res['id']]);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['calendar_id']], 'date' => gmdate('Y-m-d', strtotime($res['check_in'])), 'hour' => gmdate('H:i:s', strtotime($res['start_hour'])), 'people' => 0, 'pricer' => 'API', 'price' => $res['price'], 'email' => $res['email'], 'status' => $res['status'] === 'approved', 'extid' => $res['id']]);
     }
     private function Add($res): void
     {
@@ -286,7 +287,7 @@ class Dopbsp implements PluginInterface
         $data = $message['data'];
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
-        $hour = date('H:i', strtotime($data['hour']));
+        $hour = gmdate('H:i', strtotime($data['hour']));
         $calendar_id = $this->GetCalendar($roomid);
         if (!$calendar_id) {
             return \false;

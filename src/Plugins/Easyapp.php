@@ -12,6 +12,8 @@ use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 class Easyapp implements PluginInterface
 {
     private array $options;
@@ -57,8 +59,8 @@ class Easyapp implements PluginInterface
             $this->plugin->AnonymizeData(
                 [
                     'roomid' => $this->options['calendar_'.$res['location'].'_'.$res['service'].'_'.$res['worker']],
-                    'date' => date('Y-m-d', strtotime($res['date'])),
-                    'hour' => date('H:i:s', strtotime($res['start'])),
+                    'date' => gmdate('Y-m-d', strtotime($res['date'])),
+                    'hour' => gmdate('H:i:s', strtotime($res['start'])),
                     'people' => 0,
                     'pricer' => 'API',
                     'price' => $res['price'],
@@ -193,7 +195,7 @@ class Easyapp implements PluginInterface
                 case 'nopriv_ea_res_appointment':
                     $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s",
                         $_GET['location'], $_GET['service'], $_GET['worker'], $_GET['date'],
-                        date('H:i:s', strtotime($_GET['start']))), ARRAY_A);
+                        gmdate('H:i:s', strtotime($_GET['start']))), ARRAY_A);
                     if ($res) {
                         $this->Add($res);
                     }
@@ -219,7 +221,7 @@ class Easyapp implements PluginInterface
                             if (!$_GET['_method'] && $input['date']) {
                                 $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s",
                                     $input['location'], $input['service'], $input['worker'], $input['date'],
-                                    date('H:i:s', strtotime($input['start']))), ARRAY_A);
+                                    gmdate('H:i:s', strtotime($input['start']))), ARRAY_A);
                                 if ($res) {
                                     $this->Add($res);
                                 }
@@ -256,7 +258,7 @@ class Easyapp implements PluginInterface
                     'date' => $data['date'],
                     'start' => $data['hour'],
                     'end_date' => $data['date'],
-                    'end' => date('H:i:s', $end_time),
+                    'end' => gmdate('H:i:s', $end_time),
                     'price' => $data['price'],
                     'description' => 'LOCKME!',
                     'status' => $data['status'] ? 'confirmed' : 'pending'
@@ -285,7 +287,7 @@ class Easyapp implements PluginInterface
                         'date' => $data['date'],
                         'start' => $data['hour'],
                         'end_date' => $data['date'],
-                        'end' => date('H:i:s', $end_time),
+                        'end' => gmdate('H:i:s', $end_time),
                         'price' => $data['price'],
                         'description' => 'LOCKME!',
                         'status' => $data['status'] ? 'confirmed' : 'pending'

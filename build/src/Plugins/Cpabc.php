@@ -7,6 +7,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
+defined('ABSPATH') or die('No script kiddies please!');
 class Cpabc implements PluginInterface
 {
     private array $options;
@@ -96,7 +97,7 @@ class Cpabc implements PluginInterface
         if (!$res) {
             return [];
         }
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['calendar']], 'date' => date('Y-m-d', strtotime($res['booked_time_unformatted'])), 'hour' => date('H:i:s', strtotime($res['booked_time_unformatted'])), 'name' => $res['name'], 'pricer' => 'API', 'email' => $res['email'], 'phone' => $res['phone'], 'status' => 1, 'extid' => $resid]);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['calendar']], 'date' => gmdate('Y-m-d', strtotime($res['booked_time_unformatted'])), 'hour' => gmdate('H:i:s', strtotime($res['booked_time_unformatted'])), 'name' => $res['name'], 'pricer' => 'API', 'email' => $res['email'], 'phone' => $res['phone'], 'status' => 1, 'extid' => $resid]);
     }
     public function AddEditReservation($id)
     {
@@ -221,12 +222,12 @@ class Cpabc implements PluginInterface
         $calendar_id = $this->GetCalendar($roomid);
         switch ($message['action']) {
             case 'add':
-                $rows_affected = $wpdb->insert(CPABC_APPOINTMENTS_TABLE_NAME, array('calendar' => $calendar_id, 'time' => current_time('mysql'), 'booked_time' => date('Y-m-d H:i:s', $datetime), 'booked_time_customer' => date('Y-m-d H:i:s', $datetime), 'booked_time_unformatted' => date('Y-m-d H:i:s', $datetime), 'name' => $data['name'] . ' ' . $data['surname'], 'email' => $data['email'], 'phone' => $data['phone'], 'question' => "Źródło: LockMe\nIlość osób: {$data['people']}\nCena: {$data['price']}", 'quantity' => 1, 'quantity_a' => $data['people'], 'quantity_s' => 0, 'buffered_date' => serialize($data), 'who_added' => 0));
+                $rows_affected = $wpdb->insert(CPABC_APPOINTMENTS_TABLE_NAME, array('calendar' => $calendar_id, 'time' => current_time('mysql'), 'booked_time' => gmdate('Y-m-d H:i:s', $datetime), 'booked_time_customer' => gmdate('Y-m-d H:i:s', $datetime), 'booked_time_unformatted' => gmdate('Y-m-d H:i:s', $datetime), 'name' => $data['name'] . ' ' . $data['surname'], 'email' => $data['email'], 'phone' => $data['phone'], 'question' => "Źródło: LockMe\nIlość osób: {$data['people']}\nCena: {$data['price']}", 'quantity' => 1, 'quantity_a' => $data['people'], 'quantity_s' => 0, 'buffered_date' => serialize($data), 'who_added' => 0));
                 if (!$rows_affected) {
                     throw new RuntimeException('Błąd zapisu: ' . $wpdb->last_error);
                 }
                 $tid = $wpdb->insert_id;
-                $rows_affected = $wpdb->insert(CPABC_TDEAPP_CALENDAR_DATA_TABLE, array('appointment_calendar_id' => $calendar_id, 'datatime' => date('Y-m-d H:i:s', $datetime), 'title' => $data['email'], 'reminder' => 0, 'quantity' => 1, 'quantity_a' => $data['people'], 'quantity_s' => 0, 'description' => "Źródło: LockMe<br/>\nIlość osób: {$data['people']}<br/>\nCena: {$data['price']}", 'description_customer' => "Źródło: LockMe<br/>\nIlość osób: {$data['people']}<br/>\nCena: {$data['price']}", 'reference' => $tid, 'who_added' => 0));
+                $rows_affected = $wpdb->insert(CPABC_TDEAPP_CALENDAR_DATA_TABLE, array('appointment_calendar_id' => $calendar_id, 'datatime' => gmdate('Y-m-d H:i:s', $datetime), 'title' => $data['email'], 'reminder' => 0, 'quantity' => 1, 'quantity_a' => $data['people'], 'quantity_s' => 0, 'description' => "Źródło: LockMe<br/>\nIlość osób: {$data['people']}<br/>\nCena: {$data['price']}", 'description_customer' => "Źródło: LockMe<br/>\nIlość osób: {$data['people']}<br/>\nCena: {$data['price']}", 'reference' => $tid, 'who_added' => 0));
                 if (!$rows_affected) {
                     throw new RuntimeException('Błąd zapisu 2: ' . $wpdb->last_error);
                 }
@@ -242,8 +243,8 @@ class Cpabc implements PluginInterface
                 if ($data['extid']) {
                     $event = $wpdb->get_results('SELECT * FROM ' . CPABC_APPOINTMENTS_CALENDARS_TABLE_NAME . ' WHERE id=' . esc_sql($data['extid']));
                     $event = $event[0];
-                    $data1 = array('datatime' => date('Y-m-d H:i:s', $datetime), 'quantity' => $data['people'], 'title' => $data['email'], 'description' => "Źródło: LockMe<br/>\nIlość osób: {$data['people']}<br/>\nCena: {$data['price']}", 'who_edited' => 0);
-                    $data2 = array('booked_time_unformatted' => date('Y-m-d H:i:s', $datetime), 'booked_time' => date('Y-m-d H:i:s', $datetime), 'quantity' => $data['people'], 'buffered_date' => serialize($data));
+                    $data1 = array('datatime' => gmdate('Y-m-d H:i:s', $datetime), 'quantity' => $data['people'], 'title' => $data['email'], 'description' => "Źródło: LockMe<br/>\nIlość osób: {$data['people']}<br/>\nCena: {$data['price']}", 'who_edited' => 0);
+                    $data2 = array('booked_time_unformatted' => gmdate('Y-m-d H:i:s', $datetime), 'booked_time' => gmdate('Y-m-d H:i:s', $datetime), 'quantity' => $data['people'], 'buffered_date' => serialize($data));
                     $wpdb->update(CPABC_APPOINTMENTS_CALENDARS_TABLE_NAME, $data1, array('id' => $data['extid']));
                     if ($event->reference != '') {
                         $wpdb->update(CPABC_APPOINTMENTS_TABLE_NAME, $data2, ['id' => $event->reference]);

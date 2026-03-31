@@ -33,6 +33,8 @@ use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use WP_Query;
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 class Amelia implements PluginInterface
 {
 

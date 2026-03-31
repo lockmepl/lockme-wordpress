@@ -16,6 +16,8 @@ use LockmeIntegration\PluginInterface;
 use RuntimeException;
 use function method_exists;
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 class Bookly implements PluginInterface
 {
     public array $ajaxdata = [];
@@ -73,8 +75,8 @@ class Bookly implements PluginInterface
             $this->plugin->AnonymizeData(
                 [
                     'roomid' => $this->options['calendar_'.$info['staff_id']],
-                    'date' => date('Y-m-d', strtotime($info['start_date'])),
-                    'hour' => date('H:i:s', strtotime($info['start_date'])),
+                    'date' => gmdate('Y-m-d', strtotime($info['start_date'])),
+                    'hour' => gmdate('H:i:s', strtotime($info['start_date'])),
                     'pricer' => 'API',
                     'status' => 1,
                     'extid' => $id
@@ -101,7 +103,7 @@ class Bookly implements PluginInterface
                                        ->leftJoin('StaffService', 'ss',
                                            '`ss`.`staff_id` = `a`.`staff_id` AND `ss`.`service_id` = `a`.`service_id`')
                                        ->leftJoin('Service', 's', '`s`.`id` = `a`.`service_id`')
-                                       ->whereGte('a.start_date', date('Y-m-d'))
+                                       ->whereGte('a.start_date', gmdate('Y-m-d'))
                                        ->groupBy('a.id')
                                        ->fetchArray();
         foreach ($bookings as $b) {
@@ -282,13 +284,13 @@ class Bookly implements PluginInterface
                 $appointment->loadBy([
                     'service_id' => $service_id,
                     'staff_id' => $staff_id,
-                    'start_date' => date('Y-m-d H:i:s', $timestamp),
+                    'start_date' => gmdate('Y-m-d H:i:s', $timestamp),
                 ]);
                 if ($appointment->isLoaded() == false) {
                     $appointment->setServiceId($service_id);
                     $appointment->setStaffId($staff_id);
-                    $appointment->setStartDate(date('Y-m-d H:i:s', $timestamp));
-                    $appointment->setEndDate(date('Y-m-d H:i:s', $timestamp + $service->getDuration()));
+                    $appointment->setStartDate(gmdate('Y-m-d H:i:s', $timestamp));
+                    $appointment->setEndDate(gmdate('Y-m-d H:i:s', $timestamp + $service->getDuration()));
                     $appointment->save();
                 }
 
@@ -304,10 +306,10 @@ class Bookly implements PluginInterface
                                      ->setCreatedFrom('backend');
 
                 if(method_exists($customer_appointment, 'setCreated')) {
-                    $customer_appointment->setCreated(date('Y-m-d H:i:s'))
+                    $customer_appointment->setCreated(gmdate('Y-m-d H:i:s'))
                                          ->save();
                 } else {
-                    $customer_appointment->setCreatedAt(date('Y-m-d H:i:s'))
+                    $customer_appointment->setCreatedAt(gmdate('Y-m-d H:i:s'))
                                          ->save();
                 }
 
@@ -329,8 +331,8 @@ class Bookly implements PluginInterface
                 if ($data['extid']) {
                     $appointment = new Appointment();
                     $appointment->load($data['extid']);
-                    $appointment->setStartDate(date('Y-m-d H:i:s', $timestamp));
-                    $appointment->setEndDate(date('Y-m-d H:i:s', $timestamp + $service->getDuration()));
+                    $appointment->setStartDate(gmdate('Y-m-d H:i:s', $timestamp));
+                    $appointment->setEndDate(gmdate('Y-m-d H:i:s', $timestamp + $service->getDuration()));
                     $appointment->save();
 
                     $ca = $appointment->getCustomerAppointments();

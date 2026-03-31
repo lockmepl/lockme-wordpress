@@ -6,6 +6,7 @@ namespace LockmeDep\LockmeIntegration\Libs;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use LockmeDep\Lockme\OAuth2\Client\Provider\Lockme;
+defined('ABSPATH') or die('No script kiddies please!');
 class WrappedProvider extends Lockme
 {
     public function executeRequest(string $method, string $url, AccessToken|string|null $token, mixed $body = null): mixed

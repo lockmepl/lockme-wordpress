@@ -8,6 +8,8 @@ use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 class Cpabc implements PluginInterface {
     private array $options;
     private Plugin $plugin;
@@ -141,8 +143,8 @@ class Cpabc implements PluginInterface {
             $this->plugin->AnonymizeData(
                 [
                     'roomid'=>$this->options['calendar_'.$res['calendar']],
-                    'date'=>date('Y-m-d', strtotime($res['booked_time_unformatted'])),
-                    'hour'=>date('H:i:s', strtotime($res['booked_time_unformatted'])),
+                    'date'=>gmdate('Y-m-d', strtotime($res['booked_time_unformatted'])),
+                    'hour'=>gmdate('H:i:s', strtotime($res['booked_time_unformatted'])),
                     'name'=>$res['name'],
                     'pricer'=> 'API',
                     'email'=>$res['email'],
@@ -302,9 +304,9 @@ class Cpabc implements PluginInterface {
                 $rows_affected = $wpdb->insert( CPABC_APPOINTMENTS_TABLE_NAME,array(
                     'calendar' => $calendar_id,
                     'time' => current_time('mysql'),
-                    'booked_time' => date('Y-m-d H:i:s', $datetime),
-                    'booked_time_customer' => date('Y-m-d H:i:s', $datetime),
-                    'booked_time_unformatted' => date('Y-m-d H:i:s', $datetime),
+                    'booked_time' => gmdate('Y-m-d H:i:s', $datetime),
+                    'booked_time_customer' => gmdate('Y-m-d H:i:s', $datetime),
+                    'booked_time_unformatted' => gmdate('Y-m-d H:i:s', $datetime),
                     'name' => $data['name'].' '.$data['surname'],
                     'email' => $data['email'],
                     'phone' => $data['phone'],
@@ -322,7 +324,7 @@ class Cpabc implements PluginInterface {
 
                 $rows_affected = $wpdb->insert( CPABC_TDEAPP_CALENDAR_DATA_TABLE, array(
                     'appointment_calendar_id' => $calendar_id,
-                    'datatime' => date('Y-m-d H:i:s', $datetime),
+                    'datatime' => gmdate('Y-m-d H:i:s', $datetime),
                     'title' => $data['email'],
                     'reminder' => 0,
                     'quantity' => 1,
@@ -352,7 +354,7 @@ class Cpabc implements PluginInterface {
                     $event = $event[0];
 
                     $data1 = array(
-                        'datatime' => date('Y-m-d H:i:s', $datetime),
+                        'datatime' => gmdate('Y-m-d H:i:s', $datetime),
                         'quantity' => $data['people'],
                         'title' => $data['email'],
                         'description' => "Źródło: LockMe<br/>\nIlość osób: {$data['people']}<br/>\nCena: {$data['price']}",
@@ -360,8 +362,8 @@ class Cpabc implements PluginInterface {
                     );
 
                     $data2 = array(
-                        'booked_time_unformatted' => date('Y-m-d H:i:s', $datetime),
-                        'booked_time' => date('Y-m-d H:i:s', $datetime),
+                        'booked_time_unformatted' => gmdate('Y-m-d H:i:s', $datetime),
+                        'booked_time' => gmdate('Y-m-d H:i:s', $datetime),
                         'quantity' => $data['people'],
                         'buffered_date' => serialize($data)
                     );

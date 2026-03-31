@@ -31,6 +31,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use WP_Query;
+defined('ABSPATH') or die('No script kiddies please!');
 class Amelia implements PluginInterface
 {
     private ?Container $container = null;

@@ -9,6 +9,8 @@ use LockmeIntegration\PluginInterface;
 use RuntimeException;
 use WP_Query;
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 class Booked implements PluginInterface
 {
     private array $options;
@@ -313,8 +315,8 @@ class Booked implements PluginInterface
             $this->plugin->AnonymizeData(
                 [
                     'roomid' => $this->options['calendar_'.$calId],
-                    'date' => date('Y-m-d', get_post_meta($res->ID, '_appointment_timestamp', true)),
-                    'hour' => date('H:i:s', strtotime("$time[0]:$time[1]:00")),
+                    'date' => gmdate('Y-m-d', get_post_meta($res->ID, '_appointment_timestamp', true)),
+                    'hour' => gmdate('H:i:s', strtotime("$time[0]:$time[1]:00")),
                     'name' => $name,
                     'pricer' => 'API',
                     'email' => $email,
@@ -343,7 +345,7 @@ class Booked implements PluginInterface
             $booked_defaults = get_option('booked_defaults');
         }
 
-        $day_name = date('D', $date);
+        $day_name = gmdate('D', $date);
         $formatted_date = date_i18n('Ymd', $date);
 
         if (function_exists('quickcal_apply_custom_timeslots_details_filter')) {
@@ -367,7 +369,7 @@ class Booked implements PluginInterface
             $todays_defaults = false;
         }
 
-        $hour = date('Hi', strtotime($hour));
+        $hour = gmdate('Hi', strtotime($hour));
         foreach ($todays_defaults as $h => $cnt) {
             if (preg_match("/^$hour/", $h)) {
                 return $h;

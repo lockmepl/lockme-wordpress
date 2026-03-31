@@ -1,4 +1,4 @@
-=== Lockme OAuth2 calendars integration ===
+=== Lockme calendars integration ===
 Contributors: lustmored
 Donate link:
 Tags: lustmored

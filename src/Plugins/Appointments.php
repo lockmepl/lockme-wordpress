@@ -8,6 +8,8 @@ use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 class Appointments implements PluginInterface
 {
     private array $options;
@@ -175,7 +177,7 @@ class Appointments implements PluginInterface
                 $result = $wpdb->insert(
                     $wpdb->prefix.'app_appointments',
                     [
-                        'created' => date('Y-m-d H:i:s', $appointments->local_time),
+                        'created' => gmdate('Y-m-d H:i:s', $appointments->local_time),
                         'user' => 0,
                         'name' => $data['name'],
                         'email' => $data['email'],
@@ -184,8 +186,8 @@ class Appointments implements PluginInterface
                         'worker' => $worker,
                         'price' => $data['price'],
                         'status' => $data['status'] ? 'paid' : 'pending',
-                        'start' => date('Y-m-d H:i:s', $start),
-                        'end' => date('Y-m-d H:i:s', $start + ($service->duration*60)),
+                        'start' => gmdate('Y-m-d H:i:s', $start),
+                        'end' => gmdate('Y-m-d H:i:s', $start + ($service->duration*60)),
                         'note' => $data['comment']."\n\n#LOCKME!"
                     ]
                 );
@@ -224,8 +226,8 @@ class Appointments implements PluginInterface
                             'worker' => $worker,
                             'price' => $data['price'],
                             'status' => $data['status'] ? 'paid' : 'pending',
-                            'start' => date('Y-m-d H:i:s', $start),
-                            'end' => date('Y-m-d H:i:s', $start + ($service->duration*60)),
+                            'start' => gmdate('Y-m-d H:i:s', $start),
+                            'end' => gmdate('Y-m-d H:i:s', $start + ($service->duration*60)),
                             'note' => $data['comment']."\n\n#LOCKME!"
                         ],
                         [
@@ -282,8 +284,8 @@ class Appointments implements PluginInterface
         global $appointments;
 
         $app = json_decode(json_encode(appointments_get_appointment($id)), true);
-        $date = date('Y-m-d', strtotime($app['start']));
-        $hour = date('H:i:s', strtotime($app['start']));
+        $date = gmdate('Y-m-d', strtotime($app['start']));
+        $hour = gmdate('H:i:s', strtotime($app['start']));
 
         return
             $this->plugin->AnonymizeData(

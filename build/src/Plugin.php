@@ -22,6 +22,7 @@ use LockmeDep\LockmeIntegration\Plugins\WPBooking;
 use LockmeDep\LockmeIntegration\Plugins\WPDevArt;
 use LockmeDep\LockmeIntegration\Util\LogTable;
 include_once ABSPATH . 'wp-admin/includes/plugin.php';
+defined('ABSPATH') or die('No script kiddies please!');
 class Plugin
 {
     private const DB_VER = '1.0';
@@ -148,24 +149,30 @@ class Plugin
     }
     public function admin_register_settings(): void
     {
-        register_setting('lockme-admin', 'lockme_settings');
+        register_setting('lockme-admin', 'lockme_settings', ['sanitize_callback' => function ($settings) {
+            $settings['client_id'] = sanitize_text_field($settings['client_id'] ?? '');
+            $settings['client_secret'] = sanitize_text_field($settings['client_secret'] ?? '');
+            $settings['id_prefix'] = sanitize_text_field($settings['id_prefix'] ?? '');
+            $settings['api_domain'] = esc_url_raw($settings['api_domain'] ?? '');
+            return $settings;
+        }]);
         add_settings_section('lockme_settings_section', 'API settings', static function () {
             echo '<p>Basic data of the LockMe partner - available at <a href="https://lock.me/cockpit/" target="_blank">lock.me/cockpit</a></p>';
         }, 'lockme-admin');
         add_settings_field('client_id', 'App ID', function () {
-            echo '<input name="lockme_settings[client_id]"  type="text" value="' . $this->options['client_id'] . '" />';
+            echo '<input name="lockme_settings[client_id]"  type="text" value="' . esc_attr($this->options['client_id']) . '" />';
         }, 'lockme-admin', 'lockme_settings_section', array());
         add_settings_field('client_secret', 'App secret', function () {
-            echo '<input name="lockme_settings[client_secret]" type="text" value="' . $this->options['client_secret'] . '" />';
+            echo '<input name="lockme_settings[client_secret]" type="text" value="' . esc_attr($this->options['client_secret']) . '" />';
         }, 'lockme-admin', 'lockme_settings_section', array());
         add_settings_field('rodo_mode', 'RODO mode (anonymize data)', function () {
             echo '<input type="checkbox" name="lockme_settings[rodo_mode]" value="1"  ' . checked(1, $this->options['rodo_mode'] ?? \false, \false) . ' /> <small>If you enable this function, only information about the date and time of the visit will be sent as part of the data exchange via API between your website and Lockme. All customer personal data will remain only on your website. Note! If you edit such a reservation from the lockme panel, there is a risk that it will delete the data in your reservation system. Remember to manage such reservations only through your system.</small>';
         }, 'lockme-admin', 'lockme_settings_section', array());
         add_settings_field('id_prefix', 'Bookings ID prefix', function () {
-            echo '<input name="lockme_settings[id_prefix]" type="text" value="' . ($this->options['id_prefix'] ?? '') . '" /> <small>Set this if you may have conflicts on external ID (like when you reset database, change booking plugin or website or have more than one connected integration). IMPORTANT: changing this value on working system <strong>will break your integration</strong>.</small>';
+            echo '<input name="lockme_settings[id_prefix]" type="text" value="' . esc_attr($this->options['id_prefix'] ?? '') . '" /> <small>Set this if you may have conflicts on external ID (like when you reset database, change booking plugin or website or have more than one connected integration). IMPORTANT: changing this value on working system <strong>will break your integration</strong>.</small>';
         }, 'lockme-admin', 'lockme_settings_section', array());
         add_settings_field('api_domain', 'API domain', function () {
-            echo '<input name="lockme_settings[api_domain]" type="text" value="' . $this->options['api_domain'] . '" placeholder="https://api.lock.me" />';
+            echo '<input name="lockme_settings[api_domain]" type="text" value="' . esc_attr($this->options['api_domain']) . '" placeholder="https://api.lock.me" />';
         }, 'lockme-admin', 'lockme_settings_section', array());
         add_settings_field('api_url', 'Webhook URL', function () {
             echo '<input readonly type="text" value="' . get_site_url() . '/?lockme_api=' . $this->url_key . '" onfocus="select()" /> <small>You need to add an integration of type webhook on Lockme to get updates about bookings automatically. Use this value as a webhook URL address and use the nevest API version from 2.x options.</small>';
@@ -180,7 +187,7 @@ class Plugin
     public function admin_page(): void
     {
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to access this page.'));
+            wp_die(__('You do not have sufficient permissions to access this page.', 'lockme-calendars-integration'));
         }
         echo '<div class="wrap">';
         echo '<h2>LockMe integration</h2>';
@@ -227,7 +234,7 @@ class Plugin
                 delete_option('lockme_oauth2_state');
                 $params = [];
                 $authorizationUrl = $api->getAuthorizationUrl(['rooms_manage'], $params);
-                add_option('lockme_oauth2_state', $params['oauth2_lockme_state'], \false, \false);
+                add_option('lockme_oauth2_state', $params['oauth2_lockme_state'], '', \false);
                 echo '<p><a href="' . $authorizationUrl . '">Click here</a> to connect the plugin with Lockme.</p>';
                 echo '<p>Custom Oauth2 Access Token (use <b>only if you know what are you doing</b>):</p>';
                 echo '<p><textarea name="oauth_token"></textarea></p>';

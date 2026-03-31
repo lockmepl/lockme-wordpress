@@ -11,6 +11,7 @@ use wp_booking_calendar_lists;
 use wp_booking_calendar_public_reservation;
 use wp_booking_calendar_reservation;
 use wp_booking_calendar_slot;
+defined('ABSPATH') or die('No script kiddies please!');
 class WPBooking implements PluginInterface
 {
     private array $options;
@@ -54,7 +55,7 @@ class WPBooking implements PluginInterface
     }
     private function AppData($id, $res): array
     {
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['calendar_id']], 'date' => date('Y-m-d', strtotime($res['reservation_date'])), 'hour' => date('H:i:s', strtotime($res['reservation_time_from'])), 'people' => $res['reservation_seats'], 'pricer' => 'API', 'price' => $res['reservation_price'], 'name' => $res['reservation_name'], 'surname' => $res['reservation_surname'], 'email' => $res['reservation_email'], 'phone' => $res['reservation_phone'], 'comment' => $res['reservation_message'], 'status' => 1, 'extid' => $id]);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['calendar_id']], 'date' => gmdate('Y-m-d', strtotime($res['reservation_date'])), 'hour' => gmdate('H:i:s', strtotime($res['reservation_time_from'])), 'people' => $res['reservation_seats'], 'pricer' => 'API', 'price' => $res['reservation_price'], 'name' => $res['reservation_name'], 'surname' => $res['reservation_surname'], 'email' => $res['reservation_email'], 'phone' => $res['reservation_phone'], 'comment' => $res['reservation_message'], 'status' => 1, 'extid' => $id]);
     }
     public function Delete($id, $appdata = null): void
     {

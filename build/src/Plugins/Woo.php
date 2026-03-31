@@ -9,6 +9,7 @@ use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
 use WC_Booking;
 use WP_Query;
+defined('ABSPATH') or die('No script kiddies please!');
 class Woo implements PluginInterface
 {
     private array $options;
@@ -39,7 +40,7 @@ class Woo implements PluginInterface
     }
     public function ExportToLockMe(): void
     {
-        $args = ['post_type' => 'wc_booking', 'meta_key' => '_booking_start', 'meta_value' => date('YmdHis'), 'meta_compare' => '>=', 'posts_per_page' => -1, 'post_status' => 'any'];
+        $args = ['post_type' => 'wc_booking', 'meta_key' => '_booking_start', 'meta_value' => gmdate('YmdHis'), 'meta_compare' => '>=', 'posts_per_page' => -1, 'post_status' => 'any'];
         $loop = new WP_Query($args);
         while ($loop->have_posts()) {
             $loop->the_post();
@@ -65,7 +66,7 @@ class Woo implements PluginInterface
         }, 'lockme-woo', 'lockme_woo_section', []);
         if (($this->options['use'] ?? null) && $this->plugin->tab === 'woo_plugin') {
             add_settings_field('slot_length', 'Dłogośc slota (w min)', function () {
-                echo '<input name="lockme_woo[slot_length]" type="text" value="' . $this->options['slot_length'] . '" />';
+                echo '<input name="lockme_woo[slot_length]" type="text" value="' . esc_attr($this->options['slot_length'] ?? '') . '" />';
             }, 'lockme-woo', 'lockme_woo_section', []);
             $api = $this->plugin->GetApi();
             $rooms = [];
@@ -187,7 +188,7 @@ class Woo implements PluginInterface
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
         $date = $data['date'];
-        $hour = date('H:i:s', strtotime($data['hour']));
+        $hour = gmdate('H:i:s', strtotime($data['hour']));
         $start = strtotime($date . ' ' . $hour);
         $calendar_id = $this->GetCalendar($roomid);
         switch ($message['action']) {
@@ -217,7 +218,7 @@ class Woo implements PluginInterface
                     if ($booking->status !== 'confirmed' && $data['status']) {
                         $booking->update_status('confirmed');
                     }
-                    $meta_args = ['_booking_persons' => $data['people'], '_booking_cost' => $data['price'], '_booking_start' => date('YmdHis', $start), '_booking_end' => date('YmdHis', $start + 60 * (int) $this->options['slot_length'])];
+                    $meta_args = ['_booking_persons' => $data['people'], '_booking_cost' => $data['price'], '_booking_start' => gmdate('YmdHis', $start), '_booking_end' => gmdate('YmdHis', $start + 60 * (int) $this->options['slot_length'])];
                     foreach ($meta_args as $key => $value) {
                         update_post_meta($booking->get_id(), $key, $value);
                     }
@@ -236,7 +237,7 @@ class Woo implements PluginInterface
     private function AppData($booking): array
     {
         $order = $booking->get_order();
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $booking->get_product_id()], 'date' => date('Y-m-d', $booking->get_start()), 'hour' => date('H:i:s', $booking->get_start()), 'pricer' => 'API', 'price' => $booking->get_cost(), 'status' => $booking->get_status() === 'in-cart' ? 0 : 1, 'people' => array_sum($booking->get_person_counts()), 'extid' => $booking->get_id(), 'email' => $order ? $order->get_billing_email() : '', 'phone' => $order ? $order->get_billing_phone() : '', 'name' => $order ? $order->get_billing_first_name() : '', 'surname' => $order ? $order->get_billing_last_name() : '']);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $booking->get_product_id()], 'date' => gmdate('Y-m-d', $booking->get_start()), 'hour' => gmdate('H:i:s', $booking->get_start()), 'pricer' => 'API', 'price' => $booking->get_cost(), 'status' => $booking->get_status() === 'in-cart' ? 0 : 1, 'people' => array_sum($booking->get_person_counts()), 'extid' => $booking->get_id(), 'email' => $order ? $order->get_billing_email() : '', 'phone' => $order ? $order->get_billing_phone() : '', 'name' => $order ? $order->get_billing_first_name() : '', 'surname' => $order ? $order->get_billing_last_name() : '']);
     }
     private function GetCalendar($roomid)
     {

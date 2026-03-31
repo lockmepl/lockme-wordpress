@@ -12,6 +12,8 @@ use wp_booking_calendar_public_reservation;
 use wp_booking_calendar_reservation;
 use wp_booking_calendar_slot;
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 class WPBooking implements PluginInterface
 {
     private array $options;
@@ -68,8 +70,8 @@ class WPBooking implements PluginInterface
             $this->plugin->AnonymizeData(
                 [
                     'roomid' => $this->options['calendar_'.$res['calendar_id']],
-                    'date' => date('Y-m-d', strtotime($res['reservation_date'])),
-                    'hour' => date('H:i:s', strtotime($res['reservation_time_from'])),
+                    'date' => gmdate('Y-m-d', strtotime($res['reservation_date'])),
+                    'hour' => gmdate('H:i:s', strtotime($res['reservation_time_from'])),
                     'people' => $res['reservation_seats'],
                     'pricer' => 'API',
                     'price' => $res['reservation_price'],

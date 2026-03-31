@@ -8,6 +8,7 @@ use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
 use WP_Query;
+defined('ABSPATH') or die('No script kiddies please!');
 class Booked implements PluginInterface
 {
     private array $options;
@@ -250,7 +251,7 @@ class Booked implements PluginInterface
         }
         $name = get_post_meta($res->ID, '_appointment_guest_name', \true) ?: $name;
         $email = get_post_meta($res->ID, '_appointment_guest_email', \true) ?: $email;
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $calId], 'date' => date('Y-m-d', get_post_meta($res->ID, '_appointment_timestamp', \true)), 'hour' => date('H:i:s', strtotime("{$time[0]}:{$time[1]}:00")), 'name' => $name, 'pricer' => 'API', 'email' => $email, 'phone' => $phone, 'status' => in_array($res->post_status, ['publish', 'future']) ? 1 : 0, 'extid' => $res->ID]);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $calId], 'date' => gmdate('Y-m-d', get_post_meta($res->ID, '_appointment_timestamp', \true)), 'hour' => gmdate('H:i:s', strtotime("{$time[0]}:{$time[1]}:00")), 'name' => $name, 'pricer' => 'API', 'email' => $email, 'phone' => $phone, 'status' => in_array($res->post_status, ['publish', 'future']) ? 1 : 0, 'extid' => $res->ID]);
     }
     private function GetCalendar($roomid): ?int
     {
@@ -268,7 +269,7 @@ class Booked implements PluginInterface
         if (!$booked_defaults) {
             $booked_defaults = get_option('booked_defaults');
         }
-        $day_name = date('D', $date);
+        $day_name = gmdate('D', $date);
         $formatted_date = date_i18n('Ymd', $date);
         if (function_exists('quickcal_apply_custom_timeslots_details_filter')) {
             $booked_defaults = quickcal_apply_custom_timeslots_details_filter($booked_defaults, $calendar_id);
@@ -288,7 +289,7 @@ class Booked implements PluginInterface
         } else {
             $todays_defaults = \false;
         }
-        $hour = date('Hi', strtotime($hour));
+        $hour = gmdate('Hi', strtotime($hour));
         foreach ($todays_defaults as $h => $cnt) {
             if (preg_match("/^{$hour}/", $h)) {
                 return $h;

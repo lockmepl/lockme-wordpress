@@ -7,6 +7,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
+defined('ABSPATH') or die('No script kiddies please!');
 class Ezscm implements PluginInterface
 {
     private array $options;
@@ -101,7 +102,7 @@ class Ezscm implements PluginInterface
     private function AppData($res): array
     {
         $details = json_decode($res['data'], \true);
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['s_id']] ?: $this->options['calendar_' . $res['details-s_id']], 'date' => date('Y-m-d', strtotime($res['date'])), 'hour' => date('H:i:s', strtotime($res['time_begin'])), 'people' => 0, 'pricer' => 'API', 'price' => 0, 'email' => $details['Adres e-mail:'], 'status' => 1, 'extid' => $res['e_id']]);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['s_id']] ?: $this->options['calendar_' . $res['details-s_id']], 'date' => gmdate('Y-m-d', strtotime($res['date'])), 'hour' => gmdate('H:i:s', strtotime($res['time_begin'])), 'people' => 0, 'pricer' => 'API', 'price' => 0, 'email' => $details['Adres e-mail:'], 'status' => 1, 'extid' => $res['e_id']]);
     }
     private function Add($res): void
     {
@@ -210,7 +211,7 @@ class Ezscm implements PluginInterface
         $data = $message['data'];
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
-        $hour = date('H:i', strtotime($data['hour']));
+        $hour = gmdate('H:i', strtotime($data['hour']));
         $calendar_id = $this->GetCalendar($roomid);
         $form = array('Imię:' => $data['name'], 'Nazwisko:' => $data['surname'], 'Adres e-mail:' => $data['email'], 'Telefon:' => $data['phone'], 'Voucher:' => '', 'Dodatkowe uwagi:' => 'Lockme! ' . $data['comment']);
         $sql_data = json_encode($form);

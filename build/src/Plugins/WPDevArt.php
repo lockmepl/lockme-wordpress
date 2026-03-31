@@ -14,6 +14,7 @@ use wpdevart_bc_ModelCalendars;
 use wpdevart_bc_ModelExtras;
 use wpdevart_bc_ModelForms;
 use wpdevart_bc_ModelThemes;
+defined('ABSPATH') or die('No script kiddies please!');
 class WPDevArt implements PluginInterface
 {
     private array $options;
@@ -80,7 +81,7 @@ class WPDevArt implements PluginInterface
     }
     private function AppData($res): array
     {
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['calendar_id']], 'date' => date('Y-m-d', strtotime($res['single_day'])), 'hour' => date('H:i:s', strtotime($res['start_hour'])), 'pricer' => 'API', 'email' => $res['email'], 'status' => $res['status'] === 'approved' ? 1 : 0, 'extid' => $res['id'], 'price' => $res['price']]);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['calendar_id']], 'date' => gmdate('Y-m-d', strtotime($res['single_day'])), 'hour' => gmdate('H:i:s', strtotime($res['start_hour'])), 'pricer' => 'API', 'email' => $res['email'], 'status' => $res['status'] === 'approved' ? 1 : 0, 'extid' => $res['id'], 'price' => $res['price']]);
     }
     public function RegisterSettings(): void
     {
@@ -188,7 +189,7 @@ class WPDevArt implements PluginInterface
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
         $date = $data['date'];
-        $hour = date('H:i', strtotime($data['hour']));
+        $hour = gmdate('H:i', strtotime($data['hour']));
         $calendar_id = $this->GetCalendar($roomid);
         if (!$calendar_id) {
             throw new RuntimeException('No calendar');
@@ -205,7 +206,7 @@ class WPDevArt implements PluginInterface
         //        }
         switch ($message['action']) {
             case 'add':
-                $result = $wpdb->insert($wpdb->prefix . 'wpdevart_reservations', ['calendar_id' => $calendar_id, 'single_day' => $date, 'start_hour' => $hour, 'count_item' => 1, 'price' => $data['price'], 'total_price' => $data['price'], 'form' => [], 'email' => $data['email'], 'status' => 'approved', 'date_created' => date('Y-m-d H:i'), 'is_new' => 0]);
+                $result = $wpdb->insert($wpdb->prefix . 'wpdevart_reservations', ['calendar_id' => $calendar_id, 'single_day' => $date, 'start_hour' => $hour, 'count_item' => 1, 'price' => $data['price'], 'total_price' => $data['price'], 'form' => [], 'email' => $data['email'], 'status' => 'approved', 'date_created' => gmdate('Y-m-d H:i'), 'is_new' => 0]);
                 if ($result === \false) {
                     throw new RuntimeException('Error saving to database - ' . $wpdb->last_error);
                 }
@@ -243,7 +244,7 @@ class WPDevArt implements PluginInterface
                 if ($data['extid']) {
                     $row_id = $data['extid'];
                     $old_reserv = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $wpdb->prefix . 'wpdevart_reservations WHERE `id`=%d', $row_id), ARRAY_A);
-                    $wpdb->update($wpdb->prefix . 'wpdevart_reservations', ['calendar_id' => $calendar_id, 'single_day' => $date, 'start_hour' => $hour, 'count_item' => 1, 'price' => $data['price'], 'total_price' => $data['price'], 'form' => [], 'email' => $data['email'], 'status' => 'approved', 'date_created' => date('Y-m-d H:i'), 'is_new' => 0], ['id' => $row_id]);
+                    $wpdb->update($wpdb->prefix . 'wpdevart_reservations', ['calendar_id' => $calendar_id, 'single_day' => $date, 'start_hour' => $hour, 'count_item' => 1, 'price' => $data['price'], 'total_price' => $data['price'], 'form' => [], 'email' => $data['email'], 'status' => 'approved', 'date_created' => gmdate('Y-m-d H:i'), 'is_new' => 0], ['id' => $row_id]);
                     $theme_model = new wpdevart_bc_ModelThemes();
                     $calendar_model = new wpdevart_bc_ModelCalendars();
                     $form_model = new wpdevart_bc_ModelForms();

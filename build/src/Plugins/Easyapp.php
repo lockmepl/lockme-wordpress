@@ -11,6 +11,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
+defined('ABSPATH') or die('No script kiddies please!');
 class Easyapp implements PluginInterface
 {
     private array $options;
@@ -44,7 +45,7 @@ class Easyapp implements PluginInterface
     private function AppData($resid): array
     {
         $res = $this->models->get_appintment_by_id($resid);
-        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['location'] . '_' . $res['service'] . '_' . $res['worker']], 'date' => date('Y-m-d', strtotime($res['date'])), 'hour' => date('H:i:s', strtotime($res['start'])), 'people' => 0, 'pricer' => 'API', 'price' => $res['price'], 'name' => $res['name'], 'email' => $res['email'], 'phone' => $res['phone'], 'status' => $res['status'] === 'confirmed', 'extid' => $res['id']]);
+        return $this->plugin->AnonymizeData(['roomid' => $this->options['calendar_' . $res['location'] . '_' . $res['service'] . '_' . $res['worker']], 'date' => gmdate('Y-m-d', strtotime($res['date'])), 'hour' => gmdate('H:i:s', strtotime($res['start'])), 'people' => 0, 'pricer' => 'API', 'price' => $res['price'], 'name' => $res['name'], 'email' => $res['email'], 'phone' => $res['phone'], 'status' => $res['status'] === 'confirmed', 'extid' => $res['id']]);
     }
     public function ExportToLockMe(): void
     {
@@ -124,7 +125,7 @@ class Easyapp implements PluginInterface
             switch ($_GET['action']) {
                 case 'ea_res_appointment':
                 case 'nopriv_ea_res_appointment':
-                    $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s", $_GET['location'], $_GET['service'], $_GET['worker'], $_GET['date'], date('H:i:s', strtotime($_GET['start']))), ARRAY_A);
+                    $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s", $_GET['location'], $_GET['service'], $_GET['worker'], $_GET['date'], gmdate('H:i:s', strtotime($_GET['start']))), ARRAY_A);
                     if ($res) {
                         $this->Add($res);
                     }
@@ -148,7 +149,7 @@ class Easyapp implements PluginInterface
                         default:
                             $input = json_decode(file_get_contents('php://input'), \true);
                             if (!$_GET['_method'] && $input['date']) {
-                                $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s", $input['location'], $input['service'], $input['worker'], $input['date'], date('H:i:s', strtotime($input['start']))), ARRAY_A);
+                                $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s", $input['location'], $input['service'], $input['worker'], $input['date'], gmdate('H:i:s', strtotime($input['start']))), ARRAY_A);
                                 if ($res) {
                                     $this->Add($res);
                                 }
@@ -171,7 +172,7 @@ class Easyapp implements PluginInterface
             case 'add':
                 $s = $this->models->get_row('ea_services', $service);
                 $end_time = strtotime("{$data['hour']} + {$s->duration} minute");
-                $id = $this->models->replace('ea_appointments', ['location' => $location, 'service' => $service, 'worker' => $worker, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'date' => $data['date'], 'start' => $data['hour'], 'end_date' => $data['date'], 'end' => date('H:i:s', $end_time), 'price' => $data['price'], 'description' => 'LOCKME!', 'status' => $data['status'] ? 'confirmed' : 'pending'], \true);
+                $id = $this->models->replace('ea_appointments', ['location' => $location, 'service' => $service, 'worker' => $worker, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'date' => $data['date'], 'start' => $data['hour'], 'end_date' => $data['date'], 'end' => gmdate('H:i:s', $end_time), 'price' => $data['price'], 'description' => 'LOCKME!', 'status' => $data['status'] ? 'confirmed' : 'pending'], \true);
                 try {
                     $api = $this->plugin->GetApi();
                     $api->EditReservation($roomid, (string) $lockme_id, $this->plugin->AnonymizeData(['extid' => $id->id]));
@@ -183,7 +184,7 @@ class Easyapp implements PluginInterface
                 if ($data['extid']) {
                     $s = $this->models->get_row('ea_services', $service);
                     $end_time = strtotime("{$data['hour']} + {$s->duration} minute");
-                    $this->models->replace('ea_appointments', ['id' => $data['extid'], 'location' => $location, 'service' => $service, 'worker' => $worker, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'date' => $data['date'], 'start' => $data['hour'], 'end_date' => $data['date'], 'end' => date('H:i:s', $end_time), 'price' => $data['price'], 'description' => 'LOCKME!', 'status' => $data['status'] ? 'confirmed' : 'pending'], \true);
+                    $this->models->replace('ea_appointments', ['id' => $data['extid'], 'location' => $location, 'service' => $service, 'worker' => $worker, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'date' => $data['date'], 'start' => $data['hour'], 'end_date' => $data['date'], 'end' => gmdate('H:i:s', $end_time), 'price' => $data['price'], 'description' => 'LOCKME!', 'status' => $data['status'] ? 'confirmed' : 'pending'], \true);
                     return \true;
                 }
                 break;

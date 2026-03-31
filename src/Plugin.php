@@ -23,6 +23,8 @@ use LockmeIntegration\Util\LogTable;
 
 include_once ABSPATH.'wp-admin/includes/plugin.php';
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 class Plugin
 {
     private const DB_VER = '1.0';
@@ -298,7 +300,7 @@ class Plugin
     public function admin_page(): void
     {
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to access this page.'));
+            wp_die(__('You do not have sufficient permissions to access this page.', 'lockme-calendars-integration'));
         }
 
         echo '<div class="wrap">';
@@ -357,7 +359,7 @@ class Plugin
                 delete_option('lockme_oauth2_state');
                 $params = [];
                 $authorizationUrl = $api->getAuthorizationUrl(['rooms_manage'], $params);
-                add_option('lockme_oauth2_state', $params['oauth2_lockme_state'], false, false);
+                add_option('lockme_oauth2_state', $params['oauth2_lockme_state'], '', false);
 
                 echo '<p><a href="'.$authorizationUrl.'">Click here</a> to connect the plugin with Lockme.</p>';
                 echo '<p>Custom Oauth2 Access Token (use <b>only if you know what are you doing</b>):</p>';

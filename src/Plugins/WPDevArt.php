@@ -15,6 +15,8 @@ use wpdevart_bc_ModelExtras;
 use wpdevart_bc_ModelForms;
 use wpdevart_bc_ModelThemes;
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 class WPDevArt implements PluginInterface
 {
     private array $options;
@@ -97,8 +99,8 @@ class WPDevArt implements PluginInterface
             $this->plugin->AnonymizeData(
                 [
                     'roomid' => $this->options['calendar_'.$res['calendar_id']],
-                    'date' => date('Y-m-d', strtotime($res['single_day'])),
-                    'hour' => date('H:i:s', strtotime($res['start_hour'])),
+                    'date' => gmdate('Y-m-d', strtotime($res['single_day'])),
+                    'hour' => gmdate('H:i:s', strtotime($res['start_hour'])),
                     'pricer' => 'API',
                     'email' => $res['email'],
                     'status' => $res['status'] === 'approved' ? 1 : 0,
@@ -257,7 +259,7 @@ class WPDevArt implements PluginInterface
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
         $date = $data['date'];
-        $hour = date('H:i', strtotime($data['hour']));
+        $hour = gmdate('H:i', strtotime($data['hour']));
 
         $calendar_id = $this->GetCalendar($roomid);
         if (!$calendar_id) {
@@ -287,7 +289,7 @@ class WPDevArt implements PluginInterface
                     'form' => [],
                     'email' => $data['email'],
                     'status' => 'approved',
-                    'date_created' => date('Y-m-d H:i'),
+                    'date_created' => gmdate('Y-m-d H:i'),
                     'is_new' => 0
                 ]);
                 if ($result === false) {
@@ -349,7 +351,7 @@ class WPDevArt implements PluginInterface
                         'form' => [],
                         'email' => $data['email'],
                         'status' => 'approved',
-                        'date_created' => date('Y-m-d H:i'),
+                        'date_created' => gmdate('Y-m-d H:i'),
                         'is_new' => 0
                     ], ['id' => $row_id]);
 

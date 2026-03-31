@@ -9,6 +9,8 @@
 
 namespace LockmeIntegration\Libs;
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 /**
  * Base class for displaying a list of items in an ajaxified HTML table.
  *
@@ -168,8 +170,8 @@ class WP_List_Table {
 
         if ( empty( $this->modes ) ) {
             $this->modes = array(
-                'list'    => __( 'Compact view' ),
-                'excerpt' => __( 'Extended view' ),
+                'list'    => __( 'Compact view' , 'lockme-calendars-integration'),
+                'excerpt' => __( 'Extended view' , 'lockme-calendars-integration'),
             );
         }
     }
@@ -334,7 +336,7 @@ class WP_List_Table {
      * @since 3.1.0
      */
     public function no_items() {
-        _e( 'No items found.' );
+        _e( 'No items found.' , 'lockme-calendars-integration');
     }
 
     /**
@@ -485,9 +487,9 @@ class WP_List_Table {
             return;
         }
 
-        echo '<label for="bulk-action-selector-' . esc_attr( $which ) . '" class="screen-reader-text">' . __( 'Select bulk action' ) . '</label>';
+        echo '<label for="bulk-action-selector-' . esc_attr( $which ) . '" class="screen-reader-text">' . __( 'Select bulk action' , 'lockme-calendars-integration') . '</label>';
         echo '<select name="action' . $two . '" id="bulk-action-selector-' . esc_attr( $which ) . "\">\n";
-        echo '<option value="-1">' . __( 'Bulk actions' ) . "</option>\n";
+        echo '<option value="-1">' . __( 'Bulk actions' , 'lockme-calendars-integration') . "</option>\n";
 
         foreach ( $this->_actions as $key => $value ) {
             if ( is_array( $value ) ) {
@@ -508,7 +510,7 @@ class WP_List_Table {
 
         echo "</select>\n";
 
-        submit_button( __( 'Apply' ), 'action', '', false, array( 'id' => "doaction$two" ) );
+        submit_button( __( 'Apply' , 'lockme-calendars-integration'), 'action', '', false, array( 'id' => "doaction$two" ) );
         echo "\n";
     }
 
@@ -567,7 +569,7 @@ class WP_List_Table {
 
         $out .= '</div>';
 
-        $out .= '<button type="button" class="toggle-row"><span class="screen-reader-text">' . __( 'Show more details' ) . '</span></button>';
+        $out .= '<button type="button" class="toggle-row"><span class="screen-reader-text">' . __( 'Show more details' , 'lockme-calendars-integration') . '</span></button>';
 
         return $out;
     }
@@ -649,7 +651,7 @@ class WP_List_Table {
         ?>
         <label for="filter-by-date" class="screen-reader-text"><?php echo get_post_type_object( $post_type )->labels->filter_by_date; ?></label>
         <select name="m" id="filter-by-date">
-            <option<?php selected( $m, 0 ); ?> value="0"><?php _e( 'All dates' ); ?></option>
+            <option<?php selected( $m, 0 ); ?> value="0"><?php _e( 'All dates' , 'lockme-calendars-integration' ); ?></option>
             <?php
             foreach ( $months as $arc_row ) {
                 if ( 0 == $arc_row->year ) {
@@ -664,7 +666,7 @@ class WP_List_Table {
                     selected( $m, $year . $month, false ),
                     esc_attr( $arc_row->year . $month ),
                     /* translators: 1: Month name, 2: 4-digit year. */
-                    sprintf( __( '%1$s %2$d' ), $wp_locale->get_month( $month ), $year )
+                    sprintf( __( '%1$s %2$d' , 'lockme-calendars-integration'), $wp_locale->get_month( $month ), $year )
                 );
             }
             ?>
@@ -721,19 +723,19 @@ class WP_List_Table {
 
         $approved_only_phrase = sprintf(
         /* translators: %s: Number of comments. */
-            _n( '%s comment', '%s comments', $approved_comments ),
+            _n( '%s comment', '%s comments', $approved_comments , 'lockme-calendars-integration'),
             $approved_comments_number
         );
 
         $approved_phrase = sprintf(
         /* translators: %s: Number of comments. */
-            _n( '%s approved comment', '%s approved comments', $approved_comments ),
+            _n( '%s approved comment', '%s approved comments', $approved_comments , 'lockme-calendars-integration'),
             $approved_comments_number
         );
 
         $pending_phrase = sprintf(
         /* translators: %s: Number of comments. */
-            _n( '%s pending comment', '%s pending comments', $pending_comments ),
+            _n( '%s pending comment', '%s pending comments', $pending_comments , 'lockme-calendars-integration'),
             $pending_comments_number
         );
 
@@ -741,7 +743,7 @@ class WP_List_Table {
             // No comments at all.
             printf(
                 '<span aria-hidden="true">&#8212;</span><span class="screen-reader-text">%s</span>',
-                __( 'No comments' )
+                __( 'No comments' , 'lockme-calendars-integration')
             );
         } elseif ( $approved_comments && 'trash' === get_post_status( $post_id ) ) {
             // Don't link the comment bubble for a trashed post.
@@ -771,7 +773,7 @@ class WP_List_Table {
             printf(
                 '<span class="post-com-count post-com-count-no-comments"><span class="comment-count comment-count-no-comments" aria-hidden="true">%s</span><span class="screen-reader-text">%s</span></span>',
                 $approved_comments_number,
-                $pending_comments ? __( 'No approved comments' ) : __( 'No comments' )
+                $pending_comments ? __( 'No approved comments' , 'lockme-calendars-integration') : __( 'No comments' , 'lockme-calendars-integration')
             );
         }
 
@@ -794,7 +796,7 @@ class WP_List_Table {
             printf(
                 '<span class="post-com-count post-com-count-pending post-com-count-no-pending"><span class="comment-count comment-count-no-pending" aria-hidden="true">%s</span><span class="screen-reader-text">%s</span></span>',
                 $pending_comments_number,
-                $approved_comments ? __( 'No pending comments' ) : __( 'No comments' )
+                $approved_comments ? __( 'No pending comments' , 'lockme-calendars-integration') : __( 'No comments' , 'lockme-calendars-integration')
             );
         }
     }
@@ -883,7 +885,7 @@ class WP_List_Table {
 
         $output = '<span class="displaying-num">' . sprintf(
             /* translators: %s: Number of items. */
-                _n( '%s item', '%s items', $total_items ),
+                _n( '%s item', '%s items', $total_items , 'lockme-calendars-integration'),
                 number_format_i18n( $total_items )
             ) . '</span>';
 
@@ -925,7 +927,7 @@ class WP_List_Table {
             $page_links[] = sprintf(
                 "<a class='first-page button' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
                 esc_url( remove_query_arg( 'paged', $current_url ) ),
-                __( 'First page' ),
+                __( 'First page' , 'lockme-calendars-integration'),
                 '&laquo;'
             );
         }
@@ -936,18 +938,18 @@ class WP_List_Table {
             $page_links[] = sprintf(
                 "<a class='prev-page button' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
                 esc_url( add_query_arg( 'paged', max( 1, $current - 1 ), $current_url ) ),
-                __( 'Previous page' ),
+                __( 'Previous page', 'lockme-calendars-integration' ),
                 '&lsaquo;'
             );
         }
 
         if ( 'bottom' === $which ) {
             $html_current_page  = $current;
-            $total_pages_before = '<span class="screen-reader-text">' . __( 'Current Page' ) . '</span><span id="table-paging" class="paging-input"><span class="tablenav-paging-text">';
+            $total_pages_before = '<span class="screen-reader-text">' . __( 'Current Page', 'lockme-calendars-integration' ) . '</span><span id="table-paging" class="paging-input"><span class="tablenav-paging-text">';
         } else {
             $html_current_page = sprintf(
                 "%s<input class='current-page' id='current-page-selector' type='text' name='paged' value='%s' size='%d' aria-describedby='table-paging' /><span class='tablenav-paging-text'>",
-                '<label for="current-page-selector" class="screen-reader-text">' . __( 'Current Page' ) . '</label>',
+                '<label for="current-page-selector" class="screen-reader-text">' . __( 'Current Page' , 'lockme-calendars-integration') . '</label>',
                 $current,
                 strlen( $total_pages )
             );
@@ -955,7 +957,7 @@ class WP_List_Table {
         $html_total_pages = sprintf( "<span class='total-pages'>%s</span>", number_format_i18n( $total_pages ) );
         $page_links[]     = $total_pages_before . sprintf(
             /* translators: 1: Current page, 2: Total pages. */
-                _x( '%1$s of %2$s', 'paging' ),
+                _x( '%1$s of %2$s', 'paging' , 'lockme-calendars-integration'),
                 $html_current_page,
                 $html_total_pages
             ) . $total_pages_after;
@@ -966,7 +968,7 @@ class WP_List_Table {
             $page_links[] = sprintf(
                 "<a class='next-page button' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
                 esc_url( add_query_arg( 'paged', min( $total_pages, $current + 1 ), $current_url ) ),
-                __( 'Next page' ),
+                __( 'Next page' , 'lockme-calendars-integration'),
                 '&rsaquo;'
             );
         }
@@ -977,7 +979,7 @@ class WP_List_Table {
             $page_links[] = sprintf(
                 "<a class='last-page button' href='%s'><span class='screen-reader-text'>%s</span><span aria-hidden='true'>%s</span></a>",
                 esc_url( add_query_arg( 'paged', $total_pages, $current_url ) ),
-                __( 'Last page' ),
+                __( 'Last page' , 'lockme-calendars-integration'),
                 '&raquo;'
             );
         }
@@ -1204,7 +1206,7 @@ class WP_List_Table {
 
         if ( ! empty( $columns['cb'] ) ) {
             static $cb_counter = 1;
-            $columns['cb']     = '<label class="screen-reader-text" for="cb-select-all-' . $cb_counter . '">' . __( 'Select All' ) . '</label>'
+            $columns['cb']     = '<label class="screen-reader-text" for="cb-select-all-' . $cb_counter . '">' . __( 'Select All' , 'lockme-calendars-integration') . '</label>'
                                  . '<input id="cb-select-all-' . $cb_counter . '" type="checkbox" />';
             $cb_counter++;
         }
@@ -1470,7 +1472,7 @@ class WP_List_Table {
      *                if the current column is not the primary column.
      */
     protected function handle_row_actions( $item, $column_name, $primary ) {
-        return $column_name === $primary ? '<button type="button" class="toggle-row"><span class="screen-reader-text">' . __( 'Show more details' ) . '</span></button>' : '';
+        return $column_name === $primary ? '<button type="button" class="toggle-row"><span class="screen-reader-text">' . __( 'Show more details' , 'lockme-calendars-integration') . '</span></button>' : '';
     }
 
     /**
@@ -1495,7 +1497,7 @@ class WP_List_Table {
         if ( isset( $this->_pagination_args['total_items'] ) ) {
             $response['total_items_i18n'] = sprintf(
             /* translators: Number of items. */
-                _n( '%s item', '%s items', $this->_pagination_args['total_items'] ),
+                _n( '%s item', '%s items', $this->_pagination_args['total_items'] , 'lockme-calendars-integration'),
                 number_format_i18n( $this->_pagination_args['total_items'] )
             );
         }

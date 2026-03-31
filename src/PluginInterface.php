@@ -3,6 +3,8 @@ namespace LockmeIntegration;
 
 use Exception;
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 interface PluginInterface
 {
 

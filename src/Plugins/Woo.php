@@ -10,6 +10,8 @@ use RuntimeException;
 use WC_Booking;
 use WP_Query;
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 class Woo implements PluginInterface
 {
     private array $options;
@@ -47,7 +49,7 @@ class Woo implements PluginInterface
         $args = [
             'post_type' => 'wc_booking',
             'meta_key' => '_booking_start',
-            'meta_value' => date('YmdHis'),
+            'meta_value' => gmdate('YmdHis'),
             'meta_compare' => '>=',
             'posts_per_page' => -1,
             'post_status' => 'any'
@@ -260,7 +262,7 @@ class Woo implements PluginInterface
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
         $date = $data['date'];
-        $hour = date('H:i:s', strtotime($data['hour']));
+        $hour = gmdate('H:i:s', strtotime($data['hour']));
         $start = strtotime($date.' '.$hour);
 
         $calendar_id = $this->GetCalendar($roomid);
@@ -311,8 +313,8 @@ class Woo implements PluginInterface
                     $meta_args = [
                         '_booking_persons' => $data['people'],
                         '_booking_cost' => $data['price'],
-                        '_booking_start' => date('YmdHis', $start),
-                        '_booking_end' => date('YmdHis', $start + 60 * (int) $this->options['slot_length'])
+                        '_booking_start' => gmdate('YmdHis', $start),
+                        '_booking_end' => gmdate('YmdHis', $start + 60 * (int) $this->options['slot_length'])
                     ];
                     foreach ($meta_args as $key => $value) {
                         update_post_meta($booking->get_id(), $key, $value);
@@ -338,8 +340,8 @@ class Woo implements PluginInterface
             $this->plugin->AnonymizeData(
                 [
                     'roomid' => $this->options['calendar_'.$booking->get_product_id()],
-                    'date' => date('Y-m-d', $booking->get_start()),
-                    'hour' => date('H:i:s', $booking->get_start()),
+                    'date' => gmdate('Y-m-d', $booking->get_start()),
+                    'hour' => gmdate('H:i:s', $booking->get_start()),
                     'pricer' => 'API',
                     'price' => $booking->get_cost(),
                     'status' => $booking->get_status() === 'in-cart' ? 0 : 1,

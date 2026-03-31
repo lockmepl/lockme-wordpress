@@ -9,6 +9,8 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 class BookingPress implements PluginInterface
 {
     private array $options;
@@ -193,7 +195,7 @@ class BookingPress implements PluginInterface
                     'bookingpress_service_id' => $service_id,
                     'bookingpress_appointment_date' => $data['date'],
                     'bookingpress_appointment_time' => $data['hour'],
-                    'bookingpress_appointment_end_time' => date('H:i:s', $timestamp + $duration_seconds),
+                    'bookingpress_appointment_end_time' => gmdate('H:i:s', $timestamp + $duration_seconds),
                     'bookingpress_appointment_status' => '1', // 1 usually means approved/confirmed
                     'bookingpress_customer_name' => $data['name'] . ' ' . $surname,
                     'bookingpress_customer_email' => $email,
@@ -230,7 +232,7 @@ class BookingPress implements PluginInterface
                         'bookingpress_customer_id' => $customer_id,
                         'bookingpress_appointment_date' => $data['date'],
                         'bookingpress_appointment_time' => $data['hour'],
-                        'bookingpress_appointment_end_time' => date('H:i:s', $timestamp + $duration_seconds),
+                        'bookingpress_appointment_end_time' => gmdate('H:i:s', $timestamp + $duration_seconds),
                         'bookingpress_customer_name' => $data['name'] . ' ' . $surname,
                         'bookingpress_customer_email' => $email,
                         'bookingpress_customer_phone' => $data['phone'] ?? '',

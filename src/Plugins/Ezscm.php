@@ -8,6 +8,8 @@ use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
 use RuntimeException;
 
+defined('ABSPATH') or die('No script kiddies please!');
+
 class Ezscm implements PluginInterface
 {
     private array $options;
@@ -161,8 +163,8 @@ class Ezscm implements PluginInterface
             $this->plugin->AnonymizeData(
                 [
                     'roomid'=>$this->options['calendar_'.$res['s_id']] ?: $this->options['calendar_'.$res['details-s_id']],
-                    'date'=>date('Y-m-d', strtotime($res['date'])),
-                    'hour'=>date('H:i:s', strtotime($res['time_begin'])),
+                    'date'=>gmdate('Y-m-d', strtotime($res['date'])),
+                    'hour'=>gmdate('H:i:s', strtotime($res['time_begin'])),
                     'people'=>0,
                     'pricer'=> 'API',
                     'price'=>0,
@@ -323,7 +325,7 @@ class Ezscm implements PluginInterface
         $data = $message['data'];
         $roomid = $message['roomid'];
         $lockme_id = $message['reservationid'];
-        $hour = date('H:i', strtotime($data['hour']));
+        $hour = gmdate('H:i', strtotime($data['hour']));
 
         $calendar_id = $this->GetCalendar($roomid);
 

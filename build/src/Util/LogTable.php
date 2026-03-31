@@ -5,6 +5,7 @@ namespace LockmeDep\LockmeIntegration\Util;
 
 use LockmeDep\LockmeIntegration\Libs\WP_List_Table;
 use WP_Query;
+defined('ABSPATH') or die('No script kiddies please!');
 class LogTable extends WP_List_Table
 {
     public function get_columns(): array

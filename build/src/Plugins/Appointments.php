@@ -7,6 +7,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
 use RuntimeException;
+defined('ABSPATH') or die('No script kiddies please!');
 class Appointments implements PluginInterface
 {
     private array $options;
@@ -121,7 +122,7 @@ class Appointments implements PluginInterface
         [$service, $worker] = $this->GetService($roomid);
         switch ($message['action']) {
             case 'add':
-                $result = $wpdb->insert($wpdb->prefix . 'app_appointments', ['created' => date('Y-m-d H:i:s', $appointments->local_time), 'user' => 0, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'service' => $service->ID, 'worker' => $worker, 'price' => $data['price'], 'status' => $data['status'] ? 'paid' : 'pending', 'start' => date('Y-m-d H:i:s', $start), 'end' => date('Y-m-d H:i:s', $start + $service->duration * 60), 'note' => $data['comment'] . "\n\n#LOCKME!"]);
+                $result = $wpdb->insert($wpdb->prefix . 'app_appointments', ['created' => gmdate('Y-m-d H:i:s', $appointments->local_time), 'user' => 0, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'service' => $service->ID, 'worker' => $worker, 'price' => $data['price'], 'status' => $data['status'] ? 'paid' : 'pending', 'start' => gmdate('Y-m-d H:i:s', $start), 'end' => gmdate('Y-m-d H:i:s', $start + $service->duration * 60), 'note' => $data['comment'] . "\n\n#LOCKME!"]);
                 if ($result === \false) {
                     throw new RuntimeException('Error saving to database');
                 }
@@ -140,7 +141,7 @@ class Appointments implements PluginInterface
                     if (!$app) {
                         throw new RuntimeException('No appointment');
                     }
-                    $result = $wpdb->update($wpdb->prefix . 'app_appointments', ['user' => 0, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'service' => $service->ID, 'worker' => $worker, 'price' => $data['price'], 'status' => $data['status'] ? 'paid' : 'pending', 'start' => date('Y-m-d H:i:s', $start), 'end' => date('Y-m-d H:i:s', $start + $service->duration * 60), 'note' => $data['comment'] . "\n\n#LOCKME!"], ['ID' => $app->ID]);
+                    $result = $wpdb->update($wpdb->prefix . 'app_appointments', ['user' => 0, 'name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'service' => $service->ID, 'worker' => $worker, 'price' => $data['price'], 'status' => $data['status'] ? 'paid' : 'pending', 'start' => gmdate('Y-m-d H:i:s', $start), 'end' => gmdate('Y-m-d H:i:s', $start + $service->duration * 60), 'note' => $data['comment'] . "\n\n#LOCKME!"], ['ID' => $app->ID]);
                     if ($result === \false) {
                         throw new RuntimeException('Error saving to database');
                     }
@@ -176,8 +177,8 @@ class Appointments implements PluginInterface
     {
         global $appointments;
         $app = json_decode(json_encode(appointments_get_appointment($id)), \true);
-        $date = date('Y-m-d', strtotime($app['start']));
-        $hour = date('H:i:s', strtotime($app['start']));
+        $date = gmdate('Y-m-d', strtotime($app['start']));
+        $hour = gmdate('H:i:s', strtotime($app['start']));
         return $this->plugin->AnonymizeData(['roomid' => $this->options['service_' . $app['service'] . '_' . $app['worker']], 'date' => $date, 'hour' => $hour, 'people' => 0, 'pricer' => $appointments->get_service_name($app['service']), 'price' => $app['price'], 'name' => $app['name'], 'surname' => $app['surname'], 'email' => $app['email'], 'phone' => $app['phone'], 'comment' => $app['note'], 'status' => in_array($app['status'], ['confirmed', 'paid']), 'extid' => $id]);
     }
     private function Add($app_id, $app): void
