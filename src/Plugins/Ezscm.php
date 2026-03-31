@@ -6,6 +6,7 @@ use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
+use LockmeIntegration\Util\Request;
 use RuntimeException;
 
 defined('ABSPATH') or die('No script kiddies please!');
@@ -30,11 +31,12 @@ class Ezscm implements PluginInterface
         );
 
         if(($this->options['use'] ?? null) && $this->CheckDependencies()){
+            $requestAction = Request::postString('action');
             if (
-                $_POST['action'] === 'ezscm_frontend' ||
-                $_POST['action'] === 'ezscm_backend'
+                $requestAction === 'ezscm_frontend' ||
+                $requestAction === 'ezscm_backend'
             ) {
-                parse_str($_REQUEST['data'], $data);
+                parse_str(Request::requestString('data'), $data);
                 $action = $data['action'];
                 $id = $data['id'];
 
@@ -49,9 +51,9 @@ class Ezscm implements PluginInterface
             register_shutdown_function([$this, 'ShutDown']);
 
             add_action('init', function(){
-                if($_GET['ezscm_export'] ?? null){
+                if (Request::getBool('ezscm_export')) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=ezscm_plugin&ezscm_exported=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=ezscm_plugin&ezscm_exported=1');
                     exit;
                 }
             }, PHP_INT_MAX);
@@ -150,7 +152,7 @@ class Ezscm implements PluginInterface
             return;
         }
 
-        if($_GET['ezscm_exported'] ?? null){
+        if (Request::getBool('ezscm_exported')) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
             echo '</div>';
@@ -278,10 +280,10 @@ class Ezscm implements PluginInterface
     public function ShutDown(): void
     {
         if (
-            $_POST['action'] === 'ezscm_frontend' ||
-            $_POST['action'] === 'ezscm_backend'
+            Request::postString('action') === 'ezscm_frontend' ||
+            Request::postString('action') === 'ezscm_backend'
         ) {
-            parse_str($_REQUEST['data'], $data);
+            parse_str(Request::requestString('data'), $data);
             $action = $data['action'];
             $id = $data['id'];
 
@@ -353,7 +355,7 @@ class Ezscm implements PluginInterface
                         'private' => 0,
                         'time_begin' => $hour,
                         'data' => $sql_data,
-                        'ip' => $_SERVER['REMOTE_ADDR']
+                        'ip' => Request::serverString('REMOTE_ADDR')
                     ),
                     array(
                         '%d',
@@ -382,7 +384,7 @@ class Ezscm implements PluginInterface
                             'private' => 0,
                             'time_begin' => $hour,
                             'data' => $sql_data,
-                            'ip' => $_SERVER['REMOTE_ADDR']
+                            'ip' => Request::serverString('REMOTE_ADDR')
                         ),
                         array('e_id' => $data['extid']),
                         array(
@@ -418,7 +420,6 @@ class Ezscm implements PluginInterface
     public function ExportToLockMe(): void
     {
         global $wpdb;
-        set_time_limit(0);
 
         $rows = $wpdb->get_results(
             $wpdb->prepare(

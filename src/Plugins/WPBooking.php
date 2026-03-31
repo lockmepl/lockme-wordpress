@@ -6,6 +6,7 @@ use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
+use LockmeIntegration\Util\Request;
 use RuntimeException;
 use wp_booking_calendar_lists;
 use wp_booking_calendar_public_reservation;
@@ -20,43 +21,43 @@ class WPBooking implements PluginInterface
     private $delId;
     private $delData;
     private Plugin $plugin;
+    private string $wpbPath = '';
 
     public function __construct(Plugin $plugin)
     {
-        global $wpb_path;
-
         $this->plugin = $plugin;
         $this->options = get_option('lockme_wpb') ?: [];
 
         if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
-            $wpb_path = __DIR__.'/../../../../wp-booking-calendar/';
+            $this->wpbPath = __DIR__.'/../../../../wp-booking-calendar/';
             /** @noinspection PhpIncludeInspection */
-            include_once $wpb_path.'/admin/class/list.class.php';
+            include_once $this->wpbPath.'/admin/class/list.class.php';
 
             register_shutdown_function([$this, 'ShutDown']);
 
-            $script = preg_replace("/^.*wp-booking-calendar\//", '', $_SERVER['SCRIPT_FILENAME']);
+            $script = preg_replace("/^.*wp-booking-calendar\//", '', Request::serverString('SCRIPT_FILENAME'));
             if ($script === 'admin/ajax/delReservationItem.php') {
                 /** @noinspection PhpIncludeInspection */
-                include_once $wpb_path.'public/class/reservation.class.php';
-                $this->delId = $_REQUEST['item_id'];
+                include_once $this->wpbPath.'public/class/reservation.class.php';
+                $this->delId = Request::requestInt('item_id');
                 $bookingReservationObj = new wp_booking_calendar_public_reservation;
                 $reses = $bookingReservationObj->getReservationsDetails(md5($this->delId));
                 $this->delData = $this->AppData($this->delId, $reses[$this->delId]);
             }
 
             add_action('init', function () {
-                if (isset($_POST['operation']) && $_POST['operation'] === 'delReservations' && is_admin()) {
-                    foreach ($_POST['reservations'] as $id) {
+                if (Request::postString('operation') === 'delReservations' && is_admin()) {
+                    foreach (Request::postArray('reservations') as $id) {
+                        $id = absint((int) $id);
                         if ($id) {
                             $this->Delete($id);
                         }
                     }
                 }
 
-                if ($_GET['wpb_export'] ?? null) {
+                if (Request::getBool('wpb_export')) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=wp_booking_plugin&wpb_exported=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=wp_booking_plugin&wpb_exported=1');
                     exit;
                 }
             }, PHP_INT_MAX);
@@ -111,11 +112,8 @@ class WPBooking implements PluginInterface
 
     public function ExportToLockMe(): void
     {
-        global $wpb_path;
-        set_time_limit(0);
-
         /** @noinspection PhpIncludeInspection */
-        include_once $wpb_path.'public/class/reservation.class.php';
+        include_once $this->wpbPath.'public/class/reservation.class.php';
 
         $bookingListObj = new wp_booking_calendar_lists();
         $calendars = $bookingListObj->getCalendarsList('');
@@ -228,7 +226,7 @@ class WPBooking implements PluginInterface
 //     var_dump($data);
 //     var_dump($this->Add($data));
 
-        if ($_GET['wpb_exported'] ?? null) {
+        if (Request::getBool('wpb_exported')) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
             echo '</div>';
@@ -241,7 +239,7 @@ class WPBooking implements PluginInterface
     {
         global $bookingReservationObj, $listReservations, $bookingSlotsObj;
 
-        $script = preg_replace("/^.*wp-booking-calendar\//", '', $_SERVER['SCRIPT_FILENAME']);
+        $script = preg_replace("/^.*wp-booking-calendar\//", '', Request::serverString('SCRIPT_FILENAME'));
         switch ($script) {
             //Public
             case 'public/ajax/doReservation.php':
@@ -252,7 +250,7 @@ class WPBooking implements PluginInterface
                 break;
             case 'public/confirm.php':
             case 'public/cancel.php':
-                $reses = $bookingReservationObj->getReservationsDetails($_GET['reservations']);
+                $reses = $bookingReservationObj->getReservationsDetails(Request::getString('reservations'));
                 foreach ($reses as $id => $data) {
                     $this->Update($id, $data);
                 }
@@ -261,16 +259,16 @@ class WPBooking implements PluginInterface
             //Admin
             case 'admin/ajax/confirmReservation.php':
             case 'admin/ajax/unconfirmReservation.php':
-                $item_id = $_REQUEST['reservation_id'];
+                $item_id = Request::requestInt('reservation_id');
                 $bookingReservationObj->setReservation($item_id);
                 $bookingSlotsObj->setSlot($bookingReservationObj->getReservationSlotId());
-                $this->Update($_REQUEST['reservation_id'], $this->Obj2Data($bookingReservationObj, $bookingSlotsObj));
+                $this->Update($item_id, $this->Obj2Data($bookingReservationObj, $bookingSlotsObj));
                 break;
             case 'admin/ajax/cancelUserReservationItem.php':
-                $item_id = $_REQUEST['item_id'];
+                $item_id = Request::requestInt('item_id');
                 $bookingReservationObj->setReservation($item_id);
                 $bookingSlotsObj->setSlot($bookingReservationObj->getReservationSlotId());
-                $this->Update($_REQUEST['reservation_id'], $this->Obj2Data($bookingReservationObj, $bookingSlotsObj));
+                $this->Update(Request::requestInt('reservation_id'), $this->Obj2Data($bookingReservationObj, $bookingSlotsObj));
                 break;
             case 'admin/ajax/delReservationItem.php':
                 $this->Delete($this->delId, $this->delData);

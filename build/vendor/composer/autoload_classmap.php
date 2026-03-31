@@ -136,6 +136,7 @@ return array(
     'LockmeDep\\LockmeIntegration\\Plugins\\WPDevArt' => $baseDir . '/src/Plugins/WPDevArt.php',
     'LockmeDep\\LockmeIntegration\\Plugins\\Woo' => $baseDir . '/src/Plugins/Woo.php',
     'LockmeDep\\LockmeIntegration\\Util\\LogTable' => $baseDir . '/src/Util/LogTable.php',
+    'LockmeDep\\LockmeIntegration\\Util\\Request' => $baseDir . '/src/Util/Request.php',
     'LockmeDep\\Lockme\\OAuth2\\Client\\Provider\\Exception\\LockmeIdentityProviderException' => $vendorDir . '/lustmored/oauth2-lockme/src/Provider/Exception/LockmeIdentityProviderException.php',
     'LockmeDep\\Lockme\\OAuth2\\Client\\Provider\\Lockme' => $vendorDir . '/lustmored/oauth2-lockme/src/Provider/Lockme.php',
     'LockmeDep\\Lockme\\OAuth2\\Client\\Provider\\LockmeUser' => $vendorDir . '/lustmored/oauth2-lockme/src/Provider/LockmeUser.php',

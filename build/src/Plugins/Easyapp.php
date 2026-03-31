@@ -10,6 +10,7 @@ use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
+use LockmeDep\LockmeIntegration\Util\Request;
 use RuntimeException;
 defined('ABSPATH') or die('No script kiddies please!');
 class Easyapp implements PluginInterface
@@ -25,14 +26,16 @@ class Easyapp implements PluginInterface
         $this->options = get_option('lockme_easyapp') ?: [];
         if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
             $this->models = new EADBModels($wpdb, new EATableColumns(), []);
-            if (isset($_GET['action'], $_GET['id']) && $_GET['action'] === 'ea_appointment' && $_GET['id']) {
-                $this->resdata = $this->AppData($_GET['id']);
+            $action = Request::getString('action');
+            $id = Request::getInt('id');
+            if ($action === 'ea_appointment' && $id) {
+                $this->resdata = $this->AppData($id);
             }
             register_shutdown_function([$this, 'ShutDown']);
             add_action('init', function () {
-                if ($_GET['easyapp_export'] ?? null) {
+                if (Request::getBool('easyapp_export')) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=easyapp_plugin&easyapp_exported=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=easyapp_plugin&easyapp_exported=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -49,7 +52,6 @@ class Easyapp implements PluginInterface
     }
     public function ExportToLockMe(): void
     {
-        set_time_limit(0);
         $start = new DateTime();
         $end = new DateTime();
         $end->add(new DateInterval('P1Y'));
@@ -103,7 +105,7 @@ class Easyapp implements PluginInterface
             echo "<p>You don't have required plugin</p>";
             return;
         }
-        if ($_GET['easyapp_exported'] ?? null) {
+        if (Request::getBool('easyapp_exported')) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
             echo '</div>';
@@ -123,23 +125,25 @@ class Easyapp implements PluginInterface
     {
         global $wpdb;
         if (defined('DOING_AJAX') && DOING_AJAX) {
-            switch ($_GET['action']) {
+            $action = Request::getString('action');
+            switch ($action) {
                 case 'ea_res_appointment':
                 case 'nopriv_ea_res_appointment':
-                    $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s", $_GET['location'], $_GET['service'], $_GET['worker'], $_GET['date'], gmdate('H:i:s', strtotime($_GET['start']))), ARRAY_A);
+                    $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s", Request::getInt('location'), Request::getInt('service'), Request::getInt('worker'), Request::getString('date'), gmdate('H:i:s', strtotime(Request::getString('start')))), ARRAY_A);
                     if ($res) {
                         $this->Add($res);
                     }
                     break;
                 case 'ea_cancel_appointment':
                 case 'nopriv_ea_cancel_appointment':
-                    $this->Delete($_GET['id']);
+                    $this->Delete(Request::getInt('id'));
                     break;
                 case 'ea_appointment':
                     $api = $this->plugin->GetApi();
-                    switch ($_GET['_method']) {
+                    $method = strtoupper(Request::getString('_method'));
+                    switch ($method) {
                         case 'PUT':
-                            $this->AddEditReservation($_GET['id']);
+                            $this->AddEditReservation(Request::getInt('id'));
                             break;
                         case 'DELETE':
                             try {
@@ -149,8 +153,8 @@ class Easyapp implements PluginInterface
                             break;
                         default:
                             $input = json_decode(file_get_contents('php://input'), \true);
-                            if (!$_GET['_method'] && $input['date']) {
-                                $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s", $input['location'], $input['service'], $input['worker'], $input['date'], gmdate('H:i:s', strtotime($input['start']))), ARRAY_A);
+                            if ($method === '' && ($input['date'] ?? null)) {
+                                $res = $wpdb->get_row($wpdb->prepare("select `id` from {$wpdb->prefix}ea_appointments where `location` = %d and `service` = %d and `worker` = %d and `date` = %s and `start` = %s", absint((int) ($input['location'] ?? 0)), absint((int) ($input['service'] ?? 0)), absint((int) ($input['worker'] ?? 0)), sanitize_text_field((string) ($input['date'] ?? '')), gmdate('H:i:s', strtotime((string) ($input['start'] ?? '')))), ARRAY_A);
                                 if ($res) {
                                     $this->Add($res);
                                 }

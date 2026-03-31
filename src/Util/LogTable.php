@@ -56,6 +56,7 @@ class LogTable extends \WP_List_Table
         $page = ($this->get_pagenum() - 1) * $items;
 
         // query output_type will be an associative array with ARRAY_A.
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Admin log table requires direct SQL pagination.
         $this->items = $wpdb->get_results(
             $wpdb->prepare(
                 'SELECT * FROM %i ORDER BY id DESC LIMIT %d OFFSET %d',
@@ -66,6 +67,7 @@ class LogTable extends \WP_List_Table
             ARRAY_A
         );
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Admin log table requires direct SQL aggregation.
         $total = $wpdb->get_var(
             $wpdb->prepare(
                 'SELECT count(*) FROM %i',

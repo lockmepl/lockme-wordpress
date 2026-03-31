@@ -209,6 +209,7 @@ class ComposerStaticInitd4cbf4ed8610848fdd2afdd92decc223
         'LockmeDep\\LockmeIntegration\\Plugins\\WPDevArt' => __DIR__ . '/../..' . '/src/Plugins/WPDevArt.php',
         'LockmeDep\\LockmeIntegration\\Plugins\\Woo' => __DIR__ . '/../..' . '/src/Plugins/Woo.php',
         'LockmeDep\\LockmeIntegration\\Util\\LogTable' => __DIR__ . '/../..' . '/src/Util/LogTable.php',
+        'LockmeDep\\LockmeIntegration\\Util\\Request' => __DIR__ . '/../..' . '/src/Util/Request.php',
         'LockmeDep\\Lockme\\OAuth2\\Client\\Provider\\Exception\\LockmeIdentityProviderException' => __DIR__ . '/..' . '/lustmored/oauth2-lockme/src/Provider/Exception/LockmeIdentityProviderException.php',
         'LockmeDep\\Lockme\\OAuth2\\Client\\Provider\\Lockme' => __DIR__ . '/..' . '/lustmored/oauth2-lockme/src/Provider/Lockme.php',
         'LockmeDep\\Lockme\\OAuth2\\Client\\Provider\\LockmeUser' => __DIR__ . '/..' . '/lustmored/oauth2-lockme/src/Provider/LockmeUser.php',

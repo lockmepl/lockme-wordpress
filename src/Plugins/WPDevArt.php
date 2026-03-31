@@ -6,6 +6,7 @@ use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
+use LockmeIntegration\Util\Request;
 use ReflectionObject;
 use RuntimeException;
 use wpdevart_bc_BookingCalendar;
@@ -31,16 +32,21 @@ class WPDevArt implements PluginInterface
         $this->options = get_option('lockme_wpdevart') ?: [];
 
         if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
-            if ($_GET['page'] === 'wpdevart-reservations' && $_POST['task'] && $_POST['id'] && is_admin()) {
+            if (
+                Request::getString('page') === 'wpdevart-reservations'
+                && Request::postString('task') !== ''
+                && Request::postInt('id') > 0
+                && is_admin()
+            ) {
                 $this->resdata = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$wpdb->prefix.'wpdevart_reservations WHERE `id`=%d',
-                    $_POST['id']), ARRAY_A);
+                    Request::postInt('id')), ARRAY_A);
             }
             register_shutdown_function([$this, 'ShutDown']);
 
             add_action('init', function () {
-                if ($_GET['wpdevart_export'] ?? null) {
+                if (Request::getBool('wpdevart_export')) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=wpdevart_plugin&wpdevart_exported=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=wpdevart_plugin&wpdevart_exported=1');
                     exit;
                 }
             }, PHP_INT_MAX);
@@ -50,7 +56,6 @@ class WPDevArt implements PluginInterface
     public function ExportToLockMe(): void
     {
         global $wpdb;
-        set_time_limit(0);
 
         $rows = $wpdb->get_results(
             $wpdb->prepare(
@@ -208,7 +213,7 @@ class WPDevArt implements PluginInterface
             return;
         }
 
-        if ($_GET['wpdevart_exported'] ?? null) {
+        if (Request::getBool('wpdevart_exported')) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
             echo '</div>';
@@ -219,8 +224,8 @@ class WPDevArt implements PluginInterface
 
     public function ShutDown(): void
     {
-        if (isset($_GET['page']) && $_GET['page'] === 'wpdevart-reservations' && $_POST['task'] && is_admin()) {
-            switch ($_POST['task']) {
+        if (Request::getString('page') === 'wpdevart-reservations' && Request::postString('task') !== '' && is_admin()) {
+            switch (Request::postString('task')) {
                 case 'approve':
                     $this->AddEditReservation($this->resdata);
                     break;

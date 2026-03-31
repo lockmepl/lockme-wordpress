@@ -13,6 +13,7 @@ use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
+use LockmeIntegration\Util\Request;
 use RuntimeException;
 use function method_exists;
 
@@ -34,13 +35,13 @@ class Bookly implements PluginInterface
 
             add_action('init', function () {
                 if (is_admin() && wp_doing_ajax()) {
-                    switch ($_POST['action'] ?? null) {
+                    switch (Request::postString('action')) {
                         case 'bookly_delete_appointment':
-                            $this->ajaxdata = $this->AppData($_POST['appointment_id']);
+                            $this->ajaxdata = $this->AppData(Request::postInt('appointment_id'));
                             break;
                         case 'bookly_delete_customer_appointments':
                             $this->ajaxdata = [];
-                            foreach ($_POST['data'] as $caid) {
+                            foreach (Request::postArray('data') as $caid) {
                                 $info = Appointment::query('a')
                                                    ->select('a.id, SUM( ca.number_of_persons ) AS total_number_of_persons, a.staff_id, a.service_id, a.start_date, a.end_date, a.internal_note')
                                                    ->leftJoin('CustomerAppointment', 'ca',
@@ -52,9 +53,9 @@ class Bookly implements PluginInterface
                             break;
                     }
                 }
-                if ($_GET['bookly_export'] ?? null) {
+                if (Request::getBool('bookly_export')) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=bookly_plugin&bookly_exported=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=bookly_plugin&bookly_exported=1');
                     exit;
                 }
             }, PHP_INT_MAX);
@@ -150,7 +151,7 @@ class Bookly implements PluginInterface
             return;
         }
 
-        if ($_GET['bookly_exported'] ?? null) {
+        if (Request::getBool('bookly_exported')) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
             echo '</div>';
@@ -162,12 +163,12 @@ class Bookly implements PluginInterface
     public function Ajax($msg)
     {
         $data = json_decode(ob_get_contents(), true);
-        switch ($_REQUEST['action']) {
+        switch (Request::requestString('action')) {
             case 'bookly_save_appointment_form':
                 $this->AddEditReservation($data['data']['id']);
                 break;
             case 'bookly_save_appointment':
-                $form_id = $_REQUEST['form_id'];
+                $form_id = Request::requestInt('form_id');
                 $userData = new UserBookingData($form_id);
                 $userData->load();
                 foreach($userData->cart->getItems() as $item) {
@@ -191,13 +192,16 @@ class Bookly implements PluginInterface
                 }
                 break;
             case 'bookly_delete_appointment':
-                $this->Delete($_POST['appointment_id'], $this->ajaxdata);
+                $this->Delete(Request::postInt('appointment_id'), $this->ajaxdata);
                 break;
             case 'bookly_delete_customer_appointments':
                 $this->DeleteBatch();
                 break;
             case 'bookly_render_complete':
-                foreach ((array)$_SESSION['bookly']['forms'][$_REQUEST['form_id']]['booking_numbers'] as $id) {
+                $formId = Request::requestString('form_id');
+                // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- Session values are internal to Bookly cart flow.
+                $bookingNumbers = (array) ($_SESSION['bookly']['forms'][$formId]['booking_numbers'] ?? []);
+                foreach ($bookingNumbers as $id) {
                     $this->AddEditReservation($id);
                 }
                 break;

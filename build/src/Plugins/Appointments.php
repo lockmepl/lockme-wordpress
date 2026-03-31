@@ -6,6 +6,7 @@ use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
+use LockmeDep\LockmeIntegration\Util\Request;
 use RuntimeException;
 defined('ABSPATH') or die('No script kiddies please!');
 class Appointments implements PluginInterface
@@ -21,9 +22,9 @@ class Appointments implements PluginInterface
             add_action('app-appointment-inline_edit-after_save', [$this, 'AddEditReservation'], 10, 2);
             add_action('app-appointments-appointment_cancelled', [$this, 'RemoveReservation'], 10, 1);
             add_action('init', function () {
-                if ($_GET['app_export'] ?? null) {
+                if (Request::getBool('app_export')) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=appointments_plugin&app_exported=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=appointments_plugin&app_exported=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -87,7 +88,7 @@ class Appointments implements PluginInterface
         }
         //     $sql = "SELECT * FROM {$wpdb->prefix}app_appointments WHERE `start` > now() ORDER BY ID";
         //     $rows = $wpdb->get_results($sql);
-        if ($_GET['app_exported']) {
+        if (Request::getBool('app_exported')) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
             echo '</div>';

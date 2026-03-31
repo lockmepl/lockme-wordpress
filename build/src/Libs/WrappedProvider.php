@@ -23,6 +23,7 @@ class WrappedProvider extends Lockme
                 }
             }
             $data = ['method' => $method, 'uri' => $url, 'params' => json_encode($body, \JSON_PRETTY_PRINT), 'response' => is_string($response) ? $response : json_encode($response, \JSON_PRETTY_PRINT)];
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Error log persistence requires direct insert.
             $wpdb->insert($wpdb->prefix . 'lockme_log', $data);
             throw $exception;
         }

@@ -6,6 +6,7 @@ use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
+use LockmeDep\LockmeIntegration\Util\Request;
 use RuntimeException;
 defined('ABSPATH') or die('No script kiddies please!');
 class Ezscm implements PluginInterface
@@ -21,8 +22,9 @@ class Ezscm implements PluginInterface
         $this->options = get_option('lockme_ezscm') ?: [];
         $this->tables = array('entries' => "{$wpdb->prefix}ezscm_entries", 'schedules' => "{$wpdb->prefix}ezscm_schedules", 'settings' => "{$wpdb->prefix}ezscm_settings", 'settings_schedule' => "{$wpdb->prefix}ezscm_settings_schedule");
         if (($this->options['use'] ?? null) && $this->CheckDependencies()) {
-            if ($_POST['action'] === 'ezscm_frontend' || $_POST['action'] === 'ezscm_backend') {
-                parse_str($_REQUEST['data'], $data);
+            $requestAction = Request::postString('action');
+            if ($requestAction === 'ezscm_frontend' || $requestAction === 'ezscm_backend') {
+                parse_str(Request::requestString('data'), $data);
                 $action = $data['action'];
                 $id = $data['id'];
                 if ($action === 'entry_delete') {
@@ -31,9 +33,9 @@ class Ezscm implements PluginInterface
             }
             register_shutdown_function([$this, 'ShutDown']);
             add_action('init', function () {
-                if ($_GET['ezscm_export'] ?? null) {
+                if (Request::getBool('ezscm_export')) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=ezscm_plugin&ezscm_exported=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=ezscm_plugin&ezscm_exported=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -90,7 +92,7 @@ class Ezscm implements PluginInterface
             echo "<p>You don't have required plugin</p>";
             return;
         }
-        if ($_GET['ezscm_exported'] ?? null) {
+        if (Request::getBool('ezscm_exported')) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
             echo '</div>';
@@ -172,8 +174,8 @@ class Ezscm implements PluginInterface
     }
     public function ShutDown(): void
     {
-        if ($_POST['action'] === 'ezscm_frontend' || $_POST['action'] === 'ezscm_backend') {
-            parse_str($_REQUEST['data'], $data);
+        if (Request::postString('action') === 'ezscm_frontend' || Request::postString('action') === 'ezscm_backend') {
+            parse_str(Request::requestString('data'), $data);
             $action = $data['action'];
             $id = $data['id'];
             switch ($action) {
@@ -216,7 +218,7 @@ class Ezscm implements PluginInterface
         $sql_data = json_encode($form);
         switch ($message['action']) {
             case 'add':
-                $wpdb->insert($this->tables['entries'], array('s_id' => $calendar_id, 'date' => $data['date'], 'private' => 0, 'time_begin' => $hour, 'data' => $sql_data, 'ip' => $_SERVER['REMOTE_ADDR']), array('%d', '%s', '%d', '%s', '%s', '%s'));
+                $wpdb->insert($this->tables['entries'], array('s_id' => $calendar_id, 'date' => $data['date'], 'private' => 0, 'time_begin' => $hour, 'data' => $sql_data, 'ip' => Request::serverString('REMOTE_ADDR')), array('%d', '%s', '%d', '%s', '%s', '%s'));
                 $id = $wpdb->insert_id;
                 try {
                     $api = $this->plugin->GetApi();
@@ -227,7 +229,7 @@ class Ezscm implements PluginInterface
                 break;
             case 'edit':
                 if ($data['extid']) {
-                    $wpdb->update($this->tables['entries'], array('s_id' => $calendar_id, 'date' => $data['date'], 'private' => 0, 'time_begin' => $hour, 'data' => $sql_data, 'ip' => $_SERVER['REMOTE_ADDR']), array('e_id' => $data['extid']), array('%d', '%s', '%d', '%s', '%s', '%s'));
+                    $wpdb->update($this->tables['entries'], array('s_id' => $calendar_id, 'date' => $data['date'], 'private' => 0, 'time_begin' => $hour, 'data' => $sql_data, 'ip' => Request::serverString('REMOTE_ADDR')), array('e_id' => $data['extid']), array('%d', '%s', '%d', '%s', '%s', '%s'));
                     return \true;
                 }
                 break;
@@ -243,7 +245,6 @@ class Ezscm implements PluginInterface
     public function ExportToLockMe(): void
     {
         global $wpdb;
-        set_time_limit(0);
         $rows = $wpdb->get_results($wpdb->prepare('SELECT * FROM %i WHERE date>=curdate() ORDER BY e_id', $this->tables['entries']), ARRAY_A);
         foreach ($rows as $row) {
             $this->Update($row['e_id'], $row);

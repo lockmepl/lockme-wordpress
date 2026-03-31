@@ -8,6 +8,7 @@ use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
+use LockmeIntegration\Util\Request;
 
 defined('ABSPATH') or die('No script kiddies please!');
 
@@ -29,9 +30,9 @@ class BookingPress implements PluginInterface
             add_action('bookingpress_before_delete_appointment', [$this, 'DeleteReservation'], 10, 1);
 
             add_action('init', function () {
-                if ($_GET['bookingpress_export'] ?? null) {
+                if (Request::getBool('bookingpress_export')) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=booking_press_plugin&bookingpress_exported=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=booking_press_plugin&bookingpress_exported=1');
                     exit;
                 }
             }, PHP_INT_MAX);
@@ -135,7 +136,7 @@ class BookingPress implements PluginInterface
             return;
         }
 
-        if ($_GET['bookingpress_exported'] ?? null) {
+        if (Request::getBool('bookingpress_exported')) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
             echo '</div>';

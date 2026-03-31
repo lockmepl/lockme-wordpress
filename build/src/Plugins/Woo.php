@@ -6,6 +6,7 @@ use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
+use LockmeDep\LockmeIntegration\Util\Request;
 use RuntimeException;
 use WC_Booking;
 use WP_Query;
@@ -30,9 +31,9 @@ class Woo implements PluginInterface
             add_action('before_delete_post', [$this, 'Delete'], 5, 1);
             add_action('post_updated', [$this, 'AddEditReservation']);
             add_action('init', function () {
-                if ($_GET['woo_export'] ?? null) {
+                if (Request::getBool('woo_export')) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=woo_plugin&woo_exported=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=woo_plugin&woo_exported=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -102,7 +103,7 @@ class Woo implements PluginInterface
         }
         //     $booking = new WC_Booking(2918);
         //     var_dump(get_post_meta(2918));
-        if ($_GET['woo_exported'] ?? null) {
+        if (Request::getBool('woo_exported')) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
             echo '</div>';

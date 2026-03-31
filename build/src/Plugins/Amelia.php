@@ -30,6 +30,7 @@ use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
+use LockmeDep\LockmeIntegration\Util\Request;
 use WP_Query;
 defined('ABSPATH') or die('No script kiddies please!');
 class Amelia implements PluginInterface
@@ -48,9 +49,9 @@ class Amelia implements PluginInterface
             add_action('amelia_after_appointment_updated', [$this, 'AddEditAppointment']);
             add_action('amelia_after_appointment_status_updated', [$this, 'AddEditAppointment']);
             add_action('init', function () {
-                if ($_GET['amelia_export'] ?? null) {
+                if (Request::getBool('amelia_export')) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=amelia_plugin&amelia_exported=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=amelia_plugin&amelia_exported=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -188,7 +189,7 @@ class Amelia implements PluginInterface
             echo "<p>You don't have required plugin</p>";
             return;
         }
-        if ($_GET['amelia_exported'] ?? null) {
+        if (Request::getBool('amelia_exported')) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
             echo '</div>';

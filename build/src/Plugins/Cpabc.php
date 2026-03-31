@@ -6,6 +6,7 @@ use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
+use LockmeDep\LockmeIntegration\Util\Request;
 use RuntimeException;
 defined('ABSPATH') or die('No script kiddies please!');
 class Cpabc implements PluginInterface
@@ -20,9 +21,9 @@ class Cpabc implements PluginInterface
             register_shutdown_function([$this, 'ShutDown']);
             add_action('init', function () {
                 $this->CheckAdminActions();
-                if ($_GET['cpabc_export'] ?? null) {
+                if (Request::getBool('cpabc_export')) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=cpabc_plugin&cpabc_exported=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=cpabc_plugin&cpabc_exported=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -83,7 +84,7 @@ class Cpabc implements PluginInterface
         //     var_dump($res);
         //     var_dump($this->AddEditReservation($row['id']));
         //     $this->Delete(3010);
-        if ($_GET['cpabc_exported'] ?? null) {
+        if (Request::getBool('cpabc_exported')) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
             echo '</div>';
@@ -163,38 +164,41 @@ class Cpabc implements PluginInterface
     {
         global $wpdb;
         //Add from website
-        if ($_POST['cpabc_item'] && $_POST['dateAndTime']) {
-            foreach ($_POST['dateAndTime'] as $dat) {
-                $res = $wpdb->get_row($wpdb->prepare('SELECT * FROM %i a JOIN %i b ON (b.reference = a.id) WHERE `calendar` = %d AND `booked_time_unformatted` = %s', CPABC_APPOINTMENTS_TABLE_NAME, CPABC_TDEAPP_CALENDAR_DATA_TABLE, $_POST['cpabc_item'], $dat), ARRAY_A);
+        $cpabcItem = Request::postInt('cpabc_item');
+        $dateAndTime = Request::postArray('dateAndTime');
+        if ($cpabcItem && $dateAndTime) {
+            foreach ($dateAndTime as $dat) {
+                $res = $wpdb->get_row($wpdb->prepare('SELECT * FROM %i a JOIN %i b ON (b.reference = a.id) WHERE `calendar` = %d AND `booked_time_unformatted` = %s', CPABC_APPOINTMENTS_TABLE_NAME, CPABC_TDEAPP_CALENDAR_DATA_TABLE, $cpabcItem, sanitize_text_field((string) $dat)), ARRAY_A);
                 if ($res) {
                     $this->AddEditReservation($res['id']);
                 }
             }
         }
         //Admin
-        if ($_GET['page'] === 'cpabc_appointments' && is_admin()) {
-            if (isset($_GET['nocancel']) && $_GET['nocancel'] != '') {
-                $this->AddEditReservation($_GET['nocancel']);
-            } else if ($_GET['edit'] && $_POST) {
-                $this->AddEditReservation($_GET['edit']);
+        if (Request::getString('page') === 'cpabc_appointments' && is_admin()) {
+            if (Request::getString('nocancel') !== '') {
+                $this->AddEditReservation(Request::getInt('nocancel'));
+            } elseif (Request::getString('edit') !== '' && Request::hasPost()) {
+                $this->AddEditReservation(Request::getInt('edit'));
             }
         }
     }
     public function CheckAdminActions(): void
     {
         //Admin
-        if ($_GET['page'] === 'cpabc_appointments' && is_admin()) {
-            if (isset($_GET['delmark']) && $_GET['delmark'] != '') {
+        if (Request::getString('page') === 'cpabc_appointments' && is_admin()) {
+            if (Request::getString('delmark') !== '') {
                 for ($i = 0; $i <= 50; $i++) {
                     $index = 'c' . $i;
-                    if (isset($_GET[$index]) && $_GET[$index] != '') {
-                        $this->Delete($_GET[$index], \true);
+                    $value = Request::getInt($index);
+                    if ($value) {
+                        $this->Delete($value, \true);
                     }
                 }
-            } else if (isset($_GET['ld']) && $_GET['ld'] != '') {
-                $this->Delete($_GET['ld'], \true);
-            } else if (isset($_GET['cancel']) && $_GET['cancel'] != '') {
-                $this->Delete($_GET['cancel'], \true);
+            } elseif (Request::getString('ld') !== '') {
+                $this->Delete(Request::getInt('ld'), \true);
+            } elseif (Request::getString('cancel') !== '') {
+                $this->Delete(Request::getInt('cancel'), \true);
             }
         }
     }

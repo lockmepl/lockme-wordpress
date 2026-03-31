@@ -20,6 +20,7 @@ use LockmeIntegration\Plugins\Woo;
 use LockmeIntegration\Plugins\WPBooking;
 use LockmeIntegration\Plugins\WPDevArt;
 use LockmeIntegration\Util\LogTable;
+use LockmeIntegration\Util\Request;
 
 include_once ABSPATH.'wp-admin/includes/plugin.php';
 
@@ -78,7 +79,7 @@ class Plugin
         }
 
         if (is_admin()) {
-            $this->tab = $_GET['tab'] ?? 'api_options';
+            $this->tab = Request::getString('tab', 'api_options');
 
             add_action('admin_menu', array(&$this, 'admin_init'));
             add_action('admin_init', array(&$this, 'admin_register_settings'));
@@ -88,8 +89,8 @@ class Plugin
     public function api_call(): void
     {
         // Check for OAuth2 state
-        $code = $_GET['code'] ?? null;
-        $state = $_GET['state'] ?? null;
+        $code = Request::getString('code');
+        $state = Request::getString('state');
         if ($code && $state) {
             try {
                 $api = $this->GetApi();
@@ -99,16 +100,16 @@ class Plugin
                     update_option('lockme_oauth2_token', $token, false);
                 }
                 delete_option('lockme_oauth2_state');
-                wp_redirect('options-general.php?page=lockme_integration&tab=api_options');
+                wp_safe_redirect('options-general.php?page=lockme_integration&tab=api_options');
                 exit;
             } catch (Exception $e) {
-                wp_redirect('options-general.php?page=lockme_integration&tab=api_options');
+                wp_safe_redirect('options-general.php?page=lockme_integration&tab=api_options');
                 exit;
             }
         }
 
-        if(isset($_POST['oauth_token'])){
-            $token = stripslashes($_POST['oauth_token']);
+        $token = Request::postRaw('oauth_token');
+        if ($token !== '') {
             $api = $this->GetApi();
             try {
                 $api->loadAccessToken(
@@ -120,7 +121,7 @@ class Plugin
         }
 
         // Proceed with API callback
-        $api = $_GET['lockme_api'] ?? null;
+        $api = Request::getString('lockme_api');
         if ($api !== $this->url_key) {
             return;
         }
@@ -128,7 +129,7 @@ class Plugin
         define('LOCKME_MESSAGING', 1);
 
         try {
-            $messageid = $_SERVER['HTTP_X_MESSAGEID'];
+            $messageid = Request::serverString('HTTP_X_MESSAGEID');
             $api = $this->GetApi();
             $message = $api->GetMessage((int) $messageid);
 

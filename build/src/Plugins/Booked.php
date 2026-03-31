@@ -6,6 +6,7 @@ use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeDep\LockmeIntegration\Plugin;
 use LockmeDep\LockmeIntegration\PluginInterface;
+use LockmeDep\LockmeIntegration\Util\Request;
 use RuntimeException;
 use WP_Query;
 defined('ABSPATH') or die('No script kiddies please!');
@@ -26,9 +27,9 @@ class Booked implements PluginInterface
                 $this->AddEditReservation($post_id);
             }, 10, 2);
             add_action('init', function () {
-                if ($_GET['booked_export'] ?? null) {
+                if (Request::getBool('booked_export')) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=booked_plugin&booked_exported=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=booked_plugin&booked_exported=1');
                     exit;
                 }
             }, \PHP_INT_MAX);
@@ -98,7 +99,7 @@ class Booked implements PluginInterface
         //     $timeslot = get_post_meta($appt_id);
         //
         //     var_dump($timeslot);
-        if ($_GET['booked_exported'] ?? null) {
+        if (Request::getBool('booked_exported')) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
             echo '</div>';
@@ -167,6 +168,7 @@ class Booked implements PluginInterface
         }
         switch ($message['action']) {
             case 'add':
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Hook name owned by external Booked plugin.
                 $post = apply_filters('booked_new_appointment_args', [
                     'post_title' => date_i18n($date_format, $date) . ' @ ' . date_i18n($time_format, $date) . ' (User: Guest)',
                     'post_content' => '',
@@ -197,6 +199,7 @@ class Booked implements PluginInterface
             case 'edit':
                 if ($data['extid']) {
                     $row_id = $data['extid'];
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Hook name owned by external Booked plugin.
                     $post = apply_filters('booked_new_appointment_args', [
                         'ID' => $row_id,
                         'post_title' => date_i18n($date_format, $date) . ' @ ' . date_i18n($time_format, $date) . ' (User: Guest)',

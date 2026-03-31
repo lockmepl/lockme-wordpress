@@ -6,6 +6,7 @@ use Exception;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use LockmeIntegration\Plugin;
 use LockmeIntegration\PluginInterface;
+use LockmeIntegration\Util\Request;
 use RuntimeException;
 
 defined('ABSPATH') or die('No script kiddies please!');
@@ -32,15 +33,15 @@ class Dopbsp implements PluginInterface
             register_shutdown_function([$this, 'ShutDown']);
 
             add_action('init', function () {
-                if ($_GET['dopbsp_export'] ?? null) {
+                if (Request::getBool('dopbsp_export')) {
                     $this->ExportToLockMe();
-                    wp_redirect('?page=lockme_integration&tab=dopbsp_plugin&dopbsp_exported=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=dopbsp_plugin&dopbsp_exported=1');
                     exit;
                 }
 
-                if ($_GET['dopbsp_fix'] ?? null) {
+                if (Request::getBool('dopbsp_fix')) {
                     $this->FixSettings();
-                    wp_redirect('?page=lockme_integration&tab=dopbsp_plugin&dopbsp_fixed=1');
+                    wp_safe_redirect('?page=lockme_integration&tab=dopbsp_plugin&dopbsp_fixed=1');
                     exit;
                 }
             }, PHP_INT_MAX);
@@ -55,7 +56,6 @@ class Dopbsp implements PluginInterface
     public function ExportToLockMe(): void
     {
         global $DOPBSP, $wpdb;
-        set_time_limit(0);
 
         $rows = $wpdb->get_results(
             $wpdb->prepare(
@@ -157,7 +157,7 @@ class Dopbsp implements PluginInterface
     {
         global $DOPBSP, $wpdb;
 
-        $id ??= $_POST['reservation_id'];
+        $id ??= Request::postInt('reservation_id');
 
         $data = $wpdb->get_row(
             $wpdb->prepare(
@@ -357,11 +357,11 @@ class Dopbsp implements PluginInterface
             return;
         }
 
-        if ($_GET['dopbsp_exported'] ?? null) {
+        if (Request::getBool('dopbsp_exported')) {
             echo '<div class="updated">';
             echo '  <p>Bookings export completed.</p>';
             echo '</div>';
-        } elseif ($_GET['dopbsp_fixed'] ?? null) {
+        } elseif (Request::getBool('dopbsp_fixed')) {
             echo '<div class="updated">';
             echo '  <p>Ustawienia zostały naprawione. <b>Sprawdź działanie kalendarza i migrację ustawień!</b></p>';
             echo '</div>';
@@ -388,12 +388,12 @@ class Dopbsp implements PluginInterface
     public function ShutDown(): void
     {
         if (defined('DOING_AJAX') && DOING_AJAX) {
-            switch ($_POST['action']) {
+            switch (Request::postString('action')) {
                 case 'dopbsp_reservations_add_book':
                     $this->AddReservation();
                     break;
                 case 'dopbsp_reservation_approve':
-                    $id = $_POST['reservation_id'];
+                    $id = Request::postInt('reservation_id');
                     $this->AddEditReservation($id);
                     break;
             }
@@ -404,8 +404,8 @@ class Dopbsp implements PluginInterface
     {
         global $wpdb, $DOPBSP;
 
-        $cart = $_POST['cart_data'];
-        $calendar_id = $_POST['calendar_id'];
+        $cart = Request::postArray('cart_data');
+        $calendar_id = Request::postInt('calendar_id');
 
         foreach ($cart as $reservation) {
             $data = $wpdb->get_results($wpdb->prepare(
