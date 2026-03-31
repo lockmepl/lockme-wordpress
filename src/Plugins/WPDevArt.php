@@ -18,6 +18,9 @@ use wpdevart_bc_ModelThemes;
 
 defined('ABSPATH') or die('No script kiddies please!');
 
+// Integrates with third-party plugin tables, so direct queries are intentional here.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+
 class WPDevArt implements PluginInterface
 {
     private array $options;

@@ -9,6 +9,8 @@ use LockmeDep\LockmeIntegration\PluginInterface;
 use LockmeDep\LockmeIntegration\Util\Request;
 use RuntimeException;
 defined('ABSPATH') or die('No script kiddies please!');
+// Integrates with third-party plugin tables, so direct queries are intentional here.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 class Dopbsp implements PluginInterface
 {
     private array $options;
@@ -130,7 +132,7 @@ class Dopbsp implements PluginInterface
     public function FixSettings(): void
     {
         global $DOPBSP, $wpdb;
-        $settings = $wpdb->get_results("SELECT * FROM {$DOPBSP->tables->settings_calendar} WHERE `unique_key` = 'hours_definitions' and (`value` like '%-%' or `value` like '%.%')", ARRAY_A);
+        $settings = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE `unique_key` = 'hours_definitions' and (`value` like '%%-%%' or `value` like '%%.%%')", $DOPBSP->tables->settings_calendar), ARRAY_A);
         foreach ($settings as $setting) {
             $val = json_decode($setting['value'], \true);
             foreach ($val as &$v) {
@@ -139,7 +141,7 @@ class Dopbsp implements PluginInterface
             unset($v);
             $wpdb->update($DOPBSP->tables->settings_calendar, ['value' => json_encode($val)], ['id' => $setting['id']]);
         }
-        $days = $wpdb->get_results("SELECT * FROM {$DOPBSP->tables->days} WHERE (`data` like '%-%' or `data` like '%.%')", ARRAY_A);
+        $days = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE (`data` like '%%-%%' or `data` like '%%.%%')", $DOPBSP->tables->days), ARRAY_A);
         foreach ($days as $day) {
             $data = json_decode($day['data'], \true);
             foreach ($data['hours_definitions'] as &$v) {
@@ -153,7 +155,7 @@ class Dopbsp implements PluginInterface
             $data['hours'] = $hours;
             $wpdb->update($DOPBSP->tables->days, ['data' => json_encode($data)], ['unique_key' => $day['unique_key']]);
         }
-        $reses = $wpdb->get_results("SELECT * FROM {$DOPBSP->tables->reservations} WHERE (`days_hours_history` like '%-%' or `days_hours_history` like '%.%') or (`start_hour` like '%-%' or `start_hour` like '%.%')", ARRAY_A);
+        $reses = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE (`days_hours_history` like '%%-%%' or `days_hours_history` like '%%.%%') or (`start_hour` like '%%-%%' or `start_hour` like '%%.%%')", $DOPBSP->tables->reservations), ARRAY_A);
         foreach ($reses as $res) {
             $start_hour = $this->FixVal($res['start_hour']);
             $history = json_decode($res['days_hours_history'], \true);

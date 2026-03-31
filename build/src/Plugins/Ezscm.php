@@ -9,6 +9,8 @@ use LockmeDep\LockmeIntegration\PluginInterface;
 use LockmeDep\LockmeIntegration\Util\Request;
 use RuntimeException;
 defined('ABSPATH') or die('No script kiddies please!');
+// Integrates with third-party plugin tables, so direct queries are intentional here.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 class Ezscm implements PluginInterface
 {
     private array $options;
@@ -28,7 +30,7 @@ class Ezscm implements PluginInterface
                 $action = $data['action'];
                 $id = $data['id'];
                 if ($action === 'entry_delete') {
-                    $this->resdata = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->tables['entries']} WHERE e_id = %d", $id), ARRAY_A);
+                    $this->resdata = $wpdb->get_row($wpdb->prepare('SELECT * FROM %i WHERE e_id = %d', $this->tables['entries'], $id), ARRAY_A);
                 }
             }
             register_shutdown_function([$this, 'ShutDown']);
@@ -157,7 +159,7 @@ class Ezscm implements PluginInterface
     public function AddReservation($save_data): void
     {
         global $wpdb;
-        $existing = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->tables['entries']} WHERE time_begin=%s AND date=%s AND s_id=%d", $save_data['time_internal'], $save_data['date_internal'], $save_data['s_id']), ARRAY_A);
+        $existing = $wpdb->get_row($wpdb->prepare('SELECT * FROM %i WHERE time_begin=%s AND date=%s AND s_id=%d', $this->tables['entries'], $save_data['time_internal'], $save_data['date_internal'], $save_data['s_id']), ARRAY_A);
         if (!$existing) {
             return;
         }
@@ -166,7 +168,7 @@ class Ezscm implements PluginInterface
     public function AddEditReservation($save_data): void
     {
         global $wpdb;
-        $existing = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->tables['entries']} WHERE time_begin=%s AND date=%s AND s_id=%d", $save_data['details-time_internal'], $save_data['details-date_internal'], $save_data['details-s_id']), ARRAY_A);
+        $existing = $wpdb->get_row($wpdb->prepare('SELECT * FROM %i WHERE time_begin=%s AND date=%s AND s_id=%d', $this->tables['entries'], $save_data['details-time_internal'], $save_data['details-date_internal'], $save_data['details-s_id']), ARRAY_A);
         if (!$existing) {
             return;
         }

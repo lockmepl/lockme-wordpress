@@ -15,6 +15,9 @@ use wp_booking_calendar_slot;
 
 defined('ABSPATH') or die('No script kiddies please!');
 
+// Integrates with third-party plugin tables, so direct queries are intentional here.
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+
 class WPBooking implements PluginInterface
 {
     private array $options;
