@@ -293,7 +293,7 @@ class Bookly implements PluginInterface
         if (!$this->CheckDependencies()) {
             return;
         }
-        register_setting('lockme-bookly', 'lockme_bookly');
+        register_setting('lockme-bookly', 'lockme_bookly', ['sanitize_callback' => [$this->plugin, 'sanitizePluginOptions']]);
         add_settings_section('lockme_bookly_section', 'Bookly plugin settings', static function () {
             echo '<p>Integration settings with the bookly plugin</p>';
         }, 'lockme-bookly');
@@ -314,11 +314,12 @@ class Bookly implements PluginInterface
             }
             $calendars = Staff::query()->sortBy('position')->fetchArray();
             foreach ($calendars as $calendar) {
-                add_settings_field('calendar_' . $calendar['id'], 'Room for ' . $calendar['full_name'], function () use ($rooms, $calendar) {
-                    echo '<select name="lockme_bookly[calendar_' . $calendar['id'] . ']">';
+                $optionKey = 'calendar_' . (int) $calendar['id'];
+                add_settings_field($optionKey, 'Room for ' . esc_html((string) $calendar['full_name']), function () use ($rooms, $calendar, $optionKey) {
+                    echo '<select name="lockme_bookly[' . esc_attr($optionKey) . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
-                        echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_' . $calendar['id']], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
+                        echo '<option value="' . esc_attr((string) $room['roomid']) . '" ' . selected(1, ($room['roomid'] ?? null) == ($this->options[$optionKey] ?? null), \false) . '>' . esc_html((string) ($room['room'] ?? '')) . ' (' . esc_html((string) ($room['department'] ?? '')) . ')</option>';
                     }
                     echo '</select>';
                 }, 'lockme-bookly', 'lockme_bookly_section', []);

@@ -149,7 +149,9 @@ class WPBooking implements PluginInterface
             return;
         }
 
-        register_setting('lockme-wpb', 'lockme_wpb');
+        register_setting('lockme-wpb', 'lockme_wpb', [
+            'sanitize_callback' => [$this->plugin, 'sanitizePluginOptions'],
+        ]);
 
         add_settings_section(
             'lockme_wpb_section',
@@ -184,16 +186,17 @@ class WPBooking implements PluginInterface
             $bookingListObj = new wp_booking_calendar_lists();
             $calendars = $bookingListObj->getCalendarsList('');
             foreach ($calendars as $cid => $calendar) {
+                $optionKey = 'calendar_'.(int) $cid;
                 add_settings_field(
-                    'calendar_'.$cid,
-                    'Room for '.$calendar['calendar_title'],
-                    function () use ($rooms, $cid) {
-                        echo '<select name="lockme_wpb[calendar_'.$cid.']">';
+                    $optionKey,
+                    'Room for '.esc_html((string) $calendar['calendar_title']),
+                    function () use ($rooms, $cid, $optionKey) {
+                        echo '<select name="lockme_wpb['.esc_attr($optionKey).']">';
                         echo '<option value="">--select--</option>';
                         foreach ($rooms as $room) {
-                            echo '<option value="'.$room['roomid'].'" '.selected(1,
-                                    $room['roomid'] == $this->options['calendar_'.$cid],
-                                    false).'>'.$room['room'].' ('.$room['department'].')</options>';
+                            echo '<option value="'.esc_attr((string) $room['roomid']).'" '.selected(1,
+                                    ($room['roomid'] ?? null) == ($this->options[$optionKey] ?? null),
+                                    false).'>'.esc_html((string) ($room['room'] ?? '')).' ('.esc_html((string) ($room['department'] ?? '')).')</option>';
                         }
                         echo '</select>';
                     },
@@ -282,10 +285,9 @@ class WPBooking implements PluginInterface
             return false;
         }
 
-        $blog_prefix = $blog_id.'_';
-        if ($blog_id == 1) {
-            $blog_prefix = '';
-        }
+        $blog_prefix = ((int) $blog_id > 1) ? absint((int) $blog_id).'_' : '';
+        $slotsTable = $wpdb->base_prefix.$blog_prefix.'booking_slots';
+        $reservationsTable = $wpdb->base_prefix.$blog_prefix.'booking_reservation';
 
         $data = $message['data'];
         $roomid = $message['roomid'];
@@ -297,8 +299,8 @@ class WPBooking implements PluginInterface
             case 'add':
                 $slot = $wpdb->get_row(
                     $wpdb->prepare(
-                        'SELECT * FROM '.$wpdb->base_prefix.$blog_prefix.
-                        'booking_slots WHERE slot_date = %s AND slot_active = 1 AND calendar_id=%d AND slot_time_from=%s',
+                        'SELECT * FROM %i WHERE slot_date = %s AND slot_active = 1 AND calendar_id=%d AND slot_time_from=%s',
+                        $slotsTable,
                         $data['date'],
                         $calendar_id,
                         $data['hour']
@@ -306,7 +308,7 @@ class WPBooking implements PluginInterface
                     ARRAY_A
                 );
                 $wpdb->insert(
-                    $wpdb->base_prefix.$blog_prefix.'booking_reservation',
+                    $reservationsTable,
                     [
                         'slot_id' => $slot['slot_id'],
                         'reservation_name' => $data['name'],
@@ -336,7 +338,7 @@ class WPBooking implements PluginInterface
                 );
                 $id = $wpdb->insert_id;
                 if (!$id) {
-                    throw new RuntimeException($wpdb->last_error);
+                    throw new RuntimeException('Error saving to database');
                 }
                 try {
                     $api = $this->plugin->GetApi();
@@ -351,8 +353,8 @@ class WPBooking implements PluginInterface
                 if ($data['extid']) {
                     $slot = $wpdb->get_row(
                         $wpdb->prepare(
-                            'SELECT * FROM '.$wpdb->base_prefix.$blog_prefix.
-                            'booking_slots WHERE slot_date = %s AND slot_active = 1 AND calendar_id=%d AND slot_time_from=%s',
+                            'SELECT * FROM %i WHERE slot_date = %s AND slot_active = 1 AND calendar_id=%d AND slot_time_from=%s',
+                            $slotsTable,
                             $data['date'],
                             $calendar_id,
                             $data['hour']
@@ -360,7 +362,7 @@ class WPBooking implements PluginInterface
                         ARRAY_A
                     );
                     $wpdb->update(
-                        $wpdb->base_prefix.$blog_prefix.'booking_reservation',
+                        $reservationsTable,
                         [
                             'slot_id' => $slot['slot_id'],
                             'reservation_name' => $data['name'],
@@ -390,7 +392,7 @@ class WPBooking implements PluginInterface
                         ]
                     );
                     if ($wpdb->last_error) {
-                        throw new RuntimeException($wpdb->last_error);
+                        throw new RuntimeException('Error updating reservation');
                     }
                     return true;
                 }
@@ -398,7 +400,8 @@ class WPBooking implements PluginInterface
             case 'delete':
                 if ($data['extid']) {
                     $wpdb->query($wpdb->prepare(
-                        'DELETE FROM '.$wpdb->base_prefix.$blog_prefix.'booking_reservation WHERE reservation_id = %d',
+                        'DELETE FROM %i WHERE reservation_id = %d',
+                        $reservationsTable,
                         $data['extid']));
                     return true;
                 }

@@ -155,7 +155,7 @@ class Plugin
 
             echo 'OK';
         } catch (Exception $e) {
-            echo $e->getMessage();
+            echo esc_html($e->getMessage());
         }
 
         die();
@@ -274,7 +274,8 @@ class Plugin
             'api_url',
             'Webhook URL',
             function () {
-                echo '<input readonly type="text" value="'.get_site_url().'/?lockme_api='.$this->url_key.'" onfocus="select()" /> <small>You need to add an integration of type webhook on Lockme to get updates about bookings automatically. Use this value as a webhook URL address and use the nevest API version from 2.x options.</small>';
+                $webhook_url = get_site_url().'/?lockme_api='.$this->url_key;
+                echo '<input readonly type="text" value="'.esc_attr($webhook_url).'" onfocus="select()" /> <small>You need to add an integration of type webhook on Lockme to get updates about bookings automatically. Use this value as a webhook URL address and use the nevest API version from 2.x options.</small>';
             },
             'lockme-admin',
             'lockme_settings_section',
@@ -285,7 +286,8 @@ class Plugin
             'redirect_uri',
             'Redirect URI',
             function () {
-                echo '<input readonly type="text" value="'.get_admin_url().'options-general.php?page=lockme_integration&tab=api_options" onfocus="select()" /> <small>set in Lockme cockpit as a redirect URI for your API app.</small>';
+                $redirect_uri = get_admin_url().'options-general.php?page=lockme_integration&tab=api_options';
+                echo '<input readonly type="text" value="'.esc_attr($redirect_uri).'" onfocus="select()" /> <small>set in Lockme cockpit as a redirect URI for your API app.</small>';
             },
             'lockme-admin',
             'lockme_settings_section',
@@ -300,7 +302,7 @@ class Plugin
     public function admin_page(): void
     {
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to access this page.', 'lockme-calendars-integration'));
+            wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'lockme-calendars-integration'));
         }
 
         echo '<div class="wrap">';
@@ -312,7 +314,8 @@ class Plugin
         echo '    <a href="?page=lockme_integration&tab=api_options" class="nav-tab '.($this->tab ===
                                                                                        'api_options'?'nav-tab-active':'').'">API settings</a>';
         foreach ($this->available_plugins as $k=>$plugin) {
-            echo '    <a href="?page=lockme_integration&tab='.$k.'_plugin" class="nav-tab '.($this->tab === $k.'_plugin'?'nav-tab-active':'').'">'.$plugin->getPluginName().' plugin</a>';
+            $tab_key = sanitize_key($k);
+            echo '    <a href="?page=lockme_integration&tab='.esc_attr($tab_key).'_plugin" class="nav-tab '.($this->tab === $tab_key.'_plugin'?'nav-tab-active':'').'">'.esc_html($plugin->getPluginName()).' plugin</a>';
         }
         echo '    <a href="?page=lockme_integration&tab=api_logs" class="nav-tab '.($this->tab ===
                                                                                        'api_logs'?'nav-tab-active':'').'">API error logs</a>';
@@ -345,14 +348,14 @@ class Plugin
                     if ($test === 'OK') {
                         echo '<p>Connection to LockMe API <strong>CORRECT</strong>.</p>';
                         $user = $api->getResourceOwner();
-                        echo '<p>Logged in to Lockme as: <strong>'.$user->toArray()['nick'].'</strong></p>';
+                        echo '<p>Logged in to Lockme as: <strong>'.esc_html((string) ($user->toArray()['nick'] ?? '')).'</strong></p>';
                     } else {
                         echo '<p>Response <strong>ERROR</strong>.</p>';
                     }
                 } catch (Exception $e) {
-                    echo '<p><strong>API ERROR: '.$e->getMessage().'.</p>';
+                    echo '<p><strong>API ERROR: '.esc_html($e->getMessage()).'.</strong></p>';
                     if ($e instanceof IdentityProviderException) {
-                        echo '<p>Response from Lockme:<br><textarea readonly>'.$e->getResponseBody().'</textarea></p>';
+                        echo '<p>Response from Lockme:<br><textarea readonly>'.esc_textarea((string) $e->getResponseBody()).'</textarea></p>';
                     }
                 }
 
@@ -361,7 +364,7 @@ class Plugin
                 $authorizationUrl = $api->getAuthorizationUrl(['rooms_manage'], $params);
                 add_option('lockme_oauth2_state', $params['oauth2_lockme_state'], '', false);
 
-                echo '<p><a href="'.$authorizationUrl.'">Click here</a> to connect the plugin with Lockme.</p>';
+                echo '<p><a href="'.esc_url($authorizationUrl).'">Click here</a> to connect the plugin with Lockme.</p>';
                 echo '<p>Custom Oauth2 Access Token (use <b>only if you know what are you doing</b>):</p>';
                 echo '<p><textarea name="oauth_token"></textarea></p>';
             } else {
@@ -376,7 +379,7 @@ class Plugin
                     try {
                         $plugin->DrawForm();
                     }catch (Exception $e){
-                        echo '<p>Configuration error. Details: '.$e->getMessage().'</p>';
+                        echo '<p>Configuration error. Details: '.esc_html($e->getMessage()).'</p>';
                     }
                 }
             }
@@ -385,6 +388,26 @@ class Plugin
         submit_button();
         echo '</form>';
         echo '</div>';
+    }
+
+    public function sanitizePluginOptions($settings): array
+    {
+        if (!is_array($settings)) {
+            return [];
+        }
+
+        $sanitized = [];
+        foreach ($settings as $key => $value) {
+            $sanitizedKey = sanitize_key((string) $key);
+            if (is_array($value)) {
+                $sanitized[$sanitizedKey] = $this->sanitizePluginOptions($value);
+                continue;
+            }
+
+            $sanitized[$sanitizedKey] = sanitize_text_field((string) $value);
+        }
+
+        return $sanitized;
     }
 
     public function AnonymizeData(array $data): array

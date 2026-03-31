@@ -175,11 +175,8 @@ class Booked implements PluginInterface
                     'post_type' => 'booked_appointments',
                 ]);
                 $row_id = wp_insert_post($post, \true);
-                if (!$row_id) {
-                    throw new RuntimeException('Error saving to database: ' . $wpdb->last_error);
-                }
-                if (is_wp_error($row_id)) {
-                    throw new RuntimeException($row_id->get_error_message());
+                if (!$row_id || is_wp_error($row_id)) {
+                    throw new RuntimeException('Error saving appointment');
                 }
                 update_post_meta($row_id, '_appointment_guest_name', $data['name'] . ' ' . $data['surname']);
                 update_post_meta($row_id, '_appointment_guest_email', $data['email']);
@@ -255,7 +252,7 @@ class Booked implements PluginInterface
     }
     private function GetCalendar($roomid): ?int
     {
-        $calendars = get_terms('booked_custom_calendars', 'orderby=slug&hide_empty=0');
+        $calendars = get_terms(['taxonomy' => 'booked_custom_calendars', 'orderby' => 'slug', 'hide_empty' => \false]);
         foreach ($calendars as $calendar) {
             if ($this->options['calendar_' . $calendar->term_id] == $roomid) {
                 return $calendar->term_id;
@@ -306,7 +303,7 @@ class Booked implements PluginInterface
         if (!$this->CheckDependencies()) {
             return;
         }
-        register_setting('lockme-booked', 'lockme_booked');
+        register_setting('lockme-booked', 'lockme_booked', ['sanitize_callback' => [$this->plugin, 'sanitizePluginOptions']]);
         add_settings_section('lockme_booked_section', 'Booked plugin settings', static function () {
             echo '<p>Integration settings with the Booked plugin</p>';
         }, 'lockme-booked');
@@ -326,17 +323,18 @@ class Booked implements PluginInterface
                 echo '<select name="lockme_booked[calendar_default]">';
                 echo '<option value="">--select--</option>';
                 foreach ($rooms as $room) {
-                    echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_default'], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
+                    echo '<option value="' . esc_attr((string) $room['roomid']) . '" ' . selected(1, ($room['roomid'] ?? null) == ($this->options['calendar_default'] ?? null), \false) . '>' . esc_html((string) ($room['room'] ?? '')) . ' (' . esc_html((string) ($room['department'] ?? '')) . ')</option>';
                 }
                 echo '</select>';
             }, 'lockme-booked', 'lockme_booked_section');
-            $calendars = get_terms('booked_custom_calendars', 'orderby=slug&hide_empty=0');
+            $calendars = get_terms(['taxonomy' => 'booked_custom_calendars', 'orderby' => 'slug', 'hide_empty' => \false]);
             foreach ($calendars as $calendar) {
-                add_settings_field('calendar_' . $calendar->term_id, 'Room for ' . $calendar->name, function () use ($rooms, $calendar) {
-                    echo '<select name="lockme_booked[calendar_' . $calendar->term_id . ']">';
+                $optionKey = 'calendar_' . (int) $calendar->term_id;
+                add_settings_field($optionKey, 'Room for ' . esc_html((string) $calendar->name), function () use ($rooms, $calendar, $optionKey) {
+                    echo '<select name="lockme_booked[' . esc_attr($optionKey) . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
-                        echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_' . $calendar->term_id], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
+                        echo '<option value="' . esc_attr((string) $room['roomid']) . '" ' . selected(1, ($room['roomid'] ?? null) == ($this->options[$optionKey] ?? null), \false) . '>' . esc_html((string) ($room['room'] ?? '')) . ' (' . esc_html((string) ($room['department'] ?? '')) . ')</option>';
                     }
                     echo '</select>';
                 }, 'lockme-booked', 'lockme_booked_section');

@@ -42,7 +42,7 @@ class Appointments implements PluginInterface
         if (!$this->CheckDependencies()) {
             return;
         }
-        register_setting('lockme-app', 'lockme_app');
+        register_setting('lockme-app', 'lockme_app', ['sanitize_callback' => [$this->plugin, 'sanitizePluginOptions']]);
         add_settings_section('lockme_app_section', 'Appointments plugin settings', static function () {
             echo '<p>Integration settings with the Appointments plugin</p>';
         }, 'lockme-app');
@@ -63,11 +63,12 @@ class Appointments implements PluginInterface
                 $workers = appointments_get_workers_by_service($service->ID);
                 foreach ($workers as $worker) {
                     $user = get_userdata($worker->ID);
-                    add_settings_field('service_' . $service->ID . '_' . $worker->ID, 'Room for ' . $service->name . ' - ' . $user->user_login, function () use ($rooms, $service, $worker) {
-                        echo '<select name="lockme_app[service_' . $service->ID . '_' . $worker->ID . ']">';
+                    $optionKey = 'service_' . (int) $service->ID . '_' . (int) $worker->ID;
+                    add_settings_field($optionKey, 'Room for ' . esc_html((string) $service->name) . ' - ' . esc_html((string) ($user->user_login ?? '')), function () use ($rooms, $optionKey) {
+                        echo '<select name="lockme_app[' . esc_attr($optionKey) . ']">';
                         echo '<option value="">--select--</option>';
                         foreach ($rooms as $room) {
-                            echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['service_' . $service->ID . '_' . $worker->ID], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
+                            echo '<option value="' . esc_attr((string) $room['roomid']) . '" ' . selected(1, ($room['roomid'] ?? null) == ($this->options[$optionKey] ?? null), \false) . '>' . esc_html((string) ($room['room'] ?? '')) . ' (' . esc_html((string) ($room['department'] ?? '')) . ')</option>';
                         }
                         echo '</select>';
                     }, 'lockme-app', 'lockme_app_section', []);
@@ -167,8 +168,7 @@ class Appointments implements PluginInterface
     public function ExportToLockMe(): void
     {
         global $wpdb;
-        $sql = "SELECT * FROM {$wpdb->prefix}app_appointments WHERE `start` > now() ORDER BY ID";
-        $rows = $wpdb->get_results($sql);
+        $rows = $wpdb->get_results($wpdb->prepare('SELECT * FROM %i WHERE `start` > NOW() ORDER BY ID', $wpdb->prefix . 'app_appointments'));
         foreach ($rows as $row) {
             $this->AddEditReservation($row->ID);
         }

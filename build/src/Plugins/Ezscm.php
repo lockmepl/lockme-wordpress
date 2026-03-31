@@ -49,7 +49,7 @@ class Ezscm implements PluginInterface
         if (!$this->CheckDependencies()) {
             return;
         }
-        register_setting('lockme-ezscm', 'lockme_ezscm');
+        register_setting('lockme-ezscm', 'lockme_ezscm', ['sanitize_callback' => [$this->plugin, 'sanitizePluginOptions']]);
         add_settings_section('lockme_ezscm_section', 'ez Schedule Manager plugin settings', static function () {
             echo '<p>Integration settings with the ez Schedule Manager plugin</p>';
         }, 'lockme-ezscm');
@@ -66,16 +66,15 @@ class Ezscm implements PluginInterface
                 } catch (IdentityProviderException $e) {
                 }
             }
-            $calendars = $wpdb->get_results('
-        SELECT sc.s_id, sc.name
-        FROM ' . $this->tables['schedules'] . ' AS sc');
+            $calendars = $wpdb->get_results($wpdb->prepare('SELECT sc.s_id, sc.name FROM %i AS sc', $this->tables['schedules']));
             foreach ($calendars as $calendar) {
-                add_settings_field("calendar_{$calendar->s_id}", "Room for {$calendar->name}", static function () use ($options, $rooms, $calendar) {
-                    echo '<select name="lockme_ezscm[calendar_' . $calendar->s_id . ']">';
+                $optionKey = 'calendar_' . (int) $calendar->s_id;
+                add_settings_field($optionKey, 'Room for ' . esc_html((string) $calendar->name), static function () use ($options, $rooms, $optionKey) {
+                    echo '<select name="lockme_ezscm[' . esc_attr($optionKey) . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
                         /** @noinspection TypeUnsafeComparisonInspection */
-                        echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $options['calendar_' . $calendar->s_id], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
+                        echo '<option value="' . esc_attr((string) $room['roomid']) . '" ' . selected(1, ($room['roomid'] ?? null) == ($options[$optionKey] ?? null), \false) . '>' . esc_html((string) ($room['room'] ?? '')) . ' (' . esc_html((string) ($room['department'] ?? '')) . ')</option>';
                     }
                     echo '</select>';
                 }, 'lockme-ezscm', 'lockme_ezscm_section', array());
@@ -156,7 +155,7 @@ class Ezscm implements PluginInterface
     public function AddReservation($save_data): void
     {
         global $wpdb;
-        $existing = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->tables['entries']} WHERE time_begin='%s' AND date='%s' AND s_id=%d", $save_data['time_internal'], $save_data['date_internal'], $save_data['s_id']), ARRAY_A);
+        $existing = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->tables['entries']} WHERE time_begin=%s AND date=%s AND s_id=%d", $save_data['time_internal'], $save_data['date_internal'], $save_data['s_id']), ARRAY_A);
         if (!$existing) {
             return;
         }
@@ -165,7 +164,7 @@ class Ezscm implements PluginInterface
     public function AddEditReservation($save_data): void
     {
         global $wpdb;
-        $existing = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->tables['entries']} WHERE time_begin='%s' AND date='%s' AND s_id=%d", $save_data['details-time_internal'], $save_data['details-date_internal'], $save_data['details-s_id']), ARRAY_A);
+        $existing = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->tables['entries']} WHERE time_begin=%s AND date=%s AND s_id=%d", $save_data['details-time_internal'], $save_data['details-date_internal'], $save_data['details-s_id']), ARRAY_A);
         if (!$existing) {
             return;
         }
@@ -193,7 +192,7 @@ class Ezscm implements PluginInterface
     private function GetCalendar($roomid)
     {
         global $wpdb;
-        $calendars = $wpdb->get_results("\n            SELECT sc.s_id, sc.name\n            FROM {$this->tables['schedules']} AS sc\n            ");
+        $calendars = $wpdb->get_results($wpdb->prepare('SELECT sc.s_id, sc.name FROM %i AS sc', $this->tables['schedules']));
         foreach ($calendars as $calendar) {
             /** @noinspection TypeUnsafeComparisonInspection */
             if ($this->options['calendar_' . $calendar->s_id] == $roomid) {
@@ -245,8 +244,7 @@ class Ezscm implements PluginInterface
     {
         global $wpdb;
         set_time_limit(0);
-        $sql = "SELECT * FROM {$this->tables['entries']} WHERE date>=curdate() ORDER BY e_id";
-        $rows = $wpdb->get_results($sql, ARRAY_A);
+        $rows = $wpdb->get_results($wpdb->prepare('SELECT * FROM %i WHERE date>=curdate() ORDER BY e_id', $this->tables['entries']), ARRAY_A);
         foreach ($rows as $row) {
             $this->Update($row['e_id'], $row);
         }

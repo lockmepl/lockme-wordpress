@@ -75,7 +75,9 @@ class Woo implements PluginInterface
             return;
         }
 
-        register_setting('lockme-woo', 'lockme_woo');
+        register_setting('lockme-woo', 'lockme_woo', [
+            'sanitize_callback' => [$this->plugin, 'sanitizePluginOptions'],
+        ]);
 
         add_settings_section(
             'lockme_woo_section',
@@ -126,16 +128,17 @@ class Woo implements PluginInterface
             $calendars = get_posts($args);
 
             foreach ($calendars as $calendar) {
+                $optionKey = 'calendar_'.(int) $calendar->ID;
                 add_settings_field(
-                    'calendar_'.$calendar->ID,
-                    'Room for '.$calendar->post_title,
-                    function () use ($rooms, $calendar) {
-                        echo '<select name="lockme_woo[calendar_'.$calendar->ID.']">';
+                    $optionKey,
+                    'Room for '.esc_html((string) $calendar->post_title),
+                    function () use ($rooms, $optionKey) {
+                        echo '<select name="lockme_woo['.esc_attr($optionKey).']">';
                         echo '<option value="">--select--</option>';
                         foreach ($rooms as $room) {
-                            echo '<option value="'.$room['roomid'].'" '.selected(1,
-                                    $room['roomid'] == $this->options['calendar_'.$calendar->ID],
-                                    false).'>'.$room['room'].' ('.$room['department'].')</options>';
+                            echo '<option value="'.esc_attr((string) $room['roomid']).'" '.selected(1,
+                                    ($room['roomid'] ?? null) == ($this->options[$optionKey] ?? null),
+                                    false).'>'.esc_html((string) ($room['room'] ?? '')).' ('.esc_html((string) ($room['department'] ?? '')).')</option>';
                         }
                         echo '</select>';
                     },

@@ -57,8 +57,12 @@ class Dopbsp implements PluginInterface
         global $DOPBSP, $wpdb;
         set_time_limit(0);
 
-        $sql = 'SELECT * FROM '.$DOPBSP->tables->reservations.' WHERE `check_in` >= curdate() ORDER BY ID';
-        $rows = $wpdb->get_results($sql);
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                'SELECT * FROM %i WHERE `check_in` >= curdate() ORDER BY ID',
+                $DOPBSP->tables->reservations
+            )
+        );
 
         foreach ($rows as $row) {
             $this->AddEditReservation($row->id);
@@ -69,8 +73,14 @@ class Dopbsp implements PluginInterface
     {
         global $wpdb, $DOPBSP;
 
-        $data = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$DOPBSP->tables->reservations.' WHERE `id` = %d', $id),
-            ARRAY_A);
+        $data = $wpdb->get_row(
+            $wpdb->prepare(
+                'SELECT * FROM %i WHERE `id` = %d',
+                $DOPBSP->tables->reservations,
+                $id
+            ),
+            ARRAY_A
+        );
         if (!$data) {
             return;
         }
@@ -149,8 +159,14 @@ class Dopbsp implements PluginInterface
 
         $id ??= $_POST['reservation_id'];
 
-        $data = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$DOPBSP->tables->reservations.' WHERE `id` = %d', $id),
-            ARRAY_A);
+        $data = $wpdb->get_row(
+            $wpdb->prepare(
+                'SELECT * FROM %i WHERE `id` = %d',
+                $DOPBSP->tables->reservations,
+                $id
+            ),
+            ARRAY_A
+        );
         if (!$data) {
             return;
         }
@@ -247,7 +263,9 @@ class Dopbsp implements PluginInterface
         }
 
 
-        register_setting('lockme-dopbsp', 'lockme_dopbsp');
+        register_setting('lockme-dopbsp', 'lockme_dopbsp', [
+            'sanitize_callback' => [$this->plugin, 'sanitizePluginOptions'],
+        ]);
 
         add_settings_section(
             'lockme_dopbsp_section',
@@ -277,19 +295,25 @@ class Dopbsp implements PluginInterface
                 } catch (IdentityProviderException $e) {
                 }
             }
-            $calendars = $wpdb->get_results('SELECT * FROM '.$DOPBSP->tables->calendars.' ORDER BY id DESC');
+            $calendars = $wpdb->get_results(
+                $wpdb->prepare(
+                    'SELECT * FROM %i ORDER BY id DESC',
+                    $DOPBSP->tables->calendars
+                )
+            );
 
             foreach ($calendars as $calendar) {
+                $optionKey = 'calendar_'.(int) $calendar->id;
                 add_settings_field(
-                    'calendar_'.$calendar->id,
-                    'Room for '.$calendar->name,
-                    function () use ($rooms, $calendar) {
-                        echo '<select name="lockme_dopbsp[calendar_'.$calendar->id.']">';
+                    $optionKey,
+                    'Room for '.esc_html((string) $calendar->name),
+                    function () use ($rooms, $optionKey) {
+                        echo '<select name="lockme_dopbsp['.esc_attr($optionKey).']">';
                         echo '<option value="">--select--</option>';
                         foreach ($rooms as $room) {
-                            echo '<option value="'.$room['roomid'].'" '.selected(1,
-                                    $room['roomid'] == $this->options['calendar_'.$calendar->id],
-                                    false).'>'.$room['room'].' ('.$room['department'].')</options>';
+                            echo '<option value="'.esc_attr((string) $room['roomid']).'" '.selected(1,
+                                    ($room['roomid'] ?? null) == ($this->options[$optionKey] ?? null),
+                                    false).'>'.esc_html((string) ($room['room'] ?? '')).' ('.esc_html((string) ($room['department'] ?? '')).')</option>';
                         }
                         echo '</select>';
                     },
@@ -350,8 +374,10 @@ class Dopbsp implements PluginInterface
     {
         global $wpdb, $DOPBSP;
         $datas = $wpdb->get_results($wpdb->prepare(
-            'SELECT * FROM '.$DOPBSP->tables->reservations.' WHERE `transaction_id` = %d',
-            $order_id), ARRAY_A);
+            'SELECT * FROM %i WHERE `transaction_id` = %d',
+            $DOPBSP->tables->reservations,
+            $order_id
+        ), ARRAY_A);
         foreach ($datas as $data) {
             if ($data) {
                 $this->AddEditReservation($data['id']);
@@ -383,9 +409,12 @@ class Dopbsp implements PluginInterface
 
         foreach ($cart as $reservation) {
             $data = $wpdb->get_results($wpdb->prepare(
-                'SELECT * FROM '.$DOPBSP->tables->reservations.
-                ' WHERE `check_in` = %s and `start_hour` = %s and `calendar_id` = %d',
-                $reservation['check_in'], $reservation['start_hour'], $calendar_id), ARRAY_A);
+                'SELECT * FROM %i WHERE `check_in` = %s and `start_hour` = %s and `calendar_id` = %d',
+                $DOPBSP->tables->reservations,
+                $reservation['check_in'],
+                $reservation['start_hour'],
+                $calendar_id
+            ), ARRAY_A);
             foreach ($data as $res) {
                 $this->Add($res);
             }
@@ -521,7 +550,7 @@ class Dopbsp implements PluginInterface
                     ]
                 );
                 if ($result === false) {
-                    throw new RuntimeException('Error saving to database - '.$wpdb->last_error);
+                    throw new RuntimeException('Error saving to database');
                 }
                 $id = $wpdb->insert_id;
                 $DOPBSP->classes->backend_calendar_schedule->setApproved($id);
@@ -538,8 +567,8 @@ class Dopbsp implements PluginInterface
                 if ($data['extid']) {
                     $res = $wpdb->get_row(
                         $wpdb->prepare(
-                            'SELECT * FROM '.$DOPBSP->tables->reservations.
-                            ' WHERE `id` = %d',
+                            'SELECT * FROM %i WHERE `id` = %d',
+                            $DOPBSP->tables->reservations,
                             $data['extid']
                         )
                     );
@@ -597,8 +626,8 @@ class Dopbsp implements PluginInterface
                 if ($data['extid']) {
                     $res = $wpdb->get_row(
                         $wpdb->prepare(
-                            'SELECT * FROM '.$DOPBSP->tables->reservations.
-                            ' WHERE `id` = %d',
+                            'SELECT * FROM %i WHERE `id` = %d',
+                            $DOPBSP->tables->reservations,
                             $data['extid']
                         )
                     );
@@ -632,13 +661,26 @@ class Dopbsp implements PluginInterface
 
         [$year, $month, $d] = explode('-', $date);
 
-        $day_data = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$DOPBSP->tables->days.' WHERE calendar_id=%d AND day="%s"', $calendar_id, $date));
+        $day_data = $wpdb->get_row(
+            $wpdb->prepare(
+                'SELECT * FROM %i WHERE calendar_id=%d AND day=%s',
+                $DOPBSP->tables->days,
+                $calendar_id,
+                $date
+            )
+        );
 
         if ($day_data) {
             return;
         }
 
-        $calendar = $wpdb->get_row($wpdb->prepare('SELECT * FROM '.$DOPBSP->tables->calendars.' WHERE id=%d', $calendar_id));
+        $calendar = $wpdb->get_row(
+            $wpdb->prepare(
+                'SELECT * FROM %i WHERE id=%d',
+                $DOPBSP->tables->calendars,
+                $calendar_id
+            )
+        );
 
         $default_availability = $calendar->default_availability != ''
             ? $calendar->default_availability
@@ -683,7 +725,12 @@ class Dopbsp implements PluginInterface
     {
         global $DOPBSP, $wpdb;
 
-        $calendars = $wpdb->get_results('SELECT * FROM '.$DOPBSP->tables->calendars.' ORDER BY id DESC');
+        $calendars = $wpdb->get_results(
+            $wpdb->prepare(
+                'SELECT * FROM %i ORDER BY id DESC',
+                $DOPBSP->tables->calendars
+            )
+        );
         foreach ($calendars as $calendar) {
             if ($this->options['calendar_'.$calendar->id] == $roomid) {
                 return $calendar->id;

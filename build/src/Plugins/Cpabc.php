@@ -38,7 +38,7 @@ class Cpabc implements PluginInterface
         if (!$this->CheckDependencies()) {
             return;
         }
-        register_setting('lockme-cpabc', 'lockme_cpabc');
+        register_setting('lockme-cpabc', 'lockme_cpabc', ['sanitize_callback' => [$this->plugin, 'sanitizePluginOptions']]);
         add_settings_section('lockme_cpabc_section', 'Appointment Booking Calendar plugin settings', static function () {
             echo '<p>Integration settings with the Appointment Booking Calendar plugin</p>';
         }, 'lockme-cpabc');
@@ -55,13 +55,14 @@ class Cpabc implements PluginInterface
                 } catch (IdentityProviderException $e) {
                 }
             }
-            $calendars = $wpdb->get_results('SELECT * FROM ' . CPABC_APPOINTMENTS_CONFIG_TABLE_NAME);
+            $calendars = $wpdb->get_results($wpdb->prepare('SELECT * FROM %i', CPABC_APPOINTMENTS_CONFIG_TABLE_NAME));
             foreach ($calendars as $calendar) {
-                add_settings_field('calendar_' . $calendar->id, 'Room for ' . $calendar->uname, static function () use ($options, $rooms, $calendar) {
-                    echo '<select name="lockme_cpabc[calendar_' . $calendar->id . ']">';
+                $optionKey = 'calendar_' . (int) $calendar->id;
+                add_settings_field($optionKey, 'Room for ' . esc_html((string) $calendar->uname), static function () use ($options, $rooms, $optionKey) {
+                    echo '<select name="lockme_cpabc[' . esc_attr($optionKey) . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
-                        echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $options['calendar_' . $calendar->id], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
+                        echo '<option value="' . esc_attr((string) $room['roomid']) . '" ' . selected(1, ($room['roomid'] ?? null) == ($options[$optionKey] ?? null), \false) . '>' . esc_html((string) ($room['room'] ?? '')) . ' (' . esc_html((string) ($room['department'] ?? '')) . ')</option>';
                     }
                     echo '</select>';
                 }, 'lockme-cpabc', 'lockme_cpabc_section', array());
@@ -93,7 +94,7 @@ class Cpabc implements PluginInterface
     private function AppData($resid): array
     {
         global $wpdb;
-        $res = $wpdb->get_row($wpdb->prepare('select * from ' . CPABC_APPOINTMENTS_TABLE_NAME . ' a join ' . CPABC_TDEAPP_CALENDAR_DATA_TABLE . ' b on(b.reference = a.id) where b.id = %d', $resid), ARRAY_A);
+        $res = $wpdb->get_row($wpdb->prepare('SELECT * FROM %i a JOIN %i b ON (b.reference = a.id) WHERE b.id = %d', CPABC_APPOINTMENTS_TABLE_NAME, CPABC_TDEAPP_CALENDAR_DATA_TABLE, $resid), ARRAY_A);
         if (!$res) {
             return [];
         }
@@ -108,7 +109,7 @@ class Cpabc implements PluginInterface
         if (defined('LOCKME_MESSAGING')) {
             return null;
         }
-        $res = $wpdb->get_row($wpdb->prepare('select * from ' . CPABC_APPOINTMENTS_TABLE_NAME . ' a join ' . CPABC_TDEAPP_CALENDAR_DATA_TABLE . ' b on(b.reference = a.id) where b.id = %d', $id), ARRAY_A);
+        $res = $wpdb->get_row($wpdb->prepare('SELECT * FROM %i a JOIN %i b ON (b.reference = a.id) WHERE b.id = %d', CPABC_APPOINTMENTS_TABLE_NAME, CPABC_TDEAPP_CALENDAR_DATA_TABLE, $id), ARRAY_A);
         if (!$res) {
             return null;
         }
@@ -143,7 +144,7 @@ class Cpabc implements PluginInterface
         if (defined('LOCKME_MESSAGING')) {
             return \false;
         }
-        $res = $wpdb->get_row($wpdb->prepare('select * from ' . CPABC_APPOINTMENTS_TABLE_NAME . ' a join ' . CPABC_TDEAPP_CALENDAR_DATA_TABLE . ' b on(b.reference = a.id) where b.id = %d', $id), ARRAY_A);
+        $res = $wpdb->get_row($wpdb->prepare('SELECT * FROM %i a JOIN %i b ON (b.reference = a.id) WHERE b.id = %d', CPABC_APPOINTMENTS_TABLE_NAME, CPABC_TDEAPP_CALENDAR_DATA_TABLE, $id), ARRAY_A);
         if (!$force && $res && !$res['is_cancelled']) {
             return $this->AddEditReservation($id);
         }
@@ -164,7 +165,7 @@ class Cpabc implements PluginInterface
         //Add from website
         if ($_POST['cpabc_item'] && $_POST['dateAndTime']) {
             foreach ($_POST['dateAndTime'] as $dat) {
-                $res = $wpdb->get_row($wpdb->prepare('select * from ' . CPABC_APPOINTMENTS_TABLE_NAME . ' a join ' . CPABC_TDEAPP_CALENDAR_DATA_TABLE . ' b on(b.reference = a.id) where  `calendar` = %d and `booked_time_unformatted` = %s', $_POST['cpabc_item'], $dat), ARRAY_A);
+                $res = $wpdb->get_row($wpdb->prepare('SELECT * FROM %i a JOIN %i b ON (b.reference = a.id) WHERE `calendar` = %d AND `booked_time_unformatted` = %s', CPABC_APPOINTMENTS_TABLE_NAME, CPABC_TDEAPP_CALENDAR_DATA_TABLE, $_POST['cpabc_item'], $dat), ARRAY_A);
                 if ($res) {
                     $this->AddEditReservation($res['id']);
                 }
@@ -200,7 +201,7 @@ class Cpabc implements PluginInterface
     private function GetCalendar($roomid)
     {
         global $wpdb;
-        $calendars = $wpdb->get_results('SELECT * FROM ' . CPABC_APPOINTMENTS_CONFIG_TABLE_NAME);
+        $calendars = $wpdb->get_results($wpdb->prepare('SELECT * FROM %i', CPABC_APPOINTMENTS_CONFIG_TABLE_NAME));
         foreach ($calendars as $calendar) {
             if ($this->options['calendar_' . $calendar->id] == $roomid) {
                 return $calendar->id;
@@ -224,12 +225,12 @@ class Cpabc implements PluginInterface
             case 'add':
                 $rows_affected = $wpdb->insert(CPABC_APPOINTMENTS_TABLE_NAME, array('calendar' => $calendar_id, 'time' => current_time('mysql'), 'booked_time' => gmdate('Y-m-d H:i:s', $datetime), 'booked_time_customer' => gmdate('Y-m-d H:i:s', $datetime), 'booked_time_unformatted' => gmdate('Y-m-d H:i:s', $datetime), 'name' => $data['name'] . ' ' . $data['surname'], 'email' => $data['email'], 'phone' => $data['phone'], 'question' => "Źródło: LockMe\nIlość osób: {$data['people']}\nCena: {$data['price']}", 'quantity' => 1, 'quantity_a' => $data['people'], 'quantity_s' => 0, 'buffered_date' => serialize($data), 'who_added' => 0));
                 if (!$rows_affected) {
-                    throw new RuntimeException('Błąd zapisu: ' . $wpdb->last_error);
+                    throw new RuntimeException('Błąd zapisu');
                 }
                 $tid = $wpdb->insert_id;
                 $rows_affected = $wpdb->insert(CPABC_TDEAPP_CALENDAR_DATA_TABLE, array('appointment_calendar_id' => $calendar_id, 'datatime' => gmdate('Y-m-d H:i:s', $datetime), 'title' => $data['email'], 'reminder' => 0, 'quantity' => 1, 'quantity_a' => $data['people'], 'quantity_s' => 0, 'description' => "Źródło: LockMe<br/>\nIlość osób: {$data['people']}<br/>\nCena: {$data['price']}", 'description_customer' => "Źródło: LockMe<br/>\nIlość osób: {$data['people']}<br/>\nCena: {$data['price']}", 'reference' => $tid, 'who_added' => 0));
                 if (!$rows_affected) {
-                    throw new RuntimeException('Błąd zapisu 2: ' . $wpdb->last_error);
+                    throw new RuntimeException('Błąd zapisu 2');
                 }
                 $id = $wpdb->insert_id;
                 try {
@@ -241,12 +242,11 @@ class Cpabc implements PluginInterface
                 break;
             case 'edit':
                 if ($data['extid']) {
-                    $event = $wpdb->get_results('SELECT * FROM ' . CPABC_APPOINTMENTS_CALENDARS_TABLE_NAME . ' WHERE id=' . esc_sql($data['extid']));
-                    $event = $event[0];
+                    $event = $wpdb->get_row($wpdb->prepare('SELECT * FROM %i WHERE id = %d', CPABC_APPOINTMENTS_CALENDARS_TABLE_NAME, (int) $data['extid']));
                     $data1 = array('datatime' => gmdate('Y-m-d H:i:s', $datetime), 'quantity' => $data['people'], 'title' => $data['email'], 'description' => "Źródło: LockMe<br/>\nIlość osób: {$data['people']}<br/>\nCena: {$data['price']}", 'who_edited' => 0);
                     $data2 = array('booked_time_unformatted' => gmdate('Y-m-d H:i:s', $datetime), 'booked_time' => gmdate('Y-m-d H:i:s', $datetime), 'quantity' => $data['people'], 'buffered_date' => serialize($data));
-                    $wpdb->update(CPABC_APPOINTMENTS_CALENDARS_TABLE_NAME, $data1, array('id' => $data['extid']));
-                    if ($event->reference != '') {
+                    $wpdb->update(CPABC_APPOINTMENTS_CALENDARS_TABLE_NAME, $data1, array('id' => (int) $data['extid']));
+                    if ($event && $event->reference != '') {
                         $wpdb->update(CPABC_APPOINTMENTS_TABLE_NAME, $data2, ['id' => $event->reference]);
                     }
                     return \true;
@@ -254,7 +254,7 @@ class Cpabc implements PluginInterface
                 break;
             case 'delete':
                 if ($data['extid']) {
-                    $wpdb->query('DELETE FROM `' . CPABC_APPOINTMENTS_CALENDARS_TABLE_NAME . '` WHERE id=' . $data['extid']);
+                    $wpdb->query($wpdb->prepare('DELETE FROM %i WHERE id = %d', CPABC_APPOINTMENTS_CALENDARS_TABLE_NAME, (int) $data['extid']));
                     return \true;
                 }
                 break;
@@ -264,7 +264,7 @@ class Cpabc implements PluginInterface
     public function ExportToLockMe(): void
     {
         global $wpdb;
-        $rows = $wpdb->get_results('select * from ' . CPABC_APPOINTMENTS_TABLE_NAME . ' a join ' . CPABC_TDEAPP_CALENDAR_DATA_TABLE . ' b on(b.reference = a.id) where date(`datatime`) >= curdate()', ARRAY_A);
+        $rows = $wpdb->get_results($wpdb->prepare('SELECT * FROM %i a JOIN %i b ON (b.reference = a.id) WHERE date(`datatime`) >= curdate()', CPABC_APPOINTMENTS_TABLE_NAME, CPABC_TDEAPP_CALENDAR_DATA_TABLE), ARRAY_A);
         foreach ($rows as $row) {
             $this->AddEditReservation($row['id']);
         }

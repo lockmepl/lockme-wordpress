@@ -120,7 +120,6 @@ return array(
     'LockmeDep\\GuzzleHttp\\RetryMiddleware' => $vendorDir . '/guzzlehttp/guzzle/src/RetryMiddleware.php',
     'LockmeDep\\GuzzleHttp\\TransferStats' => $vendorDir . '/guzzlehttp/guzzle/src/TransferStats.php',
     'LockmeDep\\GuzzleHttp\\Utils' => $vendorDir . '/guzzlehttp/guzzle/src/Utils.php',
-    'LockmeDep\\LockmeIntegration\\Libs\\WP_List_Table' => $baseDir . '/src/Libs/WP_List_Table.php',
     'LockmeDep\\LockmeIntegration\\Libs\\WrappedProvider' => $baseDir . '/src/Libs/WrappedProvider.php',
     'LockmeDep\\LockmeIntegration\\Plugin' => $baseDir . '/src/Plugin.php',
     'LockmeDep\\LockmeIntegration\\PluginInterface' => $baseDir . '/src/PluginInterface.php',

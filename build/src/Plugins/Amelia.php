@@ -146,7 +146,7 @@ class Amelia implements PluginInterface
         if (!$this->CheckDependencies()) {
             return;
         }
-        register_setting('lockme-amelia', 'lockme_amelia');
+        register_setting('lockme-amelia', 'lockme_amelia', ['sanitize_callback' => [$this->plugin, 'sanitizePluginOptions']]);
         add_settings_section('lockme_amelia_section', 'Amelia plugin settings', static function () {
             echo '<p>Integration settings with the Amelia plugin</p>';
         }, 'lockme-amelia');
@@ -166,11 +166,13 @@ class Amelia implements PluginInterface
             $services = $serviceRepository->getAllArrayIndexedById();
             foreach ($services->getItems() as $service) {
                 assert($service instanceof Service);
-                add_settings_field('calendar_' . $service->getId()->getValue(), 'Room for ' . $service->getName()->getValue(), function () use ($rooms, $service) {
-                    echo '<select name="lockme_amelia[calendar_' . $service->getId()->getValue() . ']">';
+                $serviceId = (int) $service->getId()->getValue();
+                add_settings_field('calendar_' . $serviceId, 'Room for ' . esc_html($service->getName()->getValue()), function () use ($rooms, $serviceId) {
+                    $optionKey = 'calendar_' . $serviceId;
+                    echo '<select name="lockme_amelia[' . esc_attr($optionKey) . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
-                        echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_' . $service->getId()->getValue()], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
+                        echo '<option value="' . esc_attr($room['roomid']) . '" ' . selected(1, $room['roomid'] == ($this->options[$optionKey] ?? null), \false) . '>' . esc_html((string) ($room['room'] ?? '')) . ' (' . esc_html((string) ($room['department'] ?? '')) . ')</option>';
                     }
                     echo '</select>';
                 }, 'lockme-amelia', 'lockme_amelia_section');

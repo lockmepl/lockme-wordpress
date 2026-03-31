@@ -3,12 +3,13 @@ declare(strict_types=1);
 
 namespace LockmeIntegration\Util;
 
-use LockmeIntegration\Libs\WP_List_Table;
-use WP_Query;
-
 defined('ABSPATH') or die('No script kiddies please!');
 
-class LogTable extends WP_List_Table
+if (!class_exists('\WP_List_Table')) {
+    require_once ABSPATH.'wp-admin/includes/class-wp-list-table.php';
+}
+
+class LogTable extends \WP_List_Table
 {
     public function get_columns(): array
     {
@@ -27,9 +28,9 @@ class LogTable extends WP_List_Table
         switch ($column_name) {
             case 'params':
             case 'response':
-                return '<pre>'.$item[$column_name].'</pre>';
+                return '<pre>'.esc_html((string) ($item[$column_name] ?? '')).'</pre>';
             default:
-                return $item[$column_name];
+                return esc_html((string) ($item[$column_name] ?? ''));
         }
     }
 
@@ -40,7 +41,7 @@ class LogTable extends WP_List_Table
 
     public function no_items(): void
     {
-        echo 'The logs are empty. And this is a good thing!';
+        echo esc_html__('The logs are empty. And this is a good thing!', 'lockme-calendars-integration');
     }
 
     public function prepare_items(): void {
@@ -51,22 +52,25 @@ class LogTable extends WP_List_Table
         $this->_column_headers = [$this->get_columns(), [], []];
 
         $wpdb_table = $wpdb->prefix . 'lockme_log';
-        $orderby = ( isset( $_GET['orderby'] ) ) ? esc_sql( $_GET['orderby'] ) : 'id';
-        $order = ( isset( $_GET['order'] ) ) ? esc_sql( $_GET['order'] ) : 'DESC';
-
         $items = 10;
         $page = ($this->get_pagenum() - 1) * $items;
 
-        $query = "SELECT
-            *
-        FROM $wpdb_table
-        ORDER BY $orderby $order
-        LIMIT $page,$items";
+        $query = $wpdb->prepare(
+            'SELECT * FROM %i ORDER BY id DESC LIMIT %d OFFSET %d',
+            $wpdb_table,
+            $items,
+            $page
+        );
 
         // query output_type will be an associative array with ARRAY_A.
         $this->items = $wpdb->get_results( $query, ARRAY_A  );
 
-        $total = $wpdb->get_var("SELECT count(*) FROM {$wpdb_table}");
+        $total = $wpdb->get_var(
+            $wpdb->prepare(
+                'SELECT count(*) FROM %i',
+                $wpdb_table
+            )
+        );
 
         // code to handle data operations like sorting and filtering
 

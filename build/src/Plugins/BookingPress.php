@@ -45,7 +45,7 @@ class BookingPress implements PluginInterface
         if (!$this->CheckDependencies()) {
             return;
         }
-        register_setting('lockme-bookingpress', 'lockme_bookingpress');
+        register_setting('lockme-bookingpress', 'lockme_bookingpress', ['sanitize_callback' => [$this->plugin, 'sanitizePluginOptions']]);
         add_settings_section('lockme_bookingpress_section', 'BookingPress plugin settings', static function () {
             echo '<p>Integration settings with the BookingPress plugin</p>';
         }, 'lockme-bookingpress');
@@ -63,12 +63,13 @@ class BookingPress implements PluginInterface
             }
             $services = $wpdb->get_results("SELECT bookingpress_service_id, bookingpress_service_name FROM {$wpdb->prefix}bookingpress_services");
             foreach ($services as $service) {
-                add_settings_field('service_' . $service->bookingpress_service_id, 'Room for ' . $service->bookingpress_service_name, function () use ($rooms, $service) {
+                $optionKey = 'service_' . (int) $service->bookingpress_service_id;
+                add_settings_field($optionKey, 'Room for ' . esc_html((string) $service->bookingpress_service_name), function () use ($rooms, $optionKey) {
                     $options = $this->options;
-                    echo '<select name="lockme_bookingpress[service_' . $service->bookingpress_service_id . ']">';
+                    echo '<select name="lockme_bookingpress[' . esc_attr($optionKey) . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
-                        echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == ($options['service_' . $service->bookingpress_service_id] ?? null), \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</option>';
+                        echo '<option value="' . esc_attr((string) $room['roomid']) . '" ' . selected(1, ($room['roomid'] ?? null) == ($options[$optionKey] ?? null), \false) . '>' . esc_html((string) ($room['room'] ?? '')) . ' (' . esc_html((string) ($room['department'] ?? '')) . ')</option>';
                     }
                     echo '</select>';
                 }, 'lockme-bookingpress', 'lockme_bookingpress_section', []);

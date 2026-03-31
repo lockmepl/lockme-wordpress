@@ -64,7 +64,7 @@ class Easyapp implements PluginInterface
         if (!$this->CheckDependencies()) {
             return;
         }
-        register_setting('lockme-easyapp', 'lockme_easyapp');
+        register_setting('lockme-easyapp', 'lockme_easyapp', ['sanitize_callback' => [$this->plugin, 'sanitizePluginOptions']]);
         add_settings_section('lockme_easyapp_section', 'Easy Appointments plugin settings', static function () {
             echo '<p>Integration settings with the Easy Appointments plugin</p>';
         }, 'lockme-easyapp');
@@ -82,11 +82,12 @@ class Easyapp implements PluginInterface
             }
             $calendars = $wpdb->get_results('SELECT DISTINCT concat(l.`id`,"_",s.`id`,"_",ss.`id`) `id`, concat(l.`name`," - ",s.`name`," - ",ss.`name`) `name` FROM ' . $wpdb->prefix . 'ea_locations l join ' . $wpdb->prefix . 'ea_services s join ' . $wpdb->prefix . 'ea_staff ss');
             foreach ($calendars as $calendar) {
-                add_settings_field('calendar_' . $calendar->id, 'Room for ' . $calendar->name, function () use ($rooms, $calendar) {
-                    echo '<select name="lockme_easyapp[calendar_' . $calendar->id . ']">';
+                $optionKey = 'calendar_' . (string) $calendar->id;
+                add_settings_field($optionKey, 'Room for ' . esc_html((string) $calendar->name), function () use ($rooms, $optionKey) {
+                    echo '<select name="lockme_easyapp[' . esc_attr($optionKey) . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
-                        echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_' . $calendar->id], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
+                        echo '<option value="' . esc_attr((string) $room['roomid']) . '" ' . selected(1, ($room['roomid'] ?? null) == ($this->options[$optionKey] ?? null), \false) . '>' . esc_html((string) ($room['room'] ?? '')) . ' (' . esc_html((string) ($room['department'] ?? '')) . ')</option>';
                     }
                     echo '</select>';
                 }, 'lockme-easyapp', 'lockme_easyapp_section', []);

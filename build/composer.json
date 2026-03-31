@@ -32,7 +32,11 @@
         }
     },
     "scripts": {
-        "post-update-cmd": ".\/scoper.sh",
-        "post-install-cmd": ".\/scoper.sh"
+        "build-scoped": [
+            "~\/.config\/composer\/vendor\/bin\/php-scoper add-prefix --force",
+            "symfony composer dump-autoload --working-dir build --classmap-authoritative"
+        ],
+        "post-update-cmd": "@build-scoped",
+        "post-install-cmd": "@build-scoped"
     }
 }

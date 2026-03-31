@@ -43,8 +43,7 @@ class WPDevArt implements PluginInterface
     {
         global $wpdb;
         set_time_limit(0);
-        $sql = "SELECT * FROM {$wpdb->prefix}wpdevart_reservations WHERE `single_day` >= curdate() ORDER BY ID";
-        $rows = $wpdb->get_results($sql, ARRAY_A);
+        $rows = $wpdb->get_results($wpdb->prepare('SELECT * FROM %i WHERE `single_day` >= curdate() ORDER BY ID', $wpdb->prefix . 'wpdevart_reservations'), ARRAY_A);
         foreach ($rows as $row) {
             $this->AddEditReservation($row);
         }
@@ -89,7 +88,7 @@ class WPDevArt implements PluginInterface
         if (!$this->CheckDependencies()) {
             return;
         }
-        register_setting('lockme-wpdevart', 'lockme_wpdevart');
+        register_setting('lockme-wpdevart', 'lockme_wpdevart', ['sanitize_callback' => [$this->plugin, 'sanitizePluginOptions']]);
         add_settings_section('lockme_wpdevart_section', 'Booking Calendar Pro WpDevArt plugin settings', static function () {
             echo '<p>Integration settings with the Booking Calendar Pro WpDevArt plugin</p>';
         }, 'lockme-wpdevart');
@@ -105,14 +104,14 @@ class WPDevArt implements PluginInterface
                 } catch (IdentityProviderException $e) {
                 }
             }
-            $query = 'SELECT * FROM ' . $wpdb->prefix . 'wpdevart_calendars ';
-            $calendars = $wpdb->get_results($query);
+            $calendars = $wpdb->get_results($wpdb->prepare('SELECT * FROM %i', $wpdb->prefix . 'wpdevart_calendars'));
             foreach ($calendars as $calendar) {
-                add_settings_field('calendar_' . $calendar->id, 'Room for ' . $calendar->title, function () use ($rooms, $calendar) {
-                    echo '<select name="lockme_wpdevart[calendar_' . $calendar->id . ']">';
+                $optionKey = 'calendar_' . (int) $calendar->id;
+                add_settings_field($optionKey, 'Room for ' . esc_html((string) $calendar->title), function () use ($rooms, $optionKey) {
+                    echo '<select name="lockme_wpdevart[' . esc_attr($optionKey) . ']">';
                     echo '<option value="">--select--</option>';
                     foreach ($rooms as $room) {
-                        echo '<option value="' . $room['roomid'] . '" ' . selected(1, $room['roomid'] == $this->options['calendar_' . $calendar->id], \false) . '>' . $room['room'] . ' (' . $room['department'] . ')</options>';
+                        echo '<option value="' . esc_attr((string) $room['roomid']) . '" ' . selected(1, ($room['roomid'] ?? null) == ($this->options[$optionKey] ?? null), \false) . '>' . esc_html((string) ($room['room'] ?? '')) . ' (' . esc_html((string) ($room['department'] ?? '')) . ')</option>';
                     }
                     echo '</select>';
                 }, 'lockme-wpdevart', 'lockme_wpdevart_section', []);
@@ -208,7 +207,7 @@ class WPDevArt implements PluginInterface
             case 'add':
                 $result = $wpdb->insert($wpdb->prefix . 'wpdevart_reservations', ['calendar_id' => $calendar_id, 'single_day' => $date, 'start_hour' => $hour, 'count_item' => 1, 'price' => $data['price'], 'total_price' => $data['price'], 'form' => [], 'email' => $data['email'], 'status' => 'approved', 'date_created' => gmdate('Y-m-d H:i'), 'is_new' => 0]);
                 if ($result === \false) {
-                    throw new RuntimeException('Error saving to database - ' . $wpdb->last_error);
+                    throw new RuntimeException('Error saving to database');
                 }
                 $id = $wpdb->insert_id;
                 $res = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $wpdb->prefix . 'wpdevart_reservations WHERE `id`=%d', $id), ARRAY_A);
@@ -273,7 +272,7 @@ class WPDevArt implements PluginInterface
                 if ($data['extid']) {
                     $row_id = $data['extid'];
                     $old_reserv = $wpdb->get_row($wpdb->prepare('SELECT * FROM ' . $wpdb->prefix . 'wpdevart_reservations WHERE `id`=%d', $row_id), ARRAY_A);
-                    $wpdb->query($wpdb->prepare('DELETE FROM ' . $wpdb->prefix . 'wpdevart_reservations WHERE id="%d"', $row_id));
+                    $wpdb->query($wpdb->prepare('DELETE FROM ' . $wpdb->prefix . 'wpdevart_reservations WHERE id=%d', $row_id));
                     /** @noinspection PhpIncludeInspection */
                     require_once WPDEVART_PLUGIN_DIR . 'admin/controllers/Reservations.php';
                     $wpdevart_booking = new wpdevart_bc_ControllerReservations();
@@ -290,8 +289,7 @@ class WPDevArt implements PluginInterface
     private function GetCalendar($roomid)
     {
         global $wpdb;
-        $query = 'SELECT * FROM ' . $wpdb->prefix . 'wpdevart_calendars ';
-        $calendars = $wpdb->get_results($query);
+        $calendars = $wpdb->get_results($wpdb->prepare('SELECT * FROM %i', $wpdb->prefix . 'wpdevart_calendars'));
         foreach ($calendars as $calendar) {
             if ($this->options['calendar_' . $calendar->id] == $roomid) {
                 return $calendar->id;
