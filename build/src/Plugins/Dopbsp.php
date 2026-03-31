@@ -132,7 +132,9 @@ class Dopbsp implements PluginInterface
     public function FixSettings(): void
     {
         global $DOPBSP, $wpdb;
-        $settings = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE `unique_key` = 'hours_definitions' and (`value` like '%%-%%' or `value` like '%%.%%')", $DOPBSP->tables->settings_calendar), ARRAY_A);
+        $likeDash = '%-%';
+        $likeDot = '%.%';
+        $settings = $wpdb->get_results($wpdb->prepare('SELECT * FROM %i WHERE `unique_key` = %s and (`value` like %s or `value` like %s)', $DOPBSP->tables->settings_calendar, 'hours_definitions', $likeDash, $likeDot), ARRAY_A);
         foreach ($settings as $setting) {
             $val = json_decode($setting['value'], \true);
             foreach ($val as &$v) {
@@ -141,7 +143,7 @@ class Dopbsp implements PluginInterface
             unset($v);
             $wpdb->update($DOPBSP->tables->settings_calendar, ['value' => json_encode($val)], ['id' => $setting['id']]);
         }
-        $days = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE (`data` like '%%-%%' or `data` like '%%.%%')", $DOPBSP->tables->days), ARRAY_A);
+        $days = $wpdb->get_results($wpdb->prepare('SELECT * FROM %i WHERE (`data` like %s or `data` like %s)', $DOPBSP->tables->days, $likeDash, $likeDot), ARRAY_A);
         foreach ($days as $day) {
             $data = json_decode($day['data'], \true);
             foreach ($data['hours_definitions'] as &$v) {
@@ -155,7 +157,7 @@ class Dopbsp implements PluginInterface
             $data['hours'] = $hours;
             $wpdb->update($DOPBSP->tables->days, ['data' => json_encode($data)], ['unique_key' => $day['unique_key']]);
         }
-        $reses = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE (`days_hours_history` like '%%-%%' or `days_hours_history` like '%%.%%') or (`start_hour` like '%%-%%' or `start_hour` like '%%.%%')", $DOPBSP->tables->reservations), ARRAY_A);
+        $reses = $wpdb->get_results($wpdb->prepare('SELECT * FROM %i WHERE (`days_hours_history` like %s or `days_hours_history` like %s) or (`start_hour` like %s or `start_hour` like %s)', $DOPBSP->tables->reservations, $likeDash, $likeDot, $likeDash, $likeDot), ARRAY_A);
         foreach ($reses as $res) {
             $start_hour = $this->FixVal($res['start_hour']);
             $history = json_decode($res['days_hours_history'], \true);
